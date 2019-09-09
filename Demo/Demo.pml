@@ -20,7 +20,6 @@
 // TODO: vPortSetInterruptHandler
 // TODO: TODO: heap.c; embedded C code               
 // TODO: change bit to byte
-// TODO: an exception becomes pending is it was masked by BASEPRI
 
 proctype MY_TASK()
 {
@@ -37,9 +36,6 @@ loop:
     AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task2 %d\n", _PID));
     goto loop
 }
-
-List_t l[1];
-ListItem_t a;
 
 init {
     byte idx;

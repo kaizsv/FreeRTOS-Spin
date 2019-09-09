@@ -77,7 +77,13 @@ loop:
             AWAIT_D(_PID, pxQueueParameters1_psCheckVariable = pxQueueParameters1_psCheckVariable + 1)
         :: ELSE(_PID, sErrorEverOccureed == false)
         fi;
-        AWAIT_D(_PID, usValue = usValue + 1)
+        AWAIT_D(_PID,
+            if
+            :: usValue == NULL_byte - 1 ->
+                usValue = 0 /* integer overflow */
+            :: else ->
+                usValue = usValue + 1
+            fi )
     fi;
     goto loop
 }
@@ -105,7 +111,13 @@ loop:
                 AWAIT_D(_PID, pxQueueParameters2_psCheckVariable = pxQueueParameters2_psCheckVariable + 1)
             :: ELSE(_PID, sErrorEverOccureed == false)
             fi;
-            AWAIT_D(_PID, usExpectedValue = usExpectedValue + 1)
+            AWAIT_D(_PID,
+                if
+                :: usExpectedValue == NULL_byte - 1 ->
+                    usExpectedValue = 0 /* integer overflow */
+                :: else ->
+                    usExpectedValue = usExpectedValue + 1
+                fi )
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
@@ -132,7 +144,13 @@ loop:
             AWAIT_D(_PID, pxQueueParameters3_psCheckVariable = pxQueueParameters3_psCheckVariable + 1)
         :: ELSE(_PID, sErrorEverOccureed == false)
         fi;
-        AWAIT_D(_PID, usValue = usValue + 1)
+        AWAIT_D(_PID,
+            if
+            :: usValue == NULL_byte - 1 ->
+                usValue = 0 /* integer overflow */
+            :: else ->
+                usValue = usValue + 1
+            fi )
     fi;
     goto loop
 }
@@ -160,7 +178,13 @@ loop:
                 AWAIT_D(_PID, pxQueueParameters2_psCheckVariable = pxQueueParameters2_psCheckVariable + 1)
             :: ELSE(_PID, sErrorEverOccureed == false)
             fi;
-            AWAIT_D(_PID, usExpectedValue = usExpectedValue + 1)
+            AWAIT_D(_PID,
+                if
+                :: usExpectedValue == NULL_byte - 1 ->
+                    usExpectedValue = 0 /* integer overflow */
+                :: else ->
+                    usExpectedValue = usExpectedValue + 1
+                fi )
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
@@ -187,7 +211,13 @@ loop:
             AWAIT_D(_PID, pxQueueParameters5_psCheckVariable = pxQueueParameters5_psCheckVariable + 1)
         :: ELSE(_PID, sErrorEverOccureed == false)
         fi;
-        AWAIT_D(_PID, usValue = usValue + 1)
+        AWAIT_D(_PID,
+            if
+            :: usValue == NULL_byte - 1 ->
+                usValue = 0 /* integer overflow */
+            :: else ->
+                usValue = usValue + 1
+            fi )
     fi;
     goto loop
 }
@@ -215,7 +245,13 @@ loop:
                 AWAIT_D(_PID, pxQueueParameters2_psCheckVariable = pxQueueParameters2_psCheckVariable + 1)
             :: ELSE(_PID, sErrorEverOccureed == false)
             fi;
-            AWAIT_D(_PID, usExpectedValue = usExpectedValue + 1)
+            AWAIT_D(_PID,
+                if
+                :: usExpectedValue == NULL_byte - 1 ->
+                    usExpectedValue = 0 /* integer overflow */
+                :: else ->
+                    usExpectedValue = usExpectedValue + 1
+                fi )
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;

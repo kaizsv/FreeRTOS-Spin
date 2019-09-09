@@ -1,4 +1,4 @@
-DEFAULT_TARGET = Mutex.pml
+DEFAULT_TARGET = BlockQ.pml
 
 # memory limit in MB
 MAX_MEMORY = 20480

@@ -150,41 +150,40 @@ loop_send:
         :: ELSE(_id, xTicksToWait != portMAX_DELAY)
         fi
     fi;
-    assert(false);
-//    taskEXIT_CRITICAL(_id, temp_var);
-//
-//    vTaskSuspendAll(_id);
-//    prvLockQueue(_id, pxQueue, temp_var);
-//
-//    if
-//    :: SELE(_id, xIsNDTimeOut == false) ->
-//        if
-//        :: SELE(_id, prvIsQueueFull(pxQueue)) ->
-//            vTaskPlaceOnEventList(_id, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var);
-//
-//            prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
-//
-//            xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
-//            if
-//            :: SELE(_id, xReturn == false) ->
-//                portYIELD_WITHIN_API(_id, temp_var)
-//            :: ELSE(_id, xReturn == false) ->
-//                AWAIT_D(_id, xReturn = false) /* reset variable */
-//            fi
-//        :: ELSE(_id, prvIsQueueFull(pxQueue)) ->
-//            /* Try again. */
-//            prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
-//            xTaskResumeAll(_id, temp_var, _, temp_var2)
-//        fi
-//    :: ELSE(_id, xIsNDTimeOut == false) ->
-//        /* The timeout has expired. */
-//        prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
-//        xTaskResumeAll(_id, temp_var, _, temp_var2);
-//
-//        AWAIT_A(_id, assert(xReturn == false); goto return_send)
-//    fi;
-//
-//    AWAIT_A(_id, goto loop_send);
+    taskEXIT_CRITICAL(_id, temp_var);
+
+    vTaskSuspendAll(_id);
+    prvLockQueue(_id, pxQueue, temp_var);
+
+    if
+    :: SELE(_id, xIsNDTimeOut == false) ->
+        if
+        :: SELE(_id, prvIsQueueFull(pxQueue)) ->
+            vTaskPlaceOnEventList(_id, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var);
+
+            prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
+
+            xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
+            if
+            :: SELE(_id, xReturn == false) ->
+                portYIELD_WITHIN_API(_id, temp_var)
+            :: ELSE(_id, xReturn == false) ->
+                AWAIT_D(_id, xReturn = false) /* reset variable */
+            fi
+        :: ELSE(_id, prvIsQueueFull(pxQueue)) ->
+            /* Try again. */
+            prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
+            xTaskResumeAll(_id, temp_var, _, temp_var2)
+        fi
+    :: ELSE(_id, xIsNDTimeOut == false) ->
+        /* The timeout has expired. */
+        prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
+        xTaskResumeAll(_id, temp_var, _, temp_var2);
+
+        AWAIT_A(_id, assert(xReturn == false); goto return_send)
+    fi;
+
+    AWAIT_A(_id, goto loop_send);
 return_send:
     /* reset variables as soon as possible */
     AWAIT_A(_id,

@@ -6,7 +6,6 @@
 /* The low-order 4 bits are ignored. */
 #define NON_IMPLEMENTED_LOW_BITS(val) (val >> 4)
 
-// TODO: when to set pending bit.
 byte BASEPRI = 0;
 #define BASEPRI_MASK(id) ((BASEPRI == 0) || (GET_PRIO_EXP(id) < BASEPRI))
 

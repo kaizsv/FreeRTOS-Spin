@@ -1,3 +1,4 @@
+# git update-index --skip-worktree mk/comfig.mk
 *.swp
 pan*
 *.trail

@@ -18,6 +18,8 @@
         run IDLE_TASK();    \
     }
 
+#define QUEUE_SEND_EXIT_CRITICAL
+
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"

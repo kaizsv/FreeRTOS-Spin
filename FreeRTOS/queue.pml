@@ -134,6 +134,7 @@ loop_send:
 
         AWAIT_A(_id, xReturn = true; goto return_send)
     :: ELSE(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength || xCopyPosition == queueOVERWRITE) ->
+#ifdef QUEUE_SEND_EXIT_CRITICAL
         if
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
@@ -149,7 +150,11 @@ loop_send:
             fi
         :: ELSE(_id, xTicksToWait != portMAX_DELAY)
         fi
+#else /* QUEUE_SEND_EXIT_CRITICAL */
+        assert(false)
+#endif /* QUEUE_SEND_EXIT_CRITICAL */
     fi;
+#ifdef QUEUE_SEND_EXIT_CRITICAL
     taskEXIT_CRITICAL(_id, temp_var);
 
     vTaskSuspendAll(_id);
@@ -184,6 +189,9 @@ loop_send:
     fi;
 
     AWAIT_A(_id, goto loop_send);
+#else /* QUEUE_SEND_EXIT_CRITICAL */
+    assert(false)
+#endif /* QUEUE_SEND_EXIT_CRITICAL */
 return_send:
     /* reset variables as soon as possible */
     AWAIT_A(_id,
@@ -218,8 +226,9 @@ loop_receive:
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
-        AWAIT_A(_id, xReturn = true; goto return_receive)
+        AWAIT_A(_id, temp_var2 = NULL_byte; xReturn = true; goto return_receive)
     :: ELSE(_id, temp_var2 > 0) ->
+#ifdef QUEUE_RECEIVE_EXIT_CRITICAL
         if
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
@@ -234,9 +243,13 @@ loop_receive:
             :: ELSE(_id, xIsNDTimeOut == false)
             fi
         :: ELSE(_id, xTicksToWait != portMAX_DELAY)
-        fi
+        fi;
+        AWAIT_D(_id, temp_var2 = NULL_byte) /* reset variable */
+#else /* QUEUE_RECEIVE_EXIT_CRITICAL */
+        assert(false)
+#endif /* QUEUE_RECEIVE_EXIT_CRITICAL */
     fi;
-    AWAIT_D(_id, temp_var2 = NULL_byte); /* reset variable */
+#ifdef QUEUE_RECEIVE_EXIT_CRITICAL
     taskEXIT_CRITICAL(_id, temp_var);
 
     vTaskSuspendAll(_id);
@@ -275,6 +288,9 @@ loop_receive:
     fi;
 
     AWAIT_A(_id, goto loop_receive);
+#else /* QUEUE_RECEIVE_EXIT_CRITICAL */
+    assert(false)
+#endif /* QUEUE_RECEIVE_EXIT_CRITICAL */
 return_receive:
     /* reset variables as soon as possible */
     AWAIT_A(_id, xIsNDTimeOut = false; temp_var = NULL_byte; temp_var2 = NULL_byte)
@@ -315,8 +331,9 @@ loop_take:
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
-        AWAIT_A(_id, xReturn = true; goto return_take)
+        AWAIT_A(_id, temp_var2 = NULL_byte; xReturn = true; goto return_take)
     :: ELSE(_id, temp_var2 > 0) ->
+#ifdef QUEUE_TAKE_EXIT_CRITICAL
         if
         :: SELE(_id, xTicksToWait == 0) ->
             #if (configUSE_MUTEXES == 1)
@@ -334,9 +351,13 @@ loop_take:
             :: ELSE(_id, xIsNDTimeOut == false)
             fi
         :: ELSE(_id, xTicksToWait != portMAX_DELAY)
-        fi
+        fi;
+        AWAIT_D(_id, temp_var2 = NULL_byte) /* reset temp_var2 */
+#else /* QUEUE_TAKE_EXIT_CRITICAL */
+        assert(false)
+#endif /* QUEUE_TAKE_EXIT_CRITICAL */
     fi;
-    AWAIT_D(_id, temp_var2 = NULL_byte);
+#ifdef QUEUE_TAKE_EXIT_CRITICAL
     taskEXIT_CRITICAL(_id, temp_var);
 
     vTaskSuspendAll(_id);
@@ -398,6 +419,9 @@ loop_take:
     fi;
 
     AWAIT_A(_id, goto loop_take);
+#else /* QUEUE_TAKE_EXIT_CRITICAL */
+    assert(false);
+#endif /* QUEUE_TAKE_EXIT_CRITICAL */
 return_take:
     /* reset variables as soon as possible */
     AWAIT_A(_id,
@@ -513,7 +537,7 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
     :: ELSE(_id, temp_var2 > queueLOCKED_UNMODIFIED) ->
         AWAIT_A(_id, break)
     od;
-    AWAIT_A(_id, queueSET_cTxLock(pxQueue, queueUNLOCKED));
+    AWAIT_A(_id, temp_var2 = NULL_byte; queueSET_cTxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id, temp_var);
 
     /* Do the same for the Rx lock. */
@@ -539,7 +563,7 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
     :: ELSE(_id, temp_var2 > queueLOCKED_UNMODIFIED) ->
         AWAIT_A(_id, break)
     od;
-    AWAIT_A(_id, queueSET_cRxLock(pxQueue, queueUNLOCKED); temp_var2 = NULL_byte);
+    AWAIT_A(_id, temp_var2 = NULL_byte; queueSET_cRxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id, temp_var)
 }
 

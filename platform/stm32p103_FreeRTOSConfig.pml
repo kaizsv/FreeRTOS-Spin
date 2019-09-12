@@ -39,7 +39,8 @@ INCLUDE_xTaskAbortDelay                     0
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    80  /* 0x50 */
 //#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 0xf
 
-#define INCLUDE_vTaskSuspend                0
+#define INCLUDE_vTaskSuspend                0 // TODO
+#define INCLUDE_vTaskDelay                  1
 
 /* Configurations Limitations */
 

@@ -71,6 +71,8 @@ loop:
             assert(false)
         :: ELSE(_PID, local_xReturn == false)
         fi;
+
+        vTaskDelay(_PID, pxFirstSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) ->
         if
         :: SELE(_PID, pxFirstSemaphore_xBlockTime == 0) ->
@@ -78,7 +80,6 @@ loop:
         :: ELSE(_PID, pxFirstSemaphore_xBlockTime == 0)
         fi
     fi;
-    // TODO: vTaskDelay
 liveness:
     goto loop
 }
@@ -116,6 +117,8 @@ loop:
             assert(false)
         :: ELSE(_PID, local_xReturn == false)
         fi;
+
+        vTaskDelay(_PID, pxFirstSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) ->
         if
         :: SELE(_PID, pxFirstSemaphore_xBlockTime == 0) ->
@@ -123,7 +126,6 @@ loop:
         :: ELSE(_PID, pxFirstSemaphore_xBlockTime == 0)
         fi
     fi;
-    // TODO: vTaskDelay
 liveness:
     goto loop
 }
@@ -161,14 +163,15 @@ loop:
             assert(false)
         :: ELSE(_PID, local_xReturn == false)
         fi;
+
+        vTaskDelay(_PID, pxSecondSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) ->
         if
-        :: SELE(_PID, pxFirstSemaphore_xBlockTime == 0) ->
+        :: SELE(_PID, pxSecondSemaphore_xBlockTime == 0) ->
             taskYIELD(_PID, local_var1);
-        :: ELSE(_PID, pxFirstSemaphore_xBlockTime == 0)
+        :: ELSE(_PID, pxSecondSemaphore_xBlockTime == 0)
         fi
     fi;
-    // TODO: vTaskDelay
 liveness:
     goto loop
 }
@@ -206,14 +209,15 @@ loop:
             assert(false)
         :: ELSE(_PID, local_xReturn == false)
         fi;
+
+        vTaskDelay(_PID, pxSecondSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) ->
         if
-        :: SELE(_PID, pxFirstSemaphore_xBlockTime == 0) ->
+        :: SELE(_PID, pxSecondSemaphore_xBlockTime == 0) ->
             taskYIELD(_PID, local_var1);
-        :: ELSE(_PID, pxFirstSemaphore_xBlockTime == 0)
+        :: ELSE(_PID, pxSecondSemaphore_xBlockTime == 0)
         fi
     fi;
-    // TODO: vTaskDelay
 liveness:
     goto loop
 }

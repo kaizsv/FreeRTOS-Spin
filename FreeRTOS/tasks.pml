@@ -163,6 +163,29 @@ inline xTaskCreate(_id, pcName, Priority, temp_var)
     fi
 }
 
+#if (INCLUDE_vTaskDelay == 1)
+
+inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
+{
+    AWAIT_D(_id, xAlreadyYielded = false);
+    if
+    :: SELE(_id, xTicksToDelay == 0) ->
+        assert(uxSchedulerSuspended == 0);
+        vTaskSuspendAll(_id);
+        prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false, temp_var);
+        xTaskResumeAll(_id, temp_var, xAlreadyYielded, temp_var2);
+    :: ELSE(_id, xTicksToDelay == 0)
+    fi;
+
+    if
+    :: SELE(_id, xAlreadyYielded == false) ->
+        portYIELD_WITHIN_API(_id, temp_var)
+    :: ELSE(_id, xAlreadyYielded == false) ->
+        AWAIT_D(_id, xAlreadyYielded = false)
+    fi
+}
+
+#endif
 
 #if (INCLUDE_vTaskSuspend == 1)
 

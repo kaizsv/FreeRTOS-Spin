@@ -19,6 +19,7 @@
     }
 
 #define QUEUE_SEND_EXIT_CRITICAL
+#define QUEUE_RECEIVE_EXIT_CRITICAL
 
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"

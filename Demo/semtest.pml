@@ -8,8 +8,8 @@
 
 #define RUN_ALL_TASKS()     \
     atomic {                \
-        run MY_TASK();      \
-        run SEC_TASK();     \
+        run prvSemaphoreTest1(); \
+        run prvSemaphoreTest2(); \
         run prvSemaphoreTest3(); \
         run prvSemaphoreTest4(); \
         run IDLE_TASK();    \
@@ -21,7 +21,11 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
 
-#define semtstBLOCKING_EXPECTED_VALUE       255 /* 0xff */
+#ifdef LTL
+#include "../property/semtest.pml"
+#endif
+
+#define semtstBLOCKING_EXPECTED_VALUE       254 /* 0xff */
 #define semtstNON_BLOCKING_EXPECTED_VALUE   15  /* 0xf */
 
 QueueDeclarator(1, byte);
@@ -34,7 +38,7 @@ SemaphoreHandle_t(pxSecondSemaphore_xSemaphore, 1, byte);
 byte pxSecondSemaphore_pulSharedVariable = semtstBLOCKING_EXPECTED_VALUE;
 #define pxSecondSemaphore_xBlockTime 1
 
-proctype MY_TASK()
+proctype prvSemaphoreTest1()
 {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
@@ -75,10 +79,11 @@ loop:
         fi
     fi;
     // TODO: vTaskDelay
+liveness:
     goto loop
 }
 
-proctype SEC_TASK()
+proctype prvSemaphoreTest2()
 {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
@@ -119,6 +124,7 @@ loop:
         fi
     fi;
     // TODO: vTaskDelay
+liveness:
     goto loop
 }
 
@@ -163,6 +169,7 @@ loop:
         fi
     fi;
     // TODO: vTaskDelay
+liveness:
     goto loop
 }
 
@@ -207,6 +214,7 @@ loop:
         fi
     fi;
     // TODO: vTaskDelay
+liveness:
     goto loop
 }
 

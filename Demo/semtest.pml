@@ -81,7 +81,7 @@ loop:
         fi
     fi;
 liveness:
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype prvSemaphoreTest2()
@@ -127,7 +127,7 @@ loop:
         fi
     fi;
 liveness:
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype prvSemaphoreTest3()
@@ -173,7 +173,7 @@ loop:
         fi
     fi;
 liveness:
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype prvSemaphoreTest4()
@@ -219,7 +219,7 @@ loop:
         fi
     fi;
 liveness:
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 init {

@@ -466,7 +466,7 @@ loop:
 
     // TODO: configUSE_TICKLESS_IDLE != 0
 
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 #if (configUSE_MUTEXES == 1)

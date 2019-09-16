@@ -88,7 +88,7 @@ loop:
                 usValue = usValue + 1
             fi )
     fi;
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype QConsB2()
@@ -124,7 +124,7 @@ loop:
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype QProdB3()
@@ -155,7 +155,7 @@ loop:
                 usValue = usValue + 1
             fi )
     fi;
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype QConsB4()
@@ -191,7 +191,7 @@ loop:
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype QProdB5()
@@ -222,7 +222,7 @@ loop:
                 usValue = usValue + 1
             fi )
     fi;
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype QConsB6()
@@ -258,7 +258,7 @@ loop:
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 init {

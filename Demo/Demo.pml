@@ -26,7 +26,7 @@ proctype MY_TASK()
     assert(FIRST_TASK == _PID);
 loop:
     AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task1 %d\n", _PID));
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype SEC_TASK()
@@ -34,7 +34,7 @@ proctype SEC_TASK()
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 loop:
     AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task2 %d\n", _PID));
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 init {

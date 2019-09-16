@@ -33,7 +33,7 @@ loop:
     AWAIT_D(_PID, assert(local_xReturn == true); assert(mutex == 0); mutex = mutex + 1);
     AWAIT_D(_PID, assert(mutex == 1); mutex = mutex - 1);
     xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 proctype SEC_TASK()
@@ -48,7 +48,7 @@ loop:
     AWAIT_D(_PID, assert(local_xReturn == true); assert(mutex == 0); mutex = mutex + 1);
     AWAIT_D(_PID, assert(mutex == 1); mutex = mutex - 1);
     xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    goto loop
+    AWAIT_A(_PID, goto loop)
 }
 
 init {

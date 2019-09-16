@@ -21,6 +21,7 @@ configUSE_TICK_HOOK                         0
 configUSE_CO_ROUTINES                       0
 configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES   0
 INCLUDE_xTaskAbortDelay                     0
+configUSE_TASK_NOTIFICATIONS                0
 **********************************************************************/
 
 #define configTickType_t                    byte
@@ -39,7 +40,7 @@ INCLUDE_xTaskAbortDelay                     0
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    80  /* 0x50 */
 //#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 0xf
 
-#define INCLUDE_vTaskSuspend                0 // TODO
+#define INCLUDE_vTaskSuspend                0
 #define INCLUDE_vTaskDelay                  1
 
 /* Configurations Limitations */

@@ -41,6 +41,7 @@ typedef List_t {
 #define listLIST_IS_EMPTY(pxList) (listLIST_ITEM_CONTAINER(pxList.indices[0]) == NULL_nibble)
 #define listLIST_LENGTH_IS_EXCEEDING_ZERO(pxList)   (listLIST_ITEM_CONTAINER(pxList.indices[0]) != NULL_nibble)
 #define listLIST_LENGTH_IS_EXCEEDING_ONE(pxList)    (listLIST_ITEM_CONTAINER(pxList.indices[1]) != NULL_nibble)
+#define listLIST_LENGTH_EQUALS_CURRENTNUMBEROFTASKS(pxList) (listLIST_ITEM_CONTAINER(pxList.indices[uxCurrentNumberOfTasks - 1]) != NULL_nibble)
 
 inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList)
 {

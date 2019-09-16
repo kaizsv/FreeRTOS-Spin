@@ -95,11 +95,11 @@ inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, xReturn, temp_bool, t
 
 inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsNDTimeOut, temp_var, temp_var2, _id)
 {
-    AWAIT_D(_id, xReturn = 0);
-    assert(xYieldRequired == false && xIsNDTimeOut == false);
-    assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
-    assert(!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))));
-    assert(!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1));
+    AWAIT_A(_id, xReturn = 0;
+        assert(xYieldRequired == false && xIsNDTimeOut == false);
+        assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
+        assert(!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))));
+        assert(!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1)));
     // TODO: xTaskGetSchedulerState
 
 loop_send:
@@ -122,9 +122,8 @@ loop_send:
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             if
             :: SELE(_id, xYieldRequired != false) ->
-                queueYIELD_IF_USING_PREEMPTION(_id, temp_var);
-                /* reset variable as soon as posible */
-                AWAIT_D(_id, xYieldRequired = false)
+                AWAIT_A(_id, xYieldRequired = false); /* reset variable as soon as possible */
+                queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
             :: ELSE(_id, xYieldRequired != false)
             fi
         fi;
@@ -173,7 +172,7 @@ loop_send:
             :: SELE(_id, xReturn == false) ->
                 portYIELD_WITHIN_API(_id, temp_var)
             :: ELSE(_id, xReturn == false) ->
-                AWAIT_D(_id, xReturn = false) /* reset variable */
+                AWAIT_A(_id, xReturn = false) /* reset variable */
             fi
         :: ELSE(_id, prvIsQueueFull(pxQueue)) ->
             /* Try again. */
@@ -194,16 +193,15 @@ loop_send:
 #endif /* QUEUE_SEND_EXIT_CRITICAL */
 return_send:
     /* reset variables as soon as possible */
-    AWAIT_A(_id,
-        xYieldRequired = false; xIsNDTimeOut = false;
-        temp_var = NULL_byte; temp_var2 = NULL_byte)
+    AWAIT_A(_id, xIsNDTimeOut = false;
+        assert(xYieldRequired == false && temp_var == NULL_byte && temp_var2 == NULL_byte))
 }
 
 inline xQueueReceive(pxQueue, pvBuffer, xTicksToWait, xReturn, xIsNDTimeOut, temp_var, temp_var2, _id)
 {
-    AWAIT_D(_id, xReturn = false);
-    assert(xIsNDTimeOut == false && temp_var == NULL_byte && temp_var2 == NULL_byte);
-    assert(!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))));
+    AWAIT_A(_id, xReturn = false;
+        assert(xIsNDTimeOut == false && temp_var == NULL_byte && temp_var2 == NULL_byte);
+        assert(!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))));
     // TODO xTaskGetSchedulerState
 
 loop_receive:
@@ -212,7 +210,7 @@ loop_receive:
     if
     :: SELE(_id, temp_var2 > 0) ->
         prvCopyDataFromQueue(_id, pxQueue, pvBuffer);
-        AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1);
+        AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1; temp_var2 = NULL_byte);
 
         if
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
@@ -226,9 +224,10 @@ loop_receive:
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
-        AWAIT_A(_id, temp_var2 = NULL_byte; xReturn = true; goto return_receive)
+        AWAIT_A(_id, xReturn = true; goto return_receive)
     :: ELSE(_id, temp_var2 > 0) ->
 #ifdef QUEUE_RECEIVE_EXIT_CRITICAL
+        AWAIT_A(_id, temp_var2 = NULL_byte); /* reset variable */
         if
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
@@ -243,8 +242,7 @@ loop_receive:
             :: ELSE(_id, xIsNDTimeOut == false)
             fi
         :: ELSE(_id, xTicksToWait != portMAX_DELAY)
-        fi;
-        AWAIT_D(_id, temp_var2 = NULL_byte) /* reset variable */
+        fi
 #else /* QUEUE_RECEIVE_EXIT_CRITICAL */
         assert(false)
 #endif /* QUEUE_RECEIVE_EXIT_CRITICAL */
@@ -269,7 +267,7 @@ loop_receive:
                 portYIELD_WITHIN_API(_id, temp_var)
             :: ELSE(_id, xReturn == false) ->
                 /* reset variable as soon as possible */
-                AWAIT_D(_id, xReturn = false)
+                AWAIT_A(_id, xReturn = false)
             fi
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -293,15 +291,15 @@ loop_receive:
 #endif /* QUEUE_RECEIVE_EXIT_CRITICAL */
 return_receive:
     /* reset variables as soon as possible */
-    AWAIT_A(_id, xIsNDTimeOut = false; temp_var = NULL_byte; temp_var2 = NULL_byte)
+    AWAIT_A(_id, xIsNDTimeOut = false; assert(temp_var == NULL_byte && temp_var2 == NULL_byte))
 }
 
 inline xQueueSemaphoreTake(pxQueue, xTicksToWait, xReturn, xInheritanceOccurred, xIsNDTimeOut, temp_var, temp_var2, _id)
 {
-    AWAIT_D(_id, xReturn = false);
-    assert(xInheritanceOccurred == false && xIsNDTimeOut == false);
-    assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
-    assert(queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue));
+    AWAIT_A(_id, xReturn = false;
+        assert(xInheritanceOccurred == false && xIsNDTimeOut == false);
+        assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
+        assert(queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)));
     /* TODO xTaskGetSchedulerState */
 
 loop_take:
@@ -309,7 +307,7 @@ loop_take:
     AWAIT_D(_id, temp_var2 = pxQueue.uxMessagesWaiting); /* uxSemaphoreCount */
     if
     :: SELE(_id, temp_var2 > 0) ->
-        AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1);
+        AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1; temp_var2 = NULL_byte);
 
         #if (configUSE_MUTEXES == 1)
         if
@@ -331,9 +329,10 @@ loop_take:
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
-        AWAIT_A(_id, temp_var2 = NULL_byte; xReturn = true; goto return_take)
+        AWAIT_A(_id, xReturn = true; goto return_take)
     :: ELSE(_id, temp_var2 > 0) ->
 #ifdef QUEUE_TAKE_EXIT_CRITICAL
+        AWAIT_D(_id, temp_var2 = NULL_byte); /* reset temp_var2 */
         if
         :: SELE(_id, xTicksToWait == 0) ->
             #if (configUSE_MUTEXES == 1)
@@ -351,8 +350,7 @@ loop_take:
             :: ELSE(_id, xIsNDTimeOut == false)
             fi
         :: ELSE(_id, xTicksToWait != portMAX_DELAY)
-        fi;
-        AWAIT_D(_id, temp_var2 = NULL_byte) /* reset temp_var2 */
+        fi
 #else /* QUEUE_TAKE_EXIT_CRITICAL */
         assert(false)
 #endif /* QUEUE_TAKE_EXIT_CRITICAL */
@@ -386,7 +384,7 @@ loop_take:
                 portYIELD_WITHIN_API(_id, temp_var)
             :: ELSE(_id, xReturn == false) ->
                 /* reset xReturn as soon as possible */
-                AWAIT_D(_id, xReturn = false)
+                AWAIT_A(_id, xReturn = false)
             fi
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -402,12 +400,13 @@ loop_take:
             #if (configUSE_MUTEXES == 1)
             if
             :: SELE(_id, xInheritanceOccurred != false) ->
+                /* reset temporary variables as soon as possible*/
+                AWAIT_A(_id, xInheritanceOccurred = false);
+
                 taskENTER_CRITICAL(_id, temp_var);
                 prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, temp_var /* uxHighestWaitingPriority */);
                 vTaskPriorityDisinheritAfterTimeout(_id, pxQueue.xSemaphore.xMutexHolder, temp_var /* uxHighestWaitingPriority */, temp_var2);
 
-                /* reset temporary variables as soon as possible*/
-                AWAIT_D(_id, xInheritanceOccurred = false);
                 taskEXIT_CRITICAL(_id, temp_var)
             :: ELSE(_id, xInheritanceOccurred != false)
             fi;
@@ -424,16 +423,15 @@ loop_take:
 #endif /* QUEUE_TAKE_EXIT_CRITICAL */
 return_take:
     /* reset variables as soon as possible */
-    AWAIT_A(_id,
-        xInheritanceOccurred = false; xIsNDTimeOut = false;
-        temp_var = NULL_byte; temp_var2 = NULL_byte)
+    AWAIT_A(_id, xIsNDTimeOut = false;
+        assert(xInheritanceOccurred == false && temp_var == NULL_byte && temp_var2 == NULL_byte))
 }
 
 #if (configUSE_MUTEXES == 1)
 
 inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWaitingTasks)
 {
-    AWAIT_D(_id, assert(uxHighestPriorityOfWaitingTasks == false));
+    AWAIT_A(_id, assert(uxHighestPriorityOfWaitingTasks == false));
     if
     :: SELE(_id, listLIST_LENGTH_IS_EXCEEDING_ZERO(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
         AWAIT_D(_id, uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_ITEM_VALUE_OF_HEAD_ENTRY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
@@ -509,7 +507,7 @@ inline prvCopyDataFromQueue(_id, pxQueue, pvBuffer)
 
 inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
 {
-    AWAIT_D(_id, assert(temp_var == NULL_byte && temp_xReturn == false));
+    AWAIT_A(_id, assert(temp_var == NULL_byte && temp_xReturn == false));
 
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, temp_var2 = queueGET_cTxLock(pxQueue));
@@ -523,9 +521,9 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], temp_xReturn);
             if
             :: SELE(_id, temp_xReturn != false) ->
-                vTaskMissedYield(_id);
                 /* reset return value as fast as possible*/
-                AWAIT_D(_id, temp_xReturn = false)
+                AWAIT_A(_id, temp_xReturn = false);
+                vTaskMissedYield(_id)
             :: ELSE(_id, temp_xReturn != false)
             fi
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
@@ -550,9 +548,9 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], temp_xReturn);
             if
             :: SELE(_id, temp_xReturn != false) ->
-                vTaskMissedYield(_id);
                 /* reset return value as fast as possible*/
-                AWAIT_D(_id, temp_xReturn = false)
+                AWAIT_A(_id, temp_xReturn = false);
+                vTaskMissedYield(_id)
             :: ELSE(_id, temp_xReturn != false)
             fi;
 

@@ -45,7 +45,7 @@ typedef List_t {
 
 inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList)
 {
-    AWAIT_D(_id, assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB));
+    AWAIT_A(_id, assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB));
     if
     :: SELE(_id, LIST_SIZE > 1) ->
         for (idx: 1 .. (LIST_SIZE - 1)) {
@@ -58,7 +58,7 @@ inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList)
         }
         AWAIT_A(_id, idx = 0)
     :: ELSE(_id, LIST_SIZE > 1) ->
-        AWAIT_D(_id, assert(LIST_SIZE == 1 && listLIST_ITEM_CONTAINER(pxList.indices[0]) != NULL_nibble))
+        AWAIT_A(_id, assert(LIST_SIZE == 1 && listLIST_ITEM_CONTAINER(pxList.indices[0]) != NULL_nibble))
     fi;
 
     AWAIT_D(_id, pxTCB = listGET_LIST_ITEM_OWNER(pxList.indices[0]))

@@ -62,15 +62,14 @@ inline vPortEnterCritical(_id, temp_var)
      * user tasks. */
     if
     :: SELE(_id, uxCriticalNesting == 1) ->
-        AWAIT_D(_id, assert(EP >= FIRST_TASK))
+        AWAIT_A(_id, assert(EP >= FIRST_TASK))
     :: ELSE(_id, uxCriticalNesting == 1)
     fi
 }
 
 inline vPortExitCritical(_id, temp_var)
 {
-    AWAIT_D(_id, assert(uxCriticalNesting));
-    AWAIT_D(_id, uxCriticalNesting = uxCriticalNesting - 1);
+    AWAIT_D(_id, assert(uxCriticalNesting); uxCriticalNesting = uxCriticalNesting - 1);
     if
     :: SELE(_id, uxCriticalNesting == 0) -> portENABLE_INTERRUPTS(_id, temp_var)
     :: ELSE(_id, uxCriticalNesting == 0)

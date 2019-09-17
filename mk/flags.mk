@@ -24,6 +24,13 @@ ifdef U
 	TRAIL_FLAGS += -u$(U)
 endif
 
+# weak fairness
+ifdef WF
+	COMPILETIME_FLAGS := $(filter-out -DNOFAIR, $(COMPILETIME_FLAGS))
+	COMPILETIME_FLAGS += -DNFAIR=$(WF)
+	RUNTIME_FLAGS += -f
+endif
+
 .PHONY: .safety .bfs .ltl .np
 .safety:
 	$(eval COMPILETIME_FLAGS += -DSAFETY -DNOCLAIM)

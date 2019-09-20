@@ -505,11 +505,11 @@ inline xTaskPriorityInherit(_id, pxMutexHolder, xReturn, temp_var)
             fi;
 
             AWAIT_D(_id, xReturn = true)
-        :: ELSE(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority)
+        :: ELSE(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority) ->
             if
-            :: SELE(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority) ->
+            :: SELE(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority) ->
                 AWAIT_D(_id, xReturn = true)
-            :: ELSE(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority)
+            :: ELSE(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority)
             fi
         fi
     :: ELSE(_id, pxMutexHolder != NULL_byte)

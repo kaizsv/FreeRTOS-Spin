@@ -319,7 +319,7 @@ loop_take:
 
         if
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
-            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], xReturn);
+            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
             if
             :: SELE(_id, xReturn != false) ->
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)

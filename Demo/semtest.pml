@@ -22,7 +22,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-#include "../property/semtest.pml"
+#include "../property/semtest_check_lower_priority.pml"
 #endif
 
 #define semtstBLOCKING_EXPECTED_VALUE       254 /* 0xff */

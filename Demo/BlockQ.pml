@@ -81,11 +81,11 @@ loop:
         :: ELSE(_PID, sErrorEverOccureed == false)
         fi;
         AWAIT_D(_PID,
+            usValue = usValue + 1;
             if
-            :: usValue == NULL_byte - 1 ->
+            :: usValue == 8 ->
                 usValue = 0 /* integer overflow */
-            :: else ->
-                usValue = usValue + 1
+            :: else
             fi )
     fi;
     AWAIT_A(_PID, goto loop)
@@ -115,11 +115,11 @@ loop:
             :: ELSE(_PID, sErrorEverOccureed == false)
             fi;
             AWAIT_D(_PID,
+                usExpectedValue = usExpectedValue + 1;
                 if
-                :: usExpectedValue == NULL_byte - 1 ->
+                :: usExpectedValue == 8 ->
                     usExpectedValue = 0 /* integer overflow */
-                :: else ->
-                    usExpectedValue = usExpectedValue + 1
+                :: else
                 fi )
         fi
     :: ELSE(_PID, local_xReturn == true)
@@ -148,11 +148,11 @@ loop:
         :: ELSE(_PID, sErrorEverOccureed == false)
         fi;
         AWAIT_D(_PID,
+            usValue = usValue + 1;
             if
-            :: usValue == NULL_byte - 1 ->
+            :: usValue == 8 ->
                 usValue = 0 /* integer overflow */
-            :: else ->
-                usValue = usValue + 1
+            :: else
             fi )
     fi;
     AWAIT_A(_PID, goto loop)
@@ -182,11 +182,11 @@ loop:
             :: ELSE(_PID, sErrorEverOccureed == false)
             fi;
             AWAIT_D(_PID,
+                usExpectedValue = usExpectedValue + 1;
                 if
-                :: usExpectedValue == NULL_byte - 1 ->
+                :: usExpectedValue == 8 ->
                     usExpectedValue = 0 /* integer overflow */
-                :: else ->
-                    usExpectedValue = usExpectedValue + 1
+                :: else
                 fi )
         fi
     :: ELSE(_PID, local_xReturn == true)
@@ -215,11 +215,11 @@ loop:
         :: ELSE(_PID, sErrorEverOccureed == false)
         fi;
         AWAIT_D(_PID,
+            usValue = usValue + 1;
             if
-            :: usValue == NULL_byte - 1 ->
+            :: usValue == 8 ->
                 usValue = 0 /* integer overflow */
-            :: else ->
-                usValue = usValue + 1
+            :: else
             fi )
     fi;
     AWAIT_A(_PID, goto loop)
@@ -249,11 +249,11 @@ loop:
             :: ELSE(_PID, sErrorEverOccureed == false)
             fi;
             AWAIT_D(_PID,
+                usExpectedValue = usExpectedValue + 1;
                 if
-                :: usExpectedValue == NULL_byte - 1 ->
+                :: usExpectedValue == 8 ->
                     usExpectedValue = 0 /* integer overflow */
-                :: else ->
-                    usExpectedValue = usExpectedValue + 1
+                :: else
                 fi )
         fi
     :: ELSE(_PID, local_xReturn == true)

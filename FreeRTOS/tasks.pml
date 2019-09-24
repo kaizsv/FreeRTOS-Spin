@@ -55,8 +55,7 @@ inline taskSELECT_HIGHEST_PRIORITY_TASK(_id)
     for (idx: 0 .. uxTopReadyPriority) {
         if
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[pxReadyTasksLists + uxTopReadyPriority - idx])) ->
-            AWAIT_D(_id, uxTopReadyPriority = uxTopReadyPriority - idx);
-            AWAIT_A(_id, break)
+            AWAIT_A(_id, uxTopReadyPriority = uxTopReadyPriority - idx; break);
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[pxReadyTasksLists + uxTopReadyPriority - idx]))
         fi
     }
@@ -418,8 +417,7 @@ inline vTaskPlaceOnEventList(_id, pxEventList, EventListContainer, xTicksToWait,
 
 inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
 {
-    AWAIT_D(_id, pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList));
-    AWAIT_A(_id, assert(pxUnblockedTCB != NULL_byte));
+    AWAIT_D(_id, pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList); assert(pxUnblockedTCB != NULL_byte));
     AWAIT_D(_id, uxListRemove(pxEventList, TCB(pxUnblockedTCB).ListItems[xEvent], _));
 
     if

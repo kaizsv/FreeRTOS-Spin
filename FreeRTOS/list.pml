@@ -32,6 +32,10 @@ inline listSET_LIST_ITEM_CONTAINER(pxListItem, uxContainer)
 /* The model needs to arrange a fix memory at the compile time, we use an array
  * to simulate a linked list. */
 #define LIST_SIZE   5
+#if (LIST_SIZE < 2)
+#error LIST_SIZE must greater than 1
+#endif
+
 typedef List_t {
     ListItem_t indices[LIST_SIZE];
 };
@@ -45,21 +49,18 @@ typedef List_t {
 
 inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList)
 {
-    AWAIT_A(_id, assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB));
-    if
-    :: SELE(_id, LIST_SIZE > 1) ->
+    AWAIT_A(_id,
+        assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB);
+        assert(listLIST_ITEM_CONTAINER(pxList.indices[0]) != NULL_nibble);
         for (idx: 1 .. (LIST_SIZE - 1)) {
             if
-            :: SELE(_id, listLIST_ITEM_CONTAINER(pxList.indices[idx]) != NULL_nibble) ->
-                AWAIT_D(_id, swapListItems(pxList.indices[idx - 1], pxList.indices[idx]))
-            :: ELSE(_id, listLIST_ITEM_CONTAINER(pxList.indices[idx]) != NULL_nibble) ->
-                AWAIT_A(_id, break)
+            :: listLIST_ITEM_CONTAINER(pxList.indices[idx]) != NULL_nibble ->
+                swapListItems(pxList.indices[idx - 1], pxList.indices[idx])
+            :: else ->
+                break
             fi
         }
-        AWAIT_A(_id, idx = 0)
-    :: ELSE(_id, LIST_SIZE > 1) ->
-        AWAIT_A(_id, assert(LIST_SIZE == 1 && listLIST_ITEM_CONTAINER(pxList.indices[0]) != NULL_nibble))
-    fi;
+        idx = 0 );
 
     AWAIT_D(_id, pxTCB = listGET_LIST_ITEM_OWNER(pxList.indices[0]))
 }

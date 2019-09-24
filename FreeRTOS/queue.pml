@@ -498,9 +498,9 @@ inline prvCopyDataFromQueue(_id, pxQueue, pvBuffer)
         :: ELSE(_id, queueGET_pcReadFrom(pxQueue) >= pxQueue.uxLength)
         fi;
 
-        AWAIT_D(_id, pvBuffer = pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue))); // FIXME: memcpy
-        /* reset data in queue as soon as possible */
-        AWAIT_D(_id, pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)) = NULL_byte) // FIXME: memcyp
+        AWAIT_D(_id, pvBuffer = pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)); // FIXME: memcpy
+            /* reset data in queue as soon as possible */
+            pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)) = NULL_byte);
     :: ELSE(_id, !queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))
     fi
 }

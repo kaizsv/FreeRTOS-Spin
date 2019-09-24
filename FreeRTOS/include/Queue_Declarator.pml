@@ -9,8 +9,6 @@
 #define xSemaphore                  u
 #define xMutexHolder                single_byte
 #define uxRecursiveCallCount        multi_bytes[0]
-/* concatenate Length and Type */
-#define UNION_TYPE                  uxItemType ## uxQueueLength
 
 #define __UnionDeclarator(uxQueueLength, uxItemType)    \
     typedef __Union_ ## uxItemType ## uxQueueLength {   \

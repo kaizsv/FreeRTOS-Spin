@@ -115,16 +115,15 @@ loop_send:
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], xReturn);
             if
-            :: SELE(_id, xReturn != false) ->
+            :: atomic { SELE(_id, xReturn != false) -> xReturn = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var);
-            :: ELSE(_id, xReturn != false)
+            :: atomic { ELSE(_id, xReturn != false) -> assert(xReturn == false) }
             fi
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             if
-            :: SELE(_id, xYieldRequired != false) ->
-                AWAIT_A(_id, xYieldRequired = false); /* reset variable as soon as possible */
+            :: atomic { SELE(_id, xYieldRequired != false) -> xYieldRequired = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
-            :: ELSE(_id, xYieldRequired != false)
+            :: atomic { ELSE(_id, xYieldRequired != false) -> assert(xYieldRequired == false) }
             fi
         fi;
         #endif /* configUSE_QUEUE_SETS */
@@ -169,10 +168,9 @@ loop_send:
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
             if
-            :: SELE(_id, xReturn == false) ->
+            :: atomic { SELE(_id, xReturn == false) -> assert(xReturn == false) };
                 portYIELD_WITHIN_API(_id, temp_var)
-            :: ELSE(_id, xReturn == false) ->
-                AWAIT_A(_id, xReturn = false) /* reset variable */
+            :: atomic { ELSE(_id, xReturn == false) -> xReturn = false }
             fi
         :: ELSE(_id, prvIsQueueFull(pxQueue)) ->
             /* Try again. */
@@ -208,7 +206,7 @@ loop_receive:
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, temp_var2 = pxQueue.uxMessagesWaiting); /* uxMessagesWaiting */
     if
-    :: SELE(_id, temp_var2 > 0) ->
+    :: atomic { SELE(_id, temp_var2 > 0) -> assert(temp_var2 > 0) };
         prvCopyDataFromQueue(_id, pxQueue, pvBuffer);
         AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1; temp_var2 = NULL_byte);
 
@@ -216,18 +214,17 @@ loop_receive:
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
             if
-            :: SELE(_id, xReturn != false) ->
+            :: atomic { SELE(_id, xReturn != false) -> xReturn = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
-            :: ELSE(_id, xReturn != false)
+            :: atomic { ELSE(_id, xReturn != false) -> assert(xReturn == false) }
             fi
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]))
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
         AWAIT_A(_id, xReturn = true; goto return_receive)
-    :: ELSE(_id, temp_var2 > 0) ->
+    :: atomic { ELSE(_id, temp_var2 > 0) -> temp_var2 = NULL_byte };
 #ifdef QUEUE_RECEIVE_EXIT_CRITICAL
-        AWAIT_A(_id, temp_var2 = NULL_byte); /* reset variable */
         if
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
@@ -263,11 +260,9 @@ loop_receive:
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
             if
-            :: SELE(_id, xReturn == false) ->
+            :: atomic { SELE(_id, xReturn == false) -> assert(xReturn == false) };
                 portYIELD_WITHIN_API(_id, temp_var)
-            :: ELSE(_id, xReturn == false) ->
-                /* reset variable as soon as possible */
-                AWAIT_A(_id, xReturn = false)
+            :: atomic { ELSE(_id, xReturn == false) -> xReturn = false }
             fi
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -306,7 +301,7 @@ loop_take:
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, temp_var2 = pxQueue.uxMessagesWaiting); /* uxSemaphoreCount */
     if
-    :: SELE(_id, temp_var2 > 0) ->
+    :: atomic { SELE(_id, temp_var2 > 0) -> assert(temp_var2 > 0) };
         AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1; temp_var2 = NULL_byte);
 
         #if (configUSE_MUTEXES == 1)
@@ -321,22 +316,21 @@ loop_take:
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
             if
-            :: SELE(_id, xReturn != false) ->
+            :: atomic { SELE(_id, xReturn != false) -> xReturn = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
-            :: ELSE(_id, xReturn != false)
+            :: atomic { ELSE(_id, xReturn != false) -> assert(xReturn == false) }
             fi
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]))
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
         AWAIT_A(_id, xReturn = true; goto return_take)
-    :: ELSE(_id, temp_var2 > 0) ->
+    :: atomic { ELSE(_id, temp_var2 > 0) -> temp_var2 = NULL_byte };
 #ifdef QUEUE_TAKE_EXIT_CRITICAL
-        AWAIT_D(_id, temp_var2 = NULL_byte); /* reset temp_var2 */
         if
         :: SELE(_id, xTicksToWait == 0) ->
             #if (configUSE_MUTEXES == 1)
-            assert(xInheritanceOccurred == false);
+            AWAIT_A(_id, assert(xInheritanceOccurred == false));
             #endif
             taskEXIT_CRITICAL(_id, temp_var);
             AWAIT_A(_id, assert(xReturn == false); goto return_take)
@@ -380,11 +374,9 @@ loop_take:
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
             if
-            :: SELE(_id, xReturn == false) ->
+            :: atomic { SELE(_id, xReturn == false) -> assert(xReturn == false) };
                 portYIELD_WITHIN_API(_id, temp_var)
-            :: ELSE(_id, xReturn == false) ->
-                /* reset xReturn as soon as possible */
-                AWAIT_A(_id, xReturn = false)
+            :: atomic { ELSE(_id, xReturn == false) -> xReturn = false }
             fi
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -399,16 +391,13 @@ loop_take:
         :: SELE(_id, prvIsQueueEmpty(pxQueue)) ->
             #if (configUSE_MUTEXES == 1)
             if
-            :: SELE(_id, xInheritanceOccurred != false) ->
-                /* reset temporary variables as soon as possible*/
-                AWAIT_A(_id, xInheritanceOccurred = false);
-
+            :: atomic { SELE(_id, xInheritanceOccurred != false) -> xInheritanceOccurred = false };
                 taskENTER_CRITICAL(_id, temp_var);
                 prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, temp_var /* uxHighestWaitingPriority */);
                 vTaskPriorityDisinheritAfterTimeout(_id, pxQueue.xSemaphore.xMutexHolder, temp_var /* uxHighestWaitingPriority */, temp_var2);
 
                 taskEXIT_CRITICAL(_id, temp_var)
-            :: ELSE(_id, xInheritanceOccurred != false)
+            :: atomic { ELSE(_id, xInheritanceOccurred != false) -> assert(xInheritanceOccurred == false) }
             fi;
             #endif
 
@@ -431,12 +420,13 @@ return_take:
 
 inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWaitingTasks)
 {
-    AWAIT_A(_id, assert(uxHighestPriorityOfWaitingTasks == false));
     if
     :: SELE(_id, listLIST_LENGTH_IS_EXCEEDING_ZERO(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
-        AWAIT_D(_id, uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_ITEM_VALUE_OF_HEAD_ENTRY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
+        AWAIT_D(_id, assert(uxHighestPriorityOfWaitingTasks == false);
+            uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_ITEM_VALUE_OF_HEAD_ENTRY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
     :: ELSE(_id, listLIST_LENGTH_IS_EXCEEDING_ZERO(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
-        AWAIT_D(_id, uxHighestPriorityOfWaitingTasks = tskIDLE_PRIORITY)
+        AWAIT_D(_id, assert(uxHighestPriorityOfWaitingTasks == false);
+            uxHighestPriorityOfWaitingTasks = tskIDLE_PRIORITY)
     fi
 }
 
@@ -507,7 +497,7 @@ inline prvCopyDataFromQueue(_id, pxQueue, pvBuffer)
 
 inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
 {
-    AWAIT_A(_id, assert(temp_var == NULL_byte && temp_xReturn == false));
+    AWAIT_A(_id, assert(temp_var == NULL_byte && temp_var2 == NULL_byte && temp_xReturn == false));
 
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, temp_var2 = queueGET_cTxLock(pxQueue));
@@ -520,11 +510,9 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], temp_xReturn);
             if
-            :: SELE(_id, temp_xReturn != false) ->
-                /* reset return value as fast as possible*/
-                AWAIT_A(_id, temp_xReturn = false);
+            :: atomic { SELE(_id, temp_xReturn != false) -> temp_xReturn = false };
                 vTaskMissedYield(_id)
-            :: ELSE(_id, temp_xReturn != false)
+            :: atomic { ELSE(_id, temp_xReturn != false) -> assert(temp_xReturn == false) }
             fi
         :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             AWAIT_A(_id, break)
@@ -547,11 +535,9 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
         :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
             xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], temp_xReturn);
             if
-            :: SELE(_id, temp_xReturn != false) ->
-                /* reset return value as fast as possible*/
-                AWAIT_A(_id, temp_xReturn = false);
+            :: atomic { SELE(_id, temp_xReturn != false) -> temp_xReturn = false };
                 vTaskMissedYield(_id)
-            :: ELSE(_id, temp_xReturn != false)
+            :: atomic { ELSE(_id, temp_xReturn != false) -> assert(temp_xReturn == false) }
             fi;
 
             AWAIT_D(_id, temp_var2 = temp_var2 - 1)

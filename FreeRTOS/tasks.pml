@@ -161,12 +161,12 @@ inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
 {
     AWAIT_D(_id, xAlreadyYielded = false);
     if
-    :: SELE(_id, xTicksToDelay == 0) ->
+    :: SELE(_id, xTicksToDelay > 0) ->
         AWAIT_A(_id, assert(uxSchedulerSuspended == 0));
         vTaskSuspendAll(_id);
         prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false, temp_var);
         xTaskResumeAll(_id, temp_var, xAlreadyYielded, temp_var2)
-    :: ELSE(_id, xTicksToDelay == 0)
+    :: ELSE(_id, xTicksToDelay > 0)
     fi;
 
     if
@@ -359,18 +359,16 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
 
             prvAddTaskToReadyList(_id, pxTCB);
 
-#if (configUSE_PREEMPTION == 1)
+            #if (configUSE_PREEMPTION == 1)
             if
-            :: atomic { SELE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority) -> pxTCB = NULL_byte };
+            :: SELE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority) ->
                 AWAIT_D(_id, xSwitchRequired = true)
-            :: atomic { ELSE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority) -> pxTCB = NULL_byte }
-            fi;
-#else
-            AWAIT_A(_id, pxTCB = NULL_byte) /* reset variable as soon as possible */
-#endif
+            :: ELSE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
+            fi
+            #endif
         :: ELSE(_id, listLIST_IS_EMPTY(LISTs[pxDelayedTaskList]) == false) ->
             /* The delayed list is empty. */
-            AWAIT_A(_id, break)
+            AWAIT_A(_id, pxTCB = NULL_byte; break)
         od;
 
         #if ((configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
@@ -615,7 +613,8 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
 #if (INCLUDE_vTaskSuspend == 1)
     if
     :: SELE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
-        AWAIT_D(_id, vListInsertEnd(LISTs[xSuspendedTaskList], xSuspendedTaskList, TCB(pxCurrentTCB).ListItems[xState]))
+        assert(false)
+//        AWAIT_D(_id, vListInsertEnd(LISTs[xSuspendedTaskList], xSuspendedTaskList, TCB(pxCurrentTCB).ListItems[xState]))
     :: ELSE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
         // TODO: set the item value of xStateItem
         AWAIT_D(_id, vListInsert(LISTs[pxDelayedTaskList], pxDelayedTaskList, TCB(pxCurrentTCB).ListItems[xState], temp_var))

@@ -343,15 +343,11 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
         do
         :: SELE(_id, listLIST_IS_EMPTY(LISTs[pxDelayedTaskList]) == false) ->
             /* FIXME: timed out */
+            /* The delayed list is not empty. We ignore the effect of time in
+             * the model. Thus, the delayed tasks are added back to the ready
+             * list as soon as possible. */
             AWAIT_D(_id, pxTCB = listGET_OWNER_OF_HEAD_ENTRY(LISTs[pxDelayedTaskList]));
-
-            /* If the value is not zero, the execution breaks or continues the
-             * loop non-deterministically. */
-            if
-            :: SELE(_id, listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]) != 0) ->
-                AWAIT_A(_id, break)
-            :: SELE(_id, true)
-            fi;
+            /* FIXME: do not need to compare the item value here */
 
             AWAIT_D(_id, uxListRemove(LISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState])], TCB(pxTCB).ListItems[xState], _));
 
@@ -619,14 +615,13 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
 #if (INCLUDE_vTaskSuspend == 1)
     if
     :: SELE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
-        assert(false)
-//        AWAIT_D(_id, vListInsertEnd(LISTs[xSuspendedTaskList], xSuspendedTaskList, TCB(pxCurrentTCB).ListItems[xState]))
+        AWAIT_D(_id, vListInsertEnd(LISTs[xSuspendedTaskList], xSuspendedTaskList, TCB(pxCurrentTCB).ListItems[xState]))
     :: ELSE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
-        AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait));
+        // TODO: set the item value of xStateItem
         AWAIT_D(_id, vListInsert(LISTs[pxDelayedTaskList], pxDelayedTaskList, TCB(pxCurrentTCB).ListItems[xState], temp_var))
     fi;
 #else
-    AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait));
+    // TODO: set the item value of xStateItem
     AWAIT_D(_id, vListInsert(LISTs[pxDelayedTaskList], pxDelayedTaskList, TCB(pxCurrentTCB).ListItems[xState], temp_var));
 #endif
 }

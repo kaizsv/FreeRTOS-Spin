@@ -27,38 +27,37 @@
 
 #define blckqNUM_TASK_SETS 3
 
-#define xBlockTime  1
+#define xBlockTime  portMAX_DELAY
 #define xDontBlock  0
-
-byte sBlockingConsumerCount[blckqNUM_TASK_SETS];
-byte sBlockingProducerCount[blckqNUM_TASK_SETS];
 
 QueueDeclarator(1, byte);
 QueueDeclarator(5, byte);
 
 QueueHandle_t(pxQueueParameters1_xQueue, 1, byte);
 #define pxQueueParameters1_xBlockTime       xBlockTime
-#define pxQueueParameters1_psCheckVariable  sBlockingConsumerCount[0]
 
 #define pxQueueParameters2_xQueue           pxQueueParameters1_xQueue
 #define pxQueueParameters2_xBlockTime       xDontBlock
-#define pxQueueParameters2_psCheckVariable  sBlockingProducerCount[0]
 
 QueueHandle_t(pxQueueParameters3_xQueue, 1, byte);
 #define pxQueueParameters3_xBlockTime       xDontBlock
-#define pxQueueParameters3_psCheckVariable  sBlockingConsumerCount[1]
 
 #define pxQueueParameters4_xQueue           pxQueueParameters3_xQueue
 #define pxQueueParameters4_xBlockTime       xBlockTime
-#define pxQueueParameters4_psCheckVariable  sBlockingProducerCount[1]
 
 QueueHandle_t(pxQueueParameters5_xQueue, 5, byte);
 #define pxQueueParameters5_xBlockTime       xBlockTime
-#define pxQueueParameters5_psCheckVariable  sBlockingConsumerCount[2]
 
 #define pxQueueParameters6_xQueue           pxQueueParameters5_xQueue
 #define pxQueueParameters6_xBlockTime       xBlockTime
-#define pxQueueParameters6_psCheckVariable  sBlockingProducerCount[2]
+
+#define INCREASE_VAR_AND_INTOVERFLOW(var)   \
+    AWAIT_D(_PID, var = var + 1;            \
+        if                                  \
+        :: var == 8 -> var = 0              \
+        :: else                             \
+        fi                                  \
+    )                                       \
 
 proctype QProdB1()
 {
@@ -75,18 +74,8 @@ loop:
     :: SELE(_PID, local_xReturn != true) ->
         AWAIT_D(_PID, sErrorEverOccureed = true)
     :: ELSE(_PID, local_xReturn != true) ->
-        if
-        :: SELE(_PID, sErrorEverOccureed == false) ->
-            AWAIT_D(_PID, pxQueueParameters1_psCheckVariable = pxQueueParameters1_psCheckVariable + 1)
-        :: ELSE(_PID, sErrorEverOccureed == false)
-        fi;
-        AWAIT_D(_PID,
-            usValue = usValue + 1;
-            if
-            :: usValue == 8 ->
-                usValue = 0 /* integer overflow */
-            :: else
-            fi )
+        AWAIT_D(_PID, assert(!sErrorEverOccureed));
+        INCREASE_VAR_AND_INTOVERFLOW(usValue);
     fi;
     AWAIT_A(_PID, goto loop)
 }
@@ -109,18 +98,8 @@ loop:
             AWAIT_D(_PID, usExpectedValue = usData);
             AWAIT_D(_PID, sErrorEverOccureed = true; assert(false))
         :: ELSE(_PID, usData != usExpectedValue) ->
-            if
-            :: SELE(_PID, sErrorEverOccureed == false) ->
-                AWAIT_D(_PID, pxQueueParameters2_psCheckVariable = pxQueueParameters2_psCheckVariable + 1)
-            :: ELSE(_PID, sErrorEverOccureed == false)
-            fi;
-            AWAIT_D(_PID,
-                usExpectedValue = usExpectedValue + 1;
-                if
-                :: usExpectedValue == 8 ->
-                    usExpectedValue = 0 /* integer overflow */
-                :: else
-                fi )
+            AWAIT_D(_PID, assert(!sErrorEverOccureed));
+            INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
@@ -142,18 +121,8 @@ loop:
     :: SELE(_PID, local_xReturn != true) ->
         AWAIT_D(_PID, sErrorEverOccureed = true)
     :: ELSE(_PID, local_xReturn != true) ->
-        if
-        :: SELE(_PID, sErrorEverOccureed == false) ->
-            AWAIT_D(_PID, pxQueueParameters3_psCheckVariable = pxQueueParameters3_psCheckVariable + 1)
-        :: ELSE(_PID, sErrorEverOccureed == false)
-        fi;
-        AWAIT_D(_PID,
-            usValue = usValue + 1;
-            if
-            :: usValue == 8 ->
-                usValue = 0 /* integer overflow */
-            :: else
-            fi )
+        AWAIT_D(_PID, assert(!sErrorEverOccureed));
+        INCREASE_VAR_AND_INTOVERFLOW(usValue);
     fi;
     AWAIT_A(_PID, goto loop)
 }
@@ -176,18 +145,8 @@ loop:
             AWAIT_D(_PID, usExpectedValue = usData);
             AWAIT_D(_PID, sErrorEverOccureed = true; assert(false))
         :: ELSE(_PID, usData != usExpectedValue) ->
-            if
-            :: SELE(_PID, sErrorEverOccureed == false) ->
-                AWAIT_D(_PID, pxQueueParameters2_psCheckVariable = pxQueueParameters2_psCheckVariable + 1)
-            :: ELSE(_PID, sErrorEverOccureed == false)
-            fi;
-            AWAIT_D(_PID,
-                usExpectedValue = usExpectedValue + 1;
-                if
-                :: usExpectedValue == 8 ->
-                    usExpectedValue = 0 /* integer overflow */
-                :: else
-                fi )
+            AWAIT_D(_PID, assert(!sErrorEverOccureed));
+            INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;
@@ -209,18 +168,8 @@ loop:
     :: SELE(_PID, local_xReturn != true) ->
         AWAIT_D(_PID, sErrorEverOccureed = true)
     :: ELSE(_PID, local_xReturn != true) ->
-        if
-        :: SELE(_PID, sErrorEverOccureed == false) ->
-            AWAIT_D(_PID, pxQueueParameters5_psCheckVariable = pxQueueParameters5_psCheckVariable + 1)
-        :: ELSE(_PID, sErrorEverOccureed == false)
-        fi;
-        AWAIT_D(_PID,
-            usValue = usValue + 1;
-            if
-            :: usValue == 8 ->
-                usValue = 0 /* integer overflow */
-            :: else
-            fi )
+        AWAIT_D(_PID, assert(!sErrorEverOccureed));
+        INCREASE_VAR_AND_INTOVERFLOW(usValue);
     fi;
     AWAIT_A(_PID, goto loop)
 }
@@ -243,18 +192,8 @@ loop:
             AWAIT_D(_PID, usExpectedValue = usData);
             AWAIT_D(_PID, sErrorEverOccureed = true; assert(false))
         :: ELSE(_PID, usData != usExpectedValue) ->
-            if
-            :: SELE(_PID, sErrorEverOccureed == false) ->
-                AWAIT_D(_PID, pxQueueParameters2_psCheckVariable = pxQueueParameters2_psCheckVariable + 1)
-            :: ELSE(_PID, sErrorEverOccureed == false)
-            fi;
-            AWAIT_D(_PID,
-                usExpectedValue = usExpectedValue + 1;
-                if
-                :: usExpectedValue == 8 ->
-                    usExpectedValue = 0 /* integer overflow */
-                :: else
-                fi )
+            AWAIT_D(_PID, assert(!sErrorEverOccureed));
+            INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
         fi
     :: ELSE(_PID, local_xReturn == true)
     fi;

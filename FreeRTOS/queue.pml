@@ -416,6 +416,8 @@ return_take:
         assert(xInheritanceOccurred == false && temp_var == NULL_byte && temp_var2 == NULL_byte))
 }
 
+#define uxQueueMessagesWaiting(xQueue) xQueue.uxMessagesWaiting
+
 #if (configUSE_MUTEXES == 1)
 
 inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWaitingTasks)

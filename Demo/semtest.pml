@@ -53,7 +53,7 @@ loop:
         xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         AWAIT_D(_PID, assert(local_xReturn); local_xReturn = false);
 
-        vTaskDelay(_PID, pxFirstSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
+        vTaskDelay(_PID, pxFirstSemaphore_xBlockTime, local_bit, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) ->
         /* pxFirstSemaphore_xBlockTime == 0 */
         taskYIELD(_PID, local_var1)
@@ -80,7 +80,7 @@ loop:
         xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         AWAIT_D(_PID, assert(local_xReturn); local_xReturn = false);
 
-        vTaskDelay(_PID, pxFirstSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
+        vTaskDelay(_PID, pxFirstSemaphore_xBlockTime, local_bit, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) ->
         /* pxFirstSemaphore_xBlockTime == 0 */
         taskYIELD(_PID, local_var1)
@@ -107,7 +107,7 @@ loop:
         xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         AWAIT_D(_PID, assert(local_xReturn); local_xReturn = false);
 
-        vTaskDelay(_PID, pxSecondSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
+        vTaskDelay(_PID, pxSecondSemaphore_xBlockTime, local_bit, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) /* pxSecondSemaphore_xBlockTime != 0 */
     fi;
 liveness:
@@ -132,7 +132,7 @@ loop:
         xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         AWAIT_D(_PID, assert(local_xReturn); local_xReturn = false);
 
-        vTaskDelay(_PID, pxSecondSemaphore_xBlockTime, local_xReturn, local_var1, local_var2)
+        vTaskDelay(_PID, pxSecondSemaphore_xBlockTime, local_bit, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true) /* pxSecondSemaphore_xBlockTime != 0 */
     fi;
 liveness:

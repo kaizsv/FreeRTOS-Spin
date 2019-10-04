@@ -159,7 +159,6 @@ inline xTaskCreate(_id, pcName, Priority, temp_var)
 
 inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
 {
-    AWAIT_D(_id, xAlreadyYielded = false);
     if
     :: SELE(_id, xTicksToDelay > 0) ->
         AWAIT_A(_id, assert(uxSchedulerSuspended == 0));
@@ -170,10 +169,9 @@ inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
     fi;
 
     if
-    :: SELE(_id, xAlreadyYielded == false) ->
+    :: atomic { SELE(_id, xAlreadyYielded == false) -> assert(xAlreadyYielded == false) };
         portYIELD_WITHIN_API(_id, temp_var)
-    :: ELSE(_id, xAlreadyYielded == false) ->
-        AWAIT_A(_id, xAlreadyYielded = false)
+    :: atomic { ELSE(_id, xAlreadyYielded == false) -> assert(xTicksToDelay > 0); xAlreadyYielded = false }
     fi
 }
 

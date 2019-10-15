@@ -25,8 +25,6 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
-#define blckqNUM_TASK_SETS 3
-
 #define xBlockTime  portMAX_DELAY
 #define xDontBlock  0
 
@@ -57,7 +55,7 @@ QueueHandle_t(pxQueueParameters5_xQueue, 5, byte);
         :: var == 8 -> var = 0              \
         :: else                             \
         fi                                  \
-    )                                       \
+    )
 
 proctype QProdB1()
 {
@@ -67,7 +65,7 @@ proctype QProdB1()
     bit local_xReturn = false, local_bit = false;
     bit local_xIsNDTimeOut = false;
     bit sErrorEverOccureed = 0;
-    assert(FIRST_TASK == _PID);
+    assert(_PID == FIRST_TASK + 0);
 loop:
     xQueueSend(pxQueueParameters1_xQueue, usValue, pxQueueParameters1_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
@@ -88,7 +86,7 @@ proctype QConsB2()
     bit local_xReturn = false;
     bit local_xIsNDTimeOut = false;
     bit sErrorEverOccureed = 0;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 1);
 loop:
     xQueueReceive(pxQueueParameters2_xQueue, usData, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
@@ -96,7 +94,7 @@ loop:
         if
         :: SELE(_PID, usData != usExpectedValue) ->
             AWAIT_D(_PID, usExpectedValue = usData);
-            AWAIT_D(_PID, sErrorEverOccureed = true; assert(false))
+            AWAIT_D(_PID, sErrorEverOccureed = true)
         :: ELSE(_PID, usData != usExpectedValue) ->
             AWAIT_D(_PID, assert(!sErrorEverOccureed));
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
@@ -114,7 +112,7 @@ proctype QProdB3()
     bit local_xReturn = false, local_bit = false;
     bit local_xIsNDTimeOut = false;
     bit sErrorEverOccureed = 0;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 2);
 loop:
     xQueueSend(pxQueueParameters3_xQueue, usValue, pxQueueParameters3_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
@@ -135,15 +133,15 @@ proctype QConsB4()
     bit local_xReturn = false;
     bit local_xIsNDTimeOut = false;
     bit sErrorEverOccureed = 0;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 3);
 loop:
-    xQueueReceive(pxQueueParameters2_xQueue, usData, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    xQueueReceive(pxQueueParameters4_xQueue, usData, pxQueueParameters4_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
         if
         :: SELE(_PID, usData != usExpectedValue) ->
             AWAIT_D(_PID, usExpectedValue = usData);
-            AWAIT_D(_PID, sErrorEverOccureed = true; assert(false))
+            AWAIT_D(_PID, sErrorEverOccureed = true)
         :: ELSE(_PID, usData != usExpectedValue) ->
             AWAIT_D(_PID, assert(!sErrorEverOccureed));
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
@@ -161,7 +159,7 @@ proctype QProdB5()
     bit local_xReturn = false, local_bit = false;
     bit local_xIsNDTimeOut = false;
     bit sErrorEverOccureed = 0;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 4);
 loop:
     xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
@@ -182,15 +180,15 @@ proctype QConsB6()
     bit local_xReturn = false;
     bit local_xIsNDTimeOut = false;
     bit sErrorEverOccureed = 0;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 5);
 loop:
-    xQueueReceive(pxQueueParameters2_xQueue, usData, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
         if
         :: SELE(_PID, usData != usExpectedValue) ->
             AWAIT_D(_PID, usExpectedValue = usData);
-            AWAIT_D(_PID, sErrorEverOccureed = true; assert(false))
+            AWAIT_D(_PID, sErrorEverOccureed = true)
         :: ELSE(_PID, usData != usExpectedValue) ->
             AWAIT_D(_PID, assert(!sErrorEverOccureed));
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);

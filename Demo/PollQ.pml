@@ -1,5 +1,6 @@
 /* FreeRTOS/Demo/Common/Full/PollQ.c */
-/* verification is failed due to the fine grain time-slicing */
+/* NOTE: the delayed time of xQueueSendToBack needs to be portMAX_DELAY, or
+         the verification will be failed due to the fine grain time-slicing */
 
 #define promela_TASK_NUMBER     2
 #define promela_QUEUE_NUMBER    1
@@ -22,7 +23,7 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
-#define usNumToProduce 1
+#define usNumToProduce 3
 
 QueueDeclarator(10, byte);
 QueueHandle_t(xPolledQueue, 10, byte);
@@ -43,18 +44,14 @@ proctype QConsNB()
     bit local_xIsNDTimeOut = false;
 
     byte usData, usExpectedValue = 0;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 0);
 loop:
     do
     :: SELE(_PID, uxQueueMessagesWaiting(xPolledQueue)) ->
         xQueueReceive(xPolledQueue, usData, 0, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         if
         :: SELE(_PID, local_xReturn == true) ->
-            if
-            :: SELE(_PID, usData != usExpectedValue) ->
-                assert(false)
-            :: ELSE(_PID, usData != usExpectedValue)
-            fi;
+            AWAIT_D(_PID, assert(usData == usExpectedValue));
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue)
         :: ELSE(_PID, local_xReturn == true)
         fi
@@ -73,18 +70,19 @@ proctype QProdNB()
     bit local_xIsNDTimeOut = false;
 
     byte usValue = 0, usLoop;
-    assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
+    assert(_PID == FIRST_TASK + 1);
 loop:
-    skip;
-    for (usLoop: 0 .. (usNumToProduce - 1)) {
-        xQueueSendToBack(xPolledQueue, usValue, 0, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    do
+    :: atomic { SELE(_PID, usLoop < usNumToProduce) -> usLoop = usLoop + 1 };
+        xQueueSendToBack(xPolledQueue, usValue, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         if
         :: SELE(_PID, local_xReturn != true) ->
             assert(false)
         :: ELSE(_PID, local_xReturn != true) ->
             INCREASE_VAR_AND_INTOVERFLOW(usValue)
         fi
-    }
+    :: atomic { ELSE(_PID, usLoop < usNumToProduce) -> usLoop = 0; break }
+    od;
     vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
     AWAIT_A(_PID, goto loop)
 }

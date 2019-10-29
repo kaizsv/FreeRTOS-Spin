@@ -86,7 +86,7 @@ inline vListInitialise(pxList)
 inline dcListItem(varListItem, valListItem)
 {
     varListItem.Value_Owner = valListItem.Value_Owner;
-    varListItem.RESERVED_Container = valListItem.RESERVED_Container;
+    varListItem.RESERVED_Container = valListItem.RESERVED_Container
 }
 
 /* swap two list items in-place */
@@ -97,7 +97,7 @@ inline swapListItems(aListItem, bListItem)
     aListItem.Value_Owner = aListItem.Value_Owner ^ bListItem.Value_Owner;
     aListItem.RESERVED_Container = aListItem.RESERVED_Container ^ bListItem.RESERVED_Container;
     bListItem.RESERVED_Container = bListItem.RESERVED_Container ^ aListItem.RESERVED_Container;
-    aListItem.RESERVED_Container = aListItem.RESERVED_Container ^ bListItem.RESERVED_Container;
+    aListItem.RESERVED_Container = aListItem.RESERVED_Container ^ bListItem.RESERVED_Container
 }
 
 inline vListInsertEnd(pxList, uxContainer, pxNewListItem)
@@ -172,11 +172,23 @@ inline uxListRemove(pxList, pxItemToRemove, uReturn)
         fi
     }
 
-    /* Move the items behind the index forward */
     if
+    :: idx == 0 ->
+        /* make sure the index (position 0) is left pointing to a valid item. */
+        for (idx: 1 .. (LIST_SIZE - 1)) {
+            if
+            :: listLIST_ITEM_CONTAINER(pxList.indices[LIST_SIZE - idx]) != NULL_nibble ->
+                uReturn = LIST_SIZE - idx;
+                swapListItems(pxList.indices[0], pxList.indices[LIST_SIZE - idx]);
+                break
+            :: else ->
+                uReturn = LIST_SIZE - idx - 1
+            fi
+        }
     :: idx == (LIST_SIZE - 1) ->
         uReturn = idx
     :: else ->
+        /* Move the items behind the index forward */
         for (idx: (idx + 1) .. (LIST_SIZE - 1)) {
             if
             :: listLIST_ITEM_CONTAINER(pxList.indices[idx]) == NULL_nibble ->

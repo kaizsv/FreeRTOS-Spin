@@ -58,8 +58,6 @@ QueueHandle_t(pxQueueParameters3_xQueue, 1, byte);
         fi                                  \
     )
 
-ltl { <>[](_last != 4 && _last != 5 && _last != 7 && _last != 8) }
-
 proctype QProdB1()
 {
     byte idx;

@@ -154,7 +154,7 @@ loop:
 //    xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
 //    if
 //    :: SELE(_PID, local_xReturn != true) ->
-//        AWAIT_D(_PID, assert(flase));
+//        AWAIT_D(_PID, assert(false));
 //    :: ELSE(_PID, local_xReturn != true) ->
 //        INCREASE_VAR_AND_INTOVERFLOW(usValue);
 //    fi;

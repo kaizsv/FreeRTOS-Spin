@@ -7,7 +7,8 @@
 
 /* FIXME: To reduce the size of a single state, we merged the Rx and Tx Locks
  * into a single variable. This modification causes the UNLOCKED value is 15. */
-#define queueUNLOCKED                       15
+#define NULL_nibble                         15  /* 0b1111 */
+#define queueUNLOCKED                       NULL_nibble
 #define queueLOCKED_UNMODIFIED              0
 
 #if (configUSE_PREEMPTION == 0)

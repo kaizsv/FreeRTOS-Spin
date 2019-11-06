@@ -20,7 +20,6 @@
 ltl { <>[](_last != 5) }
 
 // TODO: verify List, Queue
-// TODO: vTaskDelay
 // TODO: vPortSetInterruptHandler
 // TODO: TODO: heap.c; embedded C code               
 // TODO: change bit to byte

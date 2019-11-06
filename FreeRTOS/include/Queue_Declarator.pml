@@ -1,6 +1,11 @@
 #ifndef _Queue_Declarator_
 #define _Queue_Declarator_
 
+#define get_upper_byte(word)            ((word >> 4) & 15)
+#define get_lower_byte(word)            (word & 15)
+#define set_upper_byte(word, value)     word = (word & 15) | ((value) << 4)
+#define set_lower_byte(word, value)     word = (word & 240) | (value)
+
 /* __QueuePointers_t */
 #define xQueue                      u
 #define pcWriteTo_pcReadFrom        single_byte
@@ -46,8 +51,8 @@ inline queueSET_pcReadFrom(pxQueue, value)
         byte cRxLock_cTxLock;                                   \
     }
 
-#define QueueDeclarator(uxQueueLength, uxItemType)      \
-    __UnionDeclarator(uxQueueLength, uxItemType)        \
+#define QueueDeclarator(uxQueueLength, uxItemType)  \
+    __UnionDeclarator(uxQueueLength, uxItemType)    \
     __QueueDeclarator(uxQueueLength, uxItemType)
 
 #define QueueHandle_t(NAME, uxQueueLength, uxItemType)  \

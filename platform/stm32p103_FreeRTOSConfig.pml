@@ -31,7 +31,7 @@ configUSE_TASK_NOTIFICATIONS                0
 #define configUSE_TIME_SLICING              1
 #define configIDLE_SHOULD_YIELD             1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0 // TODO
-#define configMAX_PRIORITIES                2
+#define configMAX_PRIORITIES                3
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         0 // TODO
 #define configUSE_QUEUE_SETS                0 // TODO
@@ -40,8 +40,10 @@ configUSE_TASK_NOTIFICATIONS                0
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    80  /* 0x50 */
 //#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 0xf
 
-#define INCLUDE_vTaskSuspend                0
+#define INCLUDE_vTaskSuspend                1
 #define INCLUDE_vTaskDelay                  1
+#define INCLUDE_uxTaskPriorityGet           1
+#define INCLUDE_vTaskPrioritySet            1
 
 /* Configurations Limitations */
 

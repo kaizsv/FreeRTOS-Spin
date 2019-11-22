@@ -78,18 +78,17 @@ inline vPortExitCritical(_id, temp_var)
 
 proctype PendSV_Handler()
 {
-    bit local_bit = 0;
     byte idx = 0;
     byte local_var = NULL_byte;
     assert(PendSV_ID == _PID);
     (EP != NULL_byte);
 loop:
-    soft_exp_request(_PID);
+    soft_gen_irq(_PID);
     AWAIT_A(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
     vTaskSwitchContext(_PID);
     AWAIT_D(_PID, MSR_BASEPRI(0));
     AWAIT_D(_PID, switch_context(pxCurrentTCB));
-    AWAIT_D(_PID, exp_return(local_var, local_bit));
+    AWAIT_D(_PID, exp_return(local_var));
 
     goto loop
 }
@@ -102,7 +101,7 @@ proctype SysTick_Handler()
     assert(SysTick_ID == _PID);
     (EP != NULL_byte);
 loop:
-    hard_exp_request(_PID);
+    irq(_PID);
     portDISABLE_INTERRUPTS(_PID, local_var);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
@@ -111,7 +110,7 @@ loop:
     :: ELSE(_PID, local_bit != false)
     fi;
     portENABLE_INTERRUPTS(_PID, local_var);
-    AWAIT_D(_PID, exp_return(local_var, local_bit));
+    AWAIT_D(_PID, exp_return(local_var));
 
     goto loop
 }

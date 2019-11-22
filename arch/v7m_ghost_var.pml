@@ -33,7 +33,7 @@ inline SET_PRIO_EXP(id, prio)
 * ISPR: others
 */
 #define GET_PENDING(ID) ((pending_exp >> ID) & 1)
-#define HAS_PENDING_EXPS (pending_exp != 0)
+#define HAS_PENDING_EXPS (pending_exp > 0)
 byte pending_exp = 0;
 
 inline set_pending(id)
@@ -73,36 +73,43 @@ inline pop(ret)
     EP_Stack[EP_Top] = NULL_byte
 }
 
+inline stack_check(id)
+{
+    if
+    :: EP_Top > 0 ->
+        for (idx: 0 .. (EP_Top - 1)) {
+            assert(EP_Stack[idx] != id)
+        }
+        idx = 0
+    :: else ->
+        assert(EP_Stack[0] == NULL_byte)
+    fi
+}
+
 inline switch_context(new_context)
 {
     assert(EP_Top == 1 && LAST_EP_STACK >= FIRST_TASK && new_context >= FIRST_TASK);
     EP_Stack[0] = new_context
 }
 
-/** exp_inactive_yet
-* The variable is to record the situation that a pending exption is selected to
-* become active at the exception return. This is similar to the late-arriving
-* mechanism. Since the selected exception is not active yet, the model uses an
-* additional variable to restore this situation.
-*
-* The eighth bit of the variable is used to record the situation of calling dsb
-* and isb instructions. The situation clears the remaining data in the pipeline
-* that the processor can active a pending exception.
-*/
-#define DSB_ISB         7
-byte exp_inactive_yet = 0;
-#define GET_INACTIVE_YET_EXP(id) ((exp_inactive_yet >> id) & 1)
+/* exp_inoperative
+ * Tail-chaining and memroy barrier mechanisms assign a pending exception to EP.
+ * In reality, the operation sets the pending exception to active state. In
+ * PROMELA model, however, the assigned EP is not in active state yet. The
+ * variable indicates that EP is inoperative and needs to be recognized at the
+ * abstraction of irq.
+ */
+bit exp_inoperative = 0;
+#define HAS_INOPERATIVE_EXP (exp_inoperative == 1)
 
-inline set_exp_inactive(id)
+inline set_exp_inoperative()
 {
-    assert(id < FIRST_TASK || id == DSB_ISB);
-    exp_inactive_yet = exp_inactive_yet | (1 << id)
+    exp_inoperative = 1
 }
 
-inline clear_exp_inactive(id)
+inline clear_exp_inoperative()
 {
-    assert(id < FIRST_TASK || id == DSB_ISB);
-    exp_inactive_yet = exp_inactive_yet & ~(1 << id)
+    exp_inoperative = 0
 }
 
 #endif

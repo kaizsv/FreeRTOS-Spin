@@ -284,18 +284,9 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
 
     if
     :: atomic { SELE(_id, pxTCB == pxCurrentTCB) -> pxTCB = NULL_byte };
-        if
-        :: SELE(_id, xSchedulerRunning != false) ->
-            AWAIT_A(_id, assert(uxSchedulerSuspended == 0));
-            portYIELD_WITHIN_API(_id, temp_var)
-        :: ELSE(_id, xSchedulerRunning != false) ->
-            if
-            :: SELE(_id, listLIST_LENGTH_EQ_CURRENTNUMBEROFTASKS(LISTs[xSuspendedTaskList])) ->
-                AWAIT_D(_id, pxCurrentTCB = NULL_byte)
-            :: ELSE(_id, listLIST_LENGTH_EQ_CURRENTNUMBEROFTASKS(LISTs[xSuspendedTaskList])) ->
-                vTaskSwitchContext(_id);
-            fi
-        fi
+        /* remodel if the assertions evaluate to false */
+        AWAIT_D(_id, assert(xSchedulerRunning != false && uxSchedulerSuspended == 0));
+        portYIELD_WITHIN_API(_id, temp_var)
     :: atomic { ELSE(_id, pxTCB == pxCurrentTCB) -> pxTCB = NULL_byte }
     fi
 }
@@ -693,11 +684,11 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
     :: SELE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
         AWAIT_D(_id, vListInsertEnd(LISTs[xSuspendedTaskList], xSuspendedTaskList, IDX_TCB(pxCurrentTCB), xState))
     :: ELSE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
-        //AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait))
+        //AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait));
         AWAIT_D(_id, vListInsert(LISTs[pxDelayedTaskList], pxDelayedTaskList, IDX_TCB(pxCurrentTCB), xState, temp_var))
     fi;
 #else
-    //AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait))
+    //AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait));
     AWAIT_D(_id, vListInsert(LISTs[pxDelayedTaskList], pxDelayedTaskList, IDX_TCB(pxCurrentTCB), xState, temp_var));
 #endif
 }

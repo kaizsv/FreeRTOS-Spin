@@ -5,208 +5,163 @@
 
 inline get_high_prio_pending(ret)
 {
-    /* make sure at least one exception is pended. */
-    assert(ret == NULL_byte);
+    /* ensure there is at least one pending exception. */
+    assert(ret == NULL_byte && promela_EXP_NUMBER < NULL_byte);
     for (idx: 0 .. (promela_EXP_NUMBER - 1)) {
         if
-        :: GET_PENDING(idx) && ret == NULL_byte ->
+        :: GET_PENDING(idx) && (ret == NULL_byte || GET_PRIO_EXP(idx) < GET_PRIO_EXP(ret)) ->
             ret = idx
-        :: else ->
-            if
-            :: GET_PENDING(idx) && (GET_PRIO_EXP(idx) < GET_PRIO_EXP(ret)) ->
-                ret = idx
-            :: else
-            fi
+        :: else
         fi
     }
     idx = 0;
-    /* check the pending bit if the return value is the first exp. */
     assert(ret != NULL_byte)
 }
 
-/** Document: Application Note 321--4.10 Changing priority level of an interrupt
-* To let the processor recognize a pending exception, the memory barrier flushes
-* the pipe lines.
-**
-* https://developer.arm.com/docs/dai0321/latest
-**/
+/* According to section 4.10 in Application Note 321, the dsb instruction
+ * followed by the isb force the new state is recognized by the subsequent
+ * instructions. */
 inline v7m_memory_barrier(high_pending_exp)
 {
     if
     :: HAS_PENDING_EXPS ->
-        assert(exp_inactive_yet == 0);
+        assert(!HAS_INOPERATIVE_EXP);
         get_high_prio_pending(high_pending_exp);
         if
         :: BASEPRI_MASK(high_pending_exp) && (EP >= FIRST_TASK || GET_PRIO_EXP(high_pending_exp) < GET_PRIO_EXP(EP)) ->
-            set_exp_inactive(DSB_ISB);
-
-            push(EP);
-            EP = high_pending_exp;
-            /* reset variable as soon as possible */
-            high_pending_exp = NULL_byte;
+            inoperative_exp_entry(high_pending_exp);
+            high_pending_exp = NULL_byte; /* reset local variable */
 
             (EP == _PID)
         :: else ->
             assert(high_pending_exp != EP);
-            /* reset variable as soon as possible */
-            high_pending_exp = NULL_byte
+            high_pending_exp = NULL_byte /* reset local variable */
         fi
     :: else
     fi
 }
 
-inline exp_entry(id)
+inline inoperative_exp_taken(id)
 {
-    assert(!GET_INACTIVE_YET_EXP(id));
-    clear_pending(id);
-    push(EP);
+    set_exp_inoperative();
     EP = id
 }
 
-// TODO: in stack check
-/* The generation of the exception is from hardware that the generation is
- * arbitrary. */
-inline hard_exp_request(gen_id)
+inline inoperative_exp_entry(id)
+{
+    push(EP);
+    inoperative_exp_taken(id)
+}
+
+inline exp_taken(id)
+{
+    clear_pending(id);
+    EP = id
+}
+
+inline exp_entry(id)
+{
+    push(EP);
+    exp_taken(id)
+}
+
+/* an abstraction of an interrupt request which is generated exhaustively */
+inline irq(gen_id)
 {
     do
-    :: atomic { BASEPRI_MASK(gen_id) && (gen_id == EP) ->
-        /* assure the process is a pended exception. */
-        assert(gen_id < FIRST_TASK && GET_PENDING(gen_id));
-        /* clear the pending bit and enter the handler. */
-        clear_pending(gen_id);
-        if
-        :: GET_INACTIVE_YET_EXP(gen_id) ->
-            /* The generated exception is selected through the tail-chaining
-             * mechanism. */
-            assert(!GET_INACTIVE_YET_EXP(DSB_ISB));
-            clear_exp_inactive(gen_id)
-        :: else ->
-            /* The generated exception is selected because the dsb and the isb
-             * instructions flush the pipeline. */
-            assert(GET_INACTIVE_YET_EXP(DSB_ISB));
-            clear_exp_inactive(DSB_ISB);
-        fi;
+    :: atomic { BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
+        /* EP is a user task. */
+        assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && EP_Top == 0);
+        stack_check(gen_id);
+        exp_entry(gen_id);
         break
        }
-    :: atomic { BASEPRI_MASK(gen_id) && (gen_id != EP) && (EP >= FIRST_TASK) ->
-        /* The executing process is a user task. Since the pending bit of the
-        *  generated exp will be cleared in exp_entry, there is no need to set
-        *  the bit. Moreover, it is necessary to separate the situations if EP
-        *  is a user task or an exception. Because they have different priority
-        *  setting. */
+#if 0
+    :: atomic { BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
+        assert(!GET_PENDING(gen_id) && (gen_id != EP));
+        stack_check(gen_id);
         if
-        :: !HAS_PENDING_EXPS ->
-            exp_entry(gen_id);
-            break
-        :: else
+        :: HAS_INOPERATIVE_EXP ->
+            /* late-arriving entry:
+             * EP is inoperative that cannot be pushed onto EP_Stack */
+            clear_exp_inoperative();
+            exp_taken(gen_id)
+        :: else ->
+            /* preemption entry */
+            exp_entry(gen_id)
         fi
        }
-    :: atomic { BASEPRI_MASK(gen_id) && (gen_id != EP) && (EP < FIRST_TASK) ->
-        assert(!GET_INACTIVE_YET_EXP(gen_id));
+#endif
+    :: atomic { BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
         if
-        :: GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP) ->
-            assert(false)
-//            if
-//            :: GET_INACTIVE_YET_EXP(EP) ->
-//                /** late-arriving mechanism
-//                * The executing exp can not be added into the stack since it
-//                * is not active yet. */
-//                assert(!GET_PENDING(gen_id));
-//                clear_exp_inactive(EP);
-//                EP = gen_id
-//            :: else ->
-//                exp_entry(gen_id)
-//            fi;
-//            break
+        :: (gen_id == EP) ->
+            /* memory barrier or tail-chaining entry */
+            assert(GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+            stack_check(gen_id);
+            clear_exp_inoperative();
+            exp_taken(gen_id);
+            break
         :: else ->
-            /* The priority of the generated exception is insufficient to
-            *  preemptive the executing task. Set the pending bit. */
+            // TODO: solve the proble of re-setting pending state
+            // assert(!GET_PENDING(gen_id));
             set_pending(gen_id)
         fi
        }
-    :: atomic { else ->
-        assert(!BASEPRI_MASK(gen_id));
+    :: atomic { !BASEPRI_MASK(gen_id) ->
+        assert(!HAS_INOPERATIVE_EXP);
         set_pending(gen_id)
        }
+    :: else -> assert(false)
     od
 }
 
-// TODO: in stack check
-/* The generation of the exception is from software (pending bit) that the
- * exception is taken only if the pending bit is set. */
-inline soft_exp_request(gen_id)
+/* an abstraction of a software-generated interrupt request */
+inline soft_gen_irq(gen_id)
 {
     do
-    :: atomic { BASEPRI_MASK(gen_id) && (gen_id == EP) ->
-        /* assure the process is a pended exception. */
-        assert(gen_id == PendSV_ID && GET_PENDING(gen_id));
-        /* clear the pending bit and enter the handler. */
-        clear_pending(gen_id);
-        if
-        :: GET_INACTIVE_YET_EXP(gen_id) ->
-            /* The generated exception is selected through the tail-chaining
-             * mechanism. */
-            assert(!GET_INACTIVE_YET_EXP(DSB_ISB));
-            clear_exp_inactive(gen_id)
-        :: else ->
-            /* The generated exception is selected because the dsb and the isb
-             * instructions flush the pipeline. */
-            assert(GET_INACTIVE_YET_EXP(DSB_ISB));
-            clear_exp_inactive(DSB_ISB);
-        fi;
+    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP >= FIRST_TASK) ->
+        /* EP is a user task. */
+        assert(!HAS_INOPERATIVE_EXP && EP_Top == 0);
+        stack_check(gen_id);
+        exp_entry(gen_id);
+        assert(!HAS_PENDING_EXPS);
         break
        }
-    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (gen_id != EP) && (EP >= FIRST_TASK) ->
-        /* PendSV exception needs to have the lowest priority. */
-        assert(EP_Top == 0);
-        /* The generated exception can interrupt user tasks only if it is pending. */
+    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
+        assert(false)
+       }
+    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
         if
-        :: (pending_exp & ~(1 << gen_id)) == 0 ->
-            exp_entry(gen_id);
+        :: (gen_id == EP) ->
+            /* memory barrier or tail-chaining entry */
+            assert(HAS_INOPERATIVE_EXP);
+            stack_check(gen_id);
+            clear_exp_inoperative();
+            exp_taken(gen_id);
             break
         :: else
         fi
        }
-    :: atomic { else ->
-        /* FIXME: Only PendSV is software request and it has the lowest priority. */
-        assert(EP >= FIRST_TASK || GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP))
-       }
     od
 }
 
-inline exp_return(high_pending_exp, tail_chaining)
+inline tail_chaining(high_pending_exp)
 {
-    assert(tail_chaining == 0);
+    get_high_prio_pending(high_pending_exp);
+    assert(BASEPRI_MASK(high_pending_exp) && !HAS_INOPERATIVE_EXP);
+    inoperative_exp_taken(high_pending_exp);
+    high_pending_exp = NULL_byte /* reset local variable */
+}
+
+inline exp_return(temp_var)
+{
     if
     :: HAS_PENDING_EXPS ->
-        /** tail-chaining mechanism
-        * Check the high priority pending exceptions can preempt the last active
-        * processe. */
-        get_high_prio_pending(high_pending_exp);
-        /* exp_request has the same conditions. */
-        if
-        :: BASEPRI_MASK(high_pending_exp) && (LAST_EP_STACK >= FIRST_TASK || GET_PRIO_EXP(high_pending_exp) < GET_PRIO_EXP(LAST_EP_STACK)) ->
-            tail_chaining = 1
-        :: else ->
-            assert(high_pending_exp != LAST_EP_STACK)
-        fi
-    :: else
-    fi;
-    if
-    :: tail_chaining ->
-        /* set the inactive ghost bit and change EP directly. */
-        set_exp_inactive(high_pending_exp);
-        EP = high_pending_exp;
-        /* reset local variable */
-        tail_chaining = 0
+        tail_chaining(temp_var)
     :: else ->
-        /* return to the last task in the stack. */
+        stack_check(EP);
         pop(EP)
-    fi;
-    /* check memory barrier flag if the exception was interrupted by others. */
-    assert(!GET_INACTIVE_YET_EXP(DSB_ISB));
-    /* reset local variable */
-    high_pending_exp = NULL_byte
+    fi
 }
 
 #endif

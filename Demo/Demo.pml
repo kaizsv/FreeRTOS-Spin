@@ -19,7 +19,7 @@
 /* Found a trace that the lowest priority task (THIRD_TASK) loops forever. */
 ltl { <>[](_last != 5) }
 
-// TODO: verify List, Queue
+// TODO: verify List, Queue; using embedded C code
 // TODO: vPortSetInterruptHandler
 // TODO: TODO: heap.c; embedded C code               
 // TODO: change bit to byte

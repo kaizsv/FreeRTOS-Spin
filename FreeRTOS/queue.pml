@@ -101,7 +101,6 @@ inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xR
         assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
         assert(!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))));
         assert(!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1)));
-    // TODO: xTaskGetSchedulerState
 
 loop_send:
     taskENTER_CRITICAL(_id, temp_var);
@@ -201,7 +200,6 @@ inline xQueueReceive(pxQueue, pvBuffer, xTicksToWait, xReturn, xIsNDTimeOut, tem
     AWAIT_A(_id, xReturn = false;
         assert(xIsNDTimeOut == false && temp_var == NULL_byte && temp_var2 == NULL_byte);
         assert(!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))));
-    // TODO xTaskGetSchedulerState
 
 loop_receive:
     taskENTER_CRITICAL(_id, temp_var);
@@ -296,7 +294,6 @@ inline xQueueSemaphoreTake(pxQueue, xTicksToWait, xReturn, xInheritanceOccurred,
         assert(xInheritanceOccurred == false && xIsNDTimeOut == false);
         assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
         assert(queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)));
-    /* TODO xTaskGetSchedulerState */
 
 loop_take:
     taskENTER_CRITICAL(_id, temp_var);

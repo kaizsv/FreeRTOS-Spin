@@ -9,10 +9,10 @@ configSUPPORT_STATIC_ALLOCATION             0
 configUSE_TRACE_FACILITY                    0
 configUSE_APPLICATION_TASK_TAG              0
 configGENERATE_RUN_TIME_STATS               0
-TODO vTaskDelete
 configUSE_TRACE_FACILITY                    0
 configUSE_IDLE_HOOK                         0
 configUSE_TIMERS                            0
+INCLUDE_xTaskGetSchedulerState              0
 configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H   0
 configUSE_TICKLESS_IDLE                     0
 configUSE_POSIX_ERRNO                       0

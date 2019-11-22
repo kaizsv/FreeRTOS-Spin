@@ -65,7 +65,6 @@ proctype LIM_INC()
 {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_bit = false;
 
     assert(_PID == xLimitedIncrementHandle);
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);

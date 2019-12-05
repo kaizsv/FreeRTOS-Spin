@@ -33,7 +33,7 @@ typedef TCB_t {
 
 #define IDX_TCB(index)  index - FIRST_TASK
 #define TCB(index) TCBs[IDX_TCB(index)]
-TCB_t TCBs[promela_TASK_NUMBER + 1]; // TODO: check if the idle task uses the TCB
+TCB_t TCBs[promela_TASK_NUMBER + 1];
 
 byte pxCurrentTCB = NULL_byte;
 
@@ -505,30 +505,24 @@ inline vTaskMissedYield(_id)
     AWAIT_D(_id, xYieldPending = true)
 }
 
-// TODO: is the modeling of the idle task necessary?
-portTASK_FUNCTION(IDLE_TASK)
+inline vTaskIDLE_TASK_BODY(_id, temp_var)
 {
-    byte idx;
-    byte local_var = NULL_byte;
-    assert(_PID == IDLE_TASK_ID);
+    assert(_id == IDLE_TASK_ID);
 loop:
     // FIXME: ifdef INCLUDE_vTaskDelete then prvCheckTasksWaitingTermination
-
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var);
+        taskYIELD(_id, temp_var);
     #endif
 
     #if ((configUSE_PREEMPTION == 1) && (configIDLE_SHOULD_YIELD == 1))
         if
-        :: SELE(_PID, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY])) ->
-            taskYIELD(_PID, local_var)
-        :: ELSE(_PID, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY]))
+        :: SELE(_id, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY])) ->
+            taskYIELD(_id, temp_var)
+        :: ELSE(_id, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY]))
         fi;
     #endif
 
-    // TODO: configUSE_TICKLESS_IDLE != 0
-
-    AWAIT_A(_PID, goto loop)
+    AWAIT_A(_id, goto loop)
 }
 
 #if (configUSE_MUTEXES == 1)

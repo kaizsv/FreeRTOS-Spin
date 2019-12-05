@@ -10,7 +10,6 @@
         run MY_TASK();      \
         run SEC_TASK();     \
         run THIRD_TASK();   \
-        run IDLE_TASK();    \
     }
 
 #include "../FreeRTOS.pml"
@@ -64,5 +63,8 @@ init {
     xTaskCreate(EP, FIRST_TASK + 0, 1, local_var);
     xTaskCreate(EP, FIRST_TASK + 1, 1, local_var);
     xTaskCreate(EP, FIRST_TASK + 2, tskIDLE_PRIORITY, local_var);
-    vTaskStartScheduler(EP, local_var)
+    vTaskStartScheduler(EP, local_var);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var)
 }

@@ -9,7 +9,6 @@
     atomic {                \
         run MY_TASK();      \
         run SEC_TASK();     \
-        run IDLE_TASK();    \
     }
 
 #define QUEUE_TAKE_EXIT_CRITICAL
@@ -64,5 +63,8 @@ init {
     prvInitialiseTaskLists(local_var1);
     xTaskCreate(EP, FIRST_TASK, 1, local_var1);
     xTaskCreate(EP, FIRST_TASK + 1, 1, local_var1);
-    vTaskStartScheduler(EP, local_var1)
+    vTaskStartScheduler(EP, local_var1);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
 }

@@ -21,7 +21,7 @@ inline get_high_prio_pending(ret)
 /* According to section 4.10 in Application Note 321, the dsb instruction
  * followed by the isb force the new state is recognized by the subsequent
  * instructions. */
-inline v7m_memory_barrier(high_pending_exp)
+inline v7m_memory_barrier(_wait_unil, high_pending_exp)
 {
     if
     :: HAS_PENDING_EXPS ->
@@ -32,7 +32,7 @@ inline v7m_memory_barrier(high_pending_exp)
             inoperative_exp_entry(high_pending_exp);
             high_pending_exp = NULL_byte; /* reset local variable */
 
-            (EP == _PID)
+            (EP == _wait_unil)
         :: else ->
             assert(high_pending_exp != EP);
             high_pending_exp = NULL_byte /* reset local variable */

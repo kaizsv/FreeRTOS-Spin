@@ -12,8 +12,6 @@
     atomic {                \
         run QConsNB();      \
         run QProdNB();      \
-                            \
-        run IDLE_TASK();    \
     }
 
 #define QUEUE_SEND_EXIT_CRITICAL
@@ -98,5 +96,8 @@ init {
     xTaskCreate(EP, FIRST_TASK + 0, 1, local_var1);
     xTaskCreate(EP, FIRST_TASK + 1, 1, local_var1);
 
-    vTaskStartScheduler(EP, local_var1)
+    vTaskStartScheduler(EP, local_var1);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
 }

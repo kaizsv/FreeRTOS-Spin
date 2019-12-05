@@ -11,8 +11,6 @@
         run CONT_INC();     \
         run LIM_INC();      \
         run C_CTRL();       \
-                            \
-        run IDLE_TASK();    \
     }
 
 #define QUEUE_SEND_EXIT_CRITICAL
@@ -121,15 +119,18 @@ loop:
 
 init {
     byte idx;
-    byte local_var1 = NULL_byte;
+    byte local_var = NULL_byte;
 
     xQueueCreate(xSuspendedTestQueue, 0, priSUSPENDED_QUEUE_LENGTH);
 
-    prvInitialiseTaskLists(local_var1);
+    prvInitialiseTaskLists(local_var);
 
-    xTaskCreate(EP, xContinousIncrementHandle, tskIDLE_PRIORITY, local_var1);
-    xTaskCreate(EP, xLimitedIncrementHandle, tskIDLE_PRIORITY + 1, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 2, tskIDLE_PRIORITY, local_var1);
+    xTaskCreate(EP, xContinousIncrementHandle, tskIDLE_PRIORITY, local_var);
+    xTaskCreate(EP, xLimitedIncrementHandle, tskIDLE_PRIORITY + 1, local_var);
+    xTaskCreate(EP, FIRST_TASK + 2, tskIDLE_PRIORITY, local_var);
 
-    vTaskStartScheduler(EP, local_var1)
+    vTaskStartScheduler(EP, local_var);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var)
 }

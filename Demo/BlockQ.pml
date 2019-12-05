@@ -13,8 +13,6 @@
         run QConsB2();      \
         run QProdB3();      \
         run QConsB4();      \
-                            \
-        run IDLE_TASK();    \
     }
 //        run QProdB5();      \
 //        run QConsB6();      \
@@ -203,5 +201,8 @@ init {
 //    xTaskCreate(EP, FIRST_TASK + 4, tskIDLE_PRIORITY, local_var1);
 //    xTaskCreate(EP, FIRST_TASK + 5, tskIDLE_PRIORITY, local_var1);
 
-    vTaskStartScheduler(EP, local_var1)
+    vTaskStartScheduler(EP, local_var1);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
 }

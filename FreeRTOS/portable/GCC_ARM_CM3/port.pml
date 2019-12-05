@@ -21,6 +21,7 @@
 /** Default configurations: modification has no effects in the model **
 portSTACK_GROWTH                (-1)
 portUSING_MPU_WRAPPERS          0
+portSUPPRESS_TICKS_AND_SLEEP    UNDEFINED
 TODO RISC-V: portCRITICAL_NESTING_IN_TCB     0
 **********************************************************************/
 

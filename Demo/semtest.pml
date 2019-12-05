@@ -12,7 +12,6 @@
         run prvSemaphoreTest2(); \
         run prvSemaphoreTest3(); \
         run prvSemaphoreTest4(); \
-        run IDLE_TASK();    \
     }
 
 #define QUEUE_TAKE_EXIT_CRITICAL
@@ -156,5 +155,8 @@ init {
     xTaskCreate(EP, FIRST_TASK + 1, tskIDLE_PRIORITY, local_var1);
     xTaskCreate(EP, FIRST_TASK + 2, 1, local_var1);
     xTaskCreate(EP, FIRST_TASK + 3, 1, local_var1);
-    vTaskStartScheduler(EP, local_var1)
+    vTaskStartScheduler(EP, local_var1);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
 }

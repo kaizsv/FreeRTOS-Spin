@@ -22,6 +22,7 @@ configUSE_CO_ROUTINES                       0
 configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES   0
 INCLUDE_xTaskAbortDelay                     0
 configUSE_TASK_NOTIFICATIONS                0
+INCLUDE_VTaskDelete                         0
 **********************************************************************/
 
 #define configTickType_t                    byte

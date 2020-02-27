@@ -187,20 +187,22 @@ init {
     byte idx;
     byte local_var1 = NULL_byte;
 
-    xQueueCreate(pxQueueParameters1_xQueue, 0, 1);
-    xQueueCreate(pxQueueParameters3_xQueue, 1, 1);
-//    xQueueCreate(pxQueueParameters5_xQueue, 2, 5);
+    d_step {
+        xQueueCreate(pxQueueParameters1_xQueue, 0, 1);
+        xQueueCreate(pxQueueParameters3_xQueue, 1, 1);
+//        xQueueCreate(pxQueueParameters5_xQueue, 2, 5);
 
-    prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists(local_var1);
 
-    xTaskCreate(EP, FIRST_TASK + 0, 1, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 1, tskIDLE_PRIORITY, local_var1);
+        xTaskCreate_fixed(FIRST_TASK + 0, 1);
+        xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY);
 
-    xTaskCreate(EP, FIRST_TASK + 2, tskIDLE_PRIORITY, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 3, 1, local_var1);
+        xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY);
+        xTaskCreate_fixed(FIRST_TASK + 3, 1);
 
-//    xTaskCreate(EP, FIRST_TASK + 4, tskIDLE_PRIORITY, local_var1);
-//    xTaskCreate(EP, FIRST_TASK + 5, tskIDLE_PRIORITY, local_var1);
+//        xTaskCreate_fixed(FIRST_TASK + 4, tskIDLE_PRIORITY);
+//        xTaskCreate_fixed(FIRST_TASK + 5, tskIDLE_PRIORITY);
+    };
 
     vTaskStartScheduler(EP, local_var1);
 

@@ -11,11 +11,11 @@
 #define semGIVE_BLOCK_TIME                  0
 
 #define vSemaphoreCreateBinary(xSemaphore, QueueID, xIsNDTimeOut, xReturn, temp_bool, temp_var) \
-    xQueueGenericCreate(xSemaphore, QueueID, 1, queueQUEUE_TYPE_BINARY_SEMAPHORE);              \
+    xQueueGenericCreate_fixed(xSemaphore, QueueID, 1, queueQUEUE_TYPE_BINARY_SEMAPHORE);        \
     xSemaphoreGive(xSemaphore, xIsNDTimeOut, xReturn, temp_bool, temp_var)
 
 #define xSemaphoreCreateBinary(xSemaphore, QueueID) \
-    xQueueGenericCreate(xSemaphore, QueueID, 1, queueQUEUE_TYPE_BINARY_SEMAPHORE)
+    xQueueGenericCreate_fixed(xSemaphore, QueueID, 1, queueQUEUE_TYPE_BINARY_SEMAPHORE)
 
 #define xSemaphoreTake(xSemaphore, xBlockTime, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var1, temp_var2, _id) \
     xQueueSemaphoreTake(xSemaphore, xBlockTime, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var1, temp_var2, _id)

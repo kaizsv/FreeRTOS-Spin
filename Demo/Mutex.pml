@@ -61,9 +61,11 @@ init {
 
     xSemaphoreCreateMutex(mysemaphore, 0, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, EP);
 
-    prvInitialiseTaskLists(local_var1);
-    xTaskCreate(EP, FIRST_TASK, 1, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 1, 1, local_var1);
+    d_step {
+        prvInitialiseTaskLists(local_var1);
+        xTaskCreate_fixed(FIRST_TASK, 1);
+        xTaskCreate_fixed(FIRST_TASK + 1, 1)
+    };
     vTaskStartScheduler(EP, local_var1);
 
     /* Start the IDLE TASK */

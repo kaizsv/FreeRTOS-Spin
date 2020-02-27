@@ -84,6 +84,12 @@ inline prvAddTaskToReadyList(_id, pxTCB)
     AWAIT_D(_id, vListInsertEnd(LISTs[pxReadyTasksLists + TCB(pxTCB).uxPriority], pxReadyTasksLists + TCB(pxTCB).uxPriority, IDX_TCB(pxTCB), xState))
 }
 
+inline prvAddTaskToReadyList_fixed(pxTCB)
+{
+    uxTopReadyPriority = (TCB(pxTCB).uxPriority > uxTopReadyPriority -> TCB(pxTCB).uxPriority : uxTopReadyPriority);
+    vListInsertEnd(LISTs[pxReadyTasksLists + TCB(pxTCB).uxPriority], pxReadyTasksLists + TCB(pxTCB).uxPriority, IDX_TCB(pxTCB), xState)
+}
+
 #define prvGetTCBFromHandle(pxHandle) (pxHandle == NULL_byte -> pxCurrentTCB : pxHandle)
 
 inline prvInitialiseTaskLists(idx2)
@@ -111,7 +117,7 @@ inline prvInitialiseTaskLists(idx2)
 #endif
 }
 
-inline xTaskCreate(_id, pcName, Priority, temp_var)
+inline xTaskCreate_fixed(pcName, Priority)
 {
     /* prvInitialiseNewTask */
     if
@@ -129,12 +135,11 @@ inline xTaskCreate(_id, pcName, Priority, temp_var)
     listSET_LIST_ITEM_VALUE(TCB(pcName).ListItems[xEvent], configMAX_PRIORITIES - Priority);
 
     /* prvAddNewTaskToReadyList */
-    taskENTER_CRITICAL(_id, temp_var);
     if
     :: pxCurrentTCB == NULL_byte ->
-        /* list initialization check */
-        assert(listLIST_IS_EMPTY(LISTs[pxReadyTasksLists]));
         pxCurrentTCB = pcName
+        /* ensure the list is initialized */
+        assert(listLIST_IS_EMPTY(LISTs[pxReadyTasksLists]));
     :: else ->
         if
         :: (xSchedulerRunning == false) &&
@@ -144,15 +149,10 @@ inline xTaskCreate(_id, pcName, Priority, temp_var)
         fi
     fi;
 
-    prvAddTaskToReadyList(_id, pcName);
-    /* TODO: portSETUP_TCB */
-    taskEXIT_CRITICAL(_id, temp_var)
+    prvAddTaskToReadyList_fixed(pcName);
 
-    if
-    :: (xSchedulerRunning != false) && (TCB(pxCurrentTCB).uxPriority < TCB(pcName).uxPriority) ->
-        taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
-    :: else
-    fi
+    /* yield the task if the assertion violated. */
+    assert(!((xSchedulerRunning != false) && (TCB(pxCurrentTCB).uxPriority < TCB(pcName).uxPriority)))
 }
 
 #if (INCLUDE_vTaskDelay == 1)
@@ -337,7 +337,7 @@ inline vTaskResume(_id, xTaskToResume, temp_xReturn, temp_var)
 
 inline vTaskStartScheduler(_id, temp_var)
 {
-    xTaskCreate(_id, IDLE_TASK_ID, (tskIDLE_PRIORITY | portPRIVILEGE_BIT), temp_var);
+    xTaskCreate_fixed(IDLE_TASK_ID, (tskIDLE_PRIORITY | portPRIVILEGE_BIT));
 
     portDISABLE_INTERRUPTS(_id, temp_var);
     xSchedulerRunning = true;

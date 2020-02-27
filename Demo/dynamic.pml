@@ -112,13 +112,15 @@ init {
     byte idx;
     byte local_var = NULL_byte;
 
-    xQueueCreate(xSuspendedTestQueue, 0, priSUSPENDED_QUEUE_LENGTH);
+    d_step {
+        xQueueCreate(xSuspendedTestQueue, 0, priSUSPENDED_QUEUE_LENGTH);
 
-    prvInitialiseTaskLists(local_var);
+        prvInitialiseTaskLists(local_var);
 
-    xTaskCreate(EP, xContinousIncrementHandle, tskIDLE_PRIORITY, local_var);
-    xTaskCreate(EP, xLimitedIncrementHandle, tskIDLE_PRIORITY + 1, local_var);
-    xTaskCreate(EP, FIRST_TASK + 2, tskIDLE_PRIORITY, local_var);
+        xTaskCreate_fixed(xContinousIncrementHandle, tskIDLE_PRIORITY);
+        xTaskCreate_fixed(xLimitedIncrementHandle, tskIDLE_PRIORITY + 1);
+        xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY)
+    };
 
     vTaskStartScheduler(EP, local_var);
 

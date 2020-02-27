@@ -10,8 +10,6 @@
 
 #define RUN_ALL_EXPS()          \
     atomic {                    \
-        assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP);  \
-        CLEAR_SYST_FLAG(); \
         run PendSV_Handler();   \
         run SysTick_Handler();  \
     }
@@ -47,6 +45,7 @@ inline xPortStartScheduler()
     uxCriticalNesting = 0;
 
     /* prvPortStartFirstTask */
+    assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && !syst_count);
     RUN_ALL_EXPS();
 
     RUN_ALL_TASKS(vPortSVCHandler)

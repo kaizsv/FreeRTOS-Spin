@@ -43,7 +43,7 @@ inline prvLockQueue(_id, pxQueue, temp_var)
     taskEXIT_CRITICAL(_id, temp_var)
 }
 
-inline xQueueGenericCreate(pxNewQueue, QueueID, uxQueueLength, ucQueueType)
+inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType)
 {
     assert(QueueID < promela_QUEUE_NUMBER && 0 < uxQueueLength);
 
@@ -60,7 +60,6 @@ inline xQueueGenericCreate(pxNewQueue, QueueID, uxQueueLength, ucQueueType)
     // TODO: configUSE_QUEUE_SETS
 
     /* xQueueReset: FIXME: reuse*/
-//    taskENTER_CRITICAL();
     pxNewQueue.uxMessagesWaiting = 0;
     queueSET_pcWriteTo(pxNewQueue, 0);
     queueSET_pcReadFrom(pxNewQueue, uxQueueLength - 1);
@@ -70,7 +69,6 @@ inline xQueueGenericCreate(pxNewQueue, QueueID, uxQueueLength, ucQueueType)
     /* xNewQueue == true */
     vListInitialise(LISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToSend]);
     vListInitialise(LISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToReceive]);
-//    taskEXIT_CRITICAL()
 
     // TODO: configUSE_QUEUE_SETS
 }
@@ -88,7 +86,7 @@ inline prvInitialiseMutex(pxNewQueue, xReturn, temp_bool, temp_xIsNDTimeOut, tem
 
 inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
 {
-    xQueueGenericCreate(pxNewQueue, QueueID, 1, ucQueueType);
+    xQueueGenericCreate_fixed(pxNewQueue, QueueID, 1, ucQueueType);
     prvInitialiseMutex(pxNewQueue, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
 }
 

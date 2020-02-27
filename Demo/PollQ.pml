@@ -90,12 +90,14 @@ init {
     byte idx;
     byte local_var1 = NULL_byte;
 
-    xQueueCreate(xPolledQueue, 0, 10);
+    d_step {
+        xQueueCreate(xPolledQueue, 0, 10);
 
-    prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists(local_var1);
 
-    xTaskCreate(EP, FIRST_TASK + 0, 1, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 1, 1, local_var1);
+        xTaskCreate_fixed(FIRST_TASK + 0, 1);
+        xTaskCreate_fixed(FIRST_TASK + 1, 1)
+    };
 
     vTaskStartScheduler(EP, local_var1);
 

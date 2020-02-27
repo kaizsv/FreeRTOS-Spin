@@ -60,10 +60,12 @@ init {
     byte idx;
     byte local_var = NULL_byte;
 
-    prvInitialiseTaskLists(local_var);
-    xTaskCreate(EP, FIRST_TASK + 0, 1, local_var);
-    xTaskCreate(EP, FIRST_TASK + 1, 1, local_var);
-    xTaskCreate(EP, FIRST_TASK + 2, tskIDLE_PRIORITY, local_var);
+    d_step {
+        prvInitialiseTaskLists(local_var);
+        xTaskCreate_fixed(FIRST_TASK + 0, 1);
+        xTaskCreate_fixed(FIRST_TASK + 1, 1);
+        xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY)
+    };
     vTaskStartScheduler(EP, local_var);
 
     /* Start the IDLE TASK */

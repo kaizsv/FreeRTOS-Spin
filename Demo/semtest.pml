@@ -151,11 +151,13 @@ init {
     xSemaphoreCreateBinary(pxSecondSemaphore_xSemaphore, 1);
     xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, EP);
 
-    prvInitialiseTaskLists(local_var1);
-    xTaskCreate(EP, FIRST_TASK, tskIDLE_PRIORITY, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 1, tskIDLE_PRIORITY, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 2, 1, local_var1);
-    xTaskCreate(EP, FIRST_TASK + 3, 1, local_var1);
+    d_step {
+        prvInitialiseTaskLists(local_var1);
+        xTaskCreate_fixed(FIRST_TASK, tskIDLE_PRIORITY);
+        xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY);
+        xTaskCreate_fixed(FIRST_TASK + 2, 1);
+        xTaskCreate_fixed(FIRST_TASK + 3, 1)
+    };
     vTaskStartScheduler(EP, local_var1);
 
     /* Start the IDLE TASK */

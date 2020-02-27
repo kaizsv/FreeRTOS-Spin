@@ -17,7 +17,7 @@
 #include "queue.pml"
 
 #define xQueueCreate(xQueue, QueueID, uxQueueLength) \
-    xQueueGenericCreate(xQueue, QueueID, uxQueueLength, queueQUEUE_TYPE_BASE)
+    xQueueGenericCreate_fixed(xQueue, QueueID, uxQueueLength, queueQUEUE_TYPE_BASE)
 
 #define xQueueSendToFront(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id) \
     xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_FRONT, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)

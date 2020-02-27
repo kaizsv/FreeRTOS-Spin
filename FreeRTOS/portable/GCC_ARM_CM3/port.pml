@@ -80,15 +80,14 @@ proctype PendSV_Handler()
     byte idx = 0;
     byte local_var = NULL_byte;
     assert(PendSV_ID == _PID);
-loop:
-    soft_gen_irq(_PID);
+do
+::  soft_gen_irq(_PID);
     AWAIT_A(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
     vTaskSwitchContext(_PID);
     AWAIT_D(_PID, MSR_BASEPRI(0));
     AWAIT_D(_PID, switch_context(pxCurrentTCB));
-    AWAIT_D(_PID, exp_return(local_var));
-
-    goto loop
+    AWAIT_D(_PID, exp_return(local_var))
+od
 }
 
 proctype SysTick_Handler()
@@ -97,8 +96,8 @@ proctype SysTick_Handler()
     byte idx = 0;
     byte local_var = NULL_byte;
     assert(SysTick_ID == _PID);
-loop:
-    irq(_PID);
+do
+::  irq(_PID);
     portDISABLE_INTERRUPTS(_PID, local_var);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
@@ -107,9 +106,8 @@ loop:
     :: ELSE(_PID, local_bit != false)
     fi;
     portENABLE_INTERRUPTS(_PID, local_var);
-    AWAIT_D(_PID, exp_return(local_var));
-
-    goto loop
+    AWAIT_D(_PID, exp_return(local_var))
+od
 }
 
 #endif

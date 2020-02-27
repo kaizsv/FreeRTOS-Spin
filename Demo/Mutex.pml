@@ -30,12 +30,12 @@ proctype MY_TASK()
     bit local_xReturn = false, local_bit = false;
     bit local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
-loop:
-    xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+do
+::  xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     AWAIT_D(_PID, assert(local_xReturn == true); assert(mutex == 0); mutex = mutex + 1);
     AWAIT_D(_PID, assert(mutex == 1); mutex = mutex - 1);
     xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 proctype SEC_TASK()
@@ -45,12 +45,12 @@ proctype SEC_TASK()
     bit local_xReturn = false, local_bit = false;
     bit local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
-loop:
-    xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+do
+::  xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     AWAIT_D(_PID, assert(local_xReturn == true); assert(mutex == 0); mutex = mutex + 1);
     AWAIT_D(_PID, assert(mutex == 1); mutex = mutex - 1);
     xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 init {

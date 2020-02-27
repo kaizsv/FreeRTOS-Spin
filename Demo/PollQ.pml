@@ -44,8 +44,8 @@ proctype QConsNB()
 
     byte usData, usExpectedValue = 0;
     assert(_PID == FIRST_TASK + 0);
-loop:
-    do
+do
+::  do
     :: SELE(_PID, uxQueueMessagesWaiting(xPolledQueue)) ->
         xQueueReceive(xPolledQueue, usData, 0, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         if
@@ -58,7 +58,7 @@ loop:
         AWAIT_A(_PID, break)
     od;
     vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 proctype QProdNB()
@@ -70,8 +70,8 @@ proctype QProdNB()
 
     byte usValue = 0, usLoop;
     assert(_PID == FIRST_TASK + 1);
-loop:
-    do
+do
+::  do
     :: atomic { SELE(_PID, usLoop < usNumToProduce) -> usLoop = usLoop + 1 };
         xQueueSendToBack(xPolledQueue, usValue, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
         if
@@ -83,7 +83,7 @@ loop:
     :: atomic { ELSE(_PID, usLoop < usNumToProduce) -> usLoop = 0; break }
     od;
     vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 init {

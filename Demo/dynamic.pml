@@ -46,11 +46,11 @@ proctype CONT_INC()
     byte uxOurPriority;
     assert(_PID == xContinousIncrementHandle);
     AWAIT_D(_PID, uxOurPriority = uxTaskPriorityGet(NULL_byte));
-loop:
-    vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2, local_var3);
+do
+::  vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2, local_var3);
     ULCOUNTER_IS_ACCESSED_BY(xContinousIncrementHandle, ulCounter);
     vTaskPrioritySet(_PID, NULL_byte, uxOurPriority, local_var1, local_bit, local_var2, local_var3);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 proctype LIM_INC()
@@ -60,11 +60,11 @@ proctype LIM_INC()
 
     assert(_PID == xLimitedIncrementHandle);
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
-loop:
-    AWAIT_A(_PID, assert(ulCounter == 0));
+do
+::  AWAIT_A(_PID, assert(ulCounter == 0));
     ULCOUNTER_IS_ACCESSED_BY(xLimitedIncrementHandle, ulCounter);
         vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 proctype C_CTRL()
@@ -75,8 +75,8 @@ proctype C_CTRL()
 
     byte sLoops;
     assert(_PID == FIRST_TASK + 2);
-loop:
-    AWAIT_A(_PID, ulCounter = 0);
+do
+::  AWAIT_A(_PID, ulCounter = 0);
 
     for (sLoops: 0 .. (priLOOPS - 1)) {
         vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
@@ -105,7 +105,7 @@ loop:
 #endif
 
     vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 init {

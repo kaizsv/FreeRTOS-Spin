@@ -30,10 +30,10 @@ proctype MY_TASK()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
-loop:
-    AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task1 %d\n", _PID));
+do
+::  AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task1 %d\n", _PID));
     vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 proctype SEC_TASK()
@@ -42,18 +42,18 @@ proctype SEC_TASK()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
-loop:
-    AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task2 %d\n", _PID));
+do
+::  AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task2 %d\n", _PID));
     vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
-    AWAIT_A(_PID, goto loop)
+od
 }
 
 proctype THIRD_TASK()
 {
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
-loop:
-    AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task3 %d low priority\n", _PID));
-    AWAIT_A(_PID, goto loop)
+do
+::  AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task3 %d low priority\n", _PID));
+od
 }
 
 init {

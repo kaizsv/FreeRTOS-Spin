@@ -508,8 +508,8 @@ inline vTaskMissedYield(_id)
 inline vTaskIDLE_TASK_BODY(_id, temp_var)
 {
     assert(_id == IDLE_TASK_ID);
-loop:
-    // FIXME: ifdef INCLUDE_vTaskDelete then prvCheckTasksWaitingTermination
+do
+::  // FIXME: ifdef INCLUDE_vTaskDelete then prvCheckTasksWaitingTermination
     #if (configUSE_PREEMPTION == 0)
         taskYIELD(_id, temp_var);
     #endif
@@ -521,8 +521,7 @@ loop:
         :: ELSE(_id, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY]))
         fi;
     #endif
-
-    AWAIT_A(_id, goto loop)
+od
 }
 
 #if (configUSE_MUTEXES == 1)

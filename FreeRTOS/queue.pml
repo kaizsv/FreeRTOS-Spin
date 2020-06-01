@@ -67,8 +67,8 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
     queueSET_cTxLock(pxNewQueue, queueUNLOCKED);
 
     /* xNewQueue == true */
-    vListInitialise(LISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToSend]);
-    vListInitialise(LISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToReceive]);
+    vListInitialise(QLISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToSend], QLIST_SIZE);
+    vListInitialise(QLISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToReceive], QLIST_SIZE);
 
     // TODO: configUSE_QUEUE_SETS
 }
@@ -110,14 +110,14 @@ loop_send:
         prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xCopyPosition, xYieldRequired, temp_var, temp_var2);
 
         if
-        :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
-            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], xReturn);
+        :: SELE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], xReturn);
             if
             :: atomic { SELE(_id, xReturn != false) -> xReturn = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var);
             :: atomic { ELSE(_id, xReturn != false) -> assert(xReturn == false) }
             fi
-        :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
+        :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             if
             :: atomic { SELE(_id, xYieldRequired != false) -> xYieldRequired = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
@@ -160,7 +160,7 @@ loop_send:
     :: SELE(_id, xIsNDTimeOut == false) ->
         if
         :: SELE(_id, prvIsQueueFull(pxQueue)) ->
-            vTaskPlaceOnEventList(_id, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var);
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var);
 
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
 
@@ -208,14 +208,14 @@ loop_receive:
         AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1; temp_var2 = NULL_byte);
 
         if
-        :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
-            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
+        :: SELE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
             if
             :: atomic { SELE(_id, xReturn != false) -> xReturn = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
             :: atomic { ELSE(_id, xReturn != false) -> assert(xReturn == false) }
             fi
-        :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]))
+        :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]))
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
@@ -252,7 +252,7 @@ loop_receive:
         /* The timeout has not expired. */
         if
         :: SELE(_id, prvIsQueueEmpty(pxQueue)) ->
-            vTaskPlaceOnEventList(_id, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var);
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var);
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
@@ -309,14 +309,14 @@ loop_take:
         #endif
 
         if
-        :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
-            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
+        :: SELE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], xReturn);
             if
             :: atomic { SELE(_id, xReturn != false) -> xReturn = false };
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
             :: atomic { ELSE(_id, xReturn != false) -> assert(xReturn == false) }
             fi
-        :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]))
+        :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]))
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
@@ -365,7 +365,7 @@ loop_take:
             fi;
             #endif
 
-            vTaskPlaceOnEventList(_id, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var);
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var);
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
@@ -419,10 +419,10 @@ return_take:
 inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWaitingTasks)
 {
     if
-    :: SELE(_id, listLIST_LENGTH_IS_EXCEEDING_ZERO(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
+    :: SELE(_id, listLENGTH_IS_EXCEEDING_0(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
         AWAIT_D(_id, assert(uxHighestPriorityOfWaitingTasks == false);
-            uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_ITEM_VALUE_OF_HEAD_ENTRY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
-    :: ELSE(_id, listLIST_LENGTH_IS_EXCEEDING_ZERO(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
+            uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_ITEM_VALUE_OF_HEAD_ENTRY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
+    :: ELSE(_id, listLENGTH_IS_EXCEEDING_0(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
         AWAIT_D(_id, assert(uxHighestPriorityOfWaitingTasks == false);
             uxHighestPriorityOfWaitingTasks = tskIDLE_PRIORITY)
     fi
@@ -505,14 +505,14 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
         // TODO
         #else /* configUSE_QUEUE_SETS */
         if
-        :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
-            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], temp_xReturn);
+        :: SELE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], temp_xReturn);
             if
             :: atomic { SELE(_id, temp_xReturn != false) -> temp_xReturn = false };
                 vTaskMissedYield(_id)
             :: atomic { ELSE(_id, temp_xReturn != false) -> assert(temp_xReturn == false) }
             fi
-        :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
+        :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
             AWAIT_A(_id, break)
         fi;
         #endif /* configUSE_QUEUE_SETS */
@@ -530,8 +530,8 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
     do
     :: SELE(_id, temp_var2 > queueLOCKED_UNMODIFIED) ->
         if
-        :: SELE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
-            xTaskRemoveFromEventList(_id, temp_var, LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], temp_xReturn);
+        :: SELE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], temp_xReturn);
             if
             :: atomic { SELE(_id, temp_xReturn != false) -> temp_xReturn = false };
                 vTaskMissedYield(_id)
@@ -539,7 +539,7 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
             fi;
 
             AWAIT_D(_id, temp_var2 = temp_var2 - 1)
-        :: ELSE(_id, !listLIST_IS_EMPTY(LISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
+        :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
             AWAIT_A(_id, break)
         fi;
     :: ELSE(_id, temp_var2 > queueLOCKED_UNMODIFIED) ->

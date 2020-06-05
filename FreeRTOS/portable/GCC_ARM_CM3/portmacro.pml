@@ -17,23 +17,11 @@ inline portYIELD(_id, temp_var)
 
 inline vPortRaiseBASEPRI(_id, temp_var)
 {
-    /** Memory barrier
-    * __asm volatile (
-    *     "isb \n\t" \
-    *     "dsb \n\t" \
-    * )
-    */
     AWAIT_A(_id, MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY); v7m_memory_barrier(_id, temp_var))
 }
 
 inline vPortSetBASEPRI(_id, ulNewMaskValue, temp_var)
 {
-    /** Memory barrier
-    * __asm volatile (
-    *     "isb \n\t" \
-    *     "dsb \n\t" \
-    * )
-    */
     AWAIT_A(_id, MSR_BASEPRI(ulNewMaskValue); v7m_memory_barrier(_id, temp_var))
 }
 

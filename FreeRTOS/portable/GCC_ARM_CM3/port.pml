@@ -22,7 +22,6 @@
 portSTACK_GROWTH                (-1)
 portUSING_MPU_WRAPPERS          0
 portSUPPRESS_TICKS_AND_SLEEP    UNDEFINED
-TODO RISC-V: portCRITICAL_NESTING_IN_TCB     0
 **********************************************************************/
 
 #define portNVIC_PENDSV_PRI     configKERNEL_INTERRUPT_PRIORITY
@@ -59,11 +58,7 @@ inline vPortEnterCritical(_id, temp_var)
     AWAIT_D(_id, uxCriticalNesting = uxCriticalNesting + 1);
     /* ensure VECTACTIVE is zero. In other words, the running task can only be
      * user tasks. */
-    if
-    :: SELE(_id, uxCriticalNesting == 1) ->
-        AWAIT_A(_id, assert(EP >= FIRST_TASK))
-    :: ELSE(_id, uxCriticalNesting == 1)
-    fi
+    AWAIT_A(_id, assert((uxCriticalNesting != 1) || (EP >= FIRST_TASK)));
 }
 
 inline vPortExitCritical(_id, temp_var)
@@ -97,7 +92,7 @@ proctype SysTick_Handler()
     byte local_var = NULL_byte;
     assert(SysTick_ID == _PID);
 do
-::  irq(_PID);
+::  syst_irq(_PID);
     portDISABLE_INTERRUPTS(_PID, local_var);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if

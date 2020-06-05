@@ -120,12 +120,7 @@ inline prvInitialiseTaskLists(idx2)
 inline xTaskCreate_fixed(pcName, Priority)
 {
     /* prvInitialiseNewTask */
-    if
-    :: Priority >= configMAX_PRIORITIES ->
-        TCB(pcName).uxPriority = configMAX_PRIORITIES - 1
-    :: else ->
-        TCB(pcName).uxPriority = Priority;
-    fi;
+    TCB(pcName).uxPriority = (Priority >= configMAX_PRIORITIES -> configMAX_PRIORITIES - 1 : Priority);
 #if (configUSE_MUTEXES == 1)
     TCB(pcName).uxBasePriority = Priority;
     TCB(pcName).uxMutexesHeld = 0;
@@ -141,12 +136,10 @@ inline xTaskCreate_fixed(pcName, Priority)
         /* ensure the list is initialized */
         assert(listLIST_IS_EMPTY(LISTs[pxReadyTasksLists]));
     :: else ->
-        if
-        :: (xSchedulerRunning == false) &&
-           (TCB(pxCurrentTCB).uxPriority <= TCB(pcName).uxPriority) ->
-            pxCurrentTCB = pcName
-        :: else
-        fi
+        pxCurrentTCB = (
+            (xSchedulerRunning == false) &&
+            (TCB(pxCurrentTCB).uxPriority <= TCB(pcName).uxPriority) ->
+                pcName : pxCurrentTCB)
     fi;
 
     prvAddTaskToReadyList_fixed(pcName);
@@ -160,8 +153,7 @@ inline xTaskCreate_fixed(pcName, Priority)
 inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
 {
     if
-    :: atomic { SELE(_id, xTicksToDelay > 0) -> assert(xAlreadyYielded == false) };
-        AWAIT_A(_id, assert(uxSchedulerSuspended == 0));
+    :: atomic { SELE(_id, xTicksToDelay > 0) -> assert(uxSchedulerSuspended == 0 && xAlreadyYielded == false) };
         vTaskSuspendAll(_id);
         prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false, temp_var);
         xTaskResumeAll(_id, temp_var, xAlreadyYielded, temp_var2)
@@ -284,7 +276,7 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
 
     if
     :: atomic { SELE(_id, pxTCB == pxCurrentTCB) -> pxTCB = NULL_byte };
-        /* remodel if the assertions evaluate to false */
+        /* The scheduler is always running */
         AWAIT_D(_id, assert(xSchedulerRunning != false && uxSchedulerSuspended == 0));
         portYIELD_WITHIN_API(_id, temp_var)
     :: atomic { ELSE(_id, pxTCB == pxCurrentTCB) -> pxTCB = NULL_byte }
@@ -354,8 +346,7 @@ inline vTaskSuspendAll(_id)
 inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
 {
     AWAIT_D(_id, xAlreadyYielded = false;
-        assert(pxTCB == NULL_byte);
-        assert(uxSchedulerSuspended));
+        assert(pxTCB == NULL_byte && uxSchedulerSuspended));
 
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, uxSchedulerSuspended = uxSchedulerSuspended - 1);

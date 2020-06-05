@@ -65,8 +65,8 @@ inline exp_entry(id)
     exp_taken(id)
 }
 
-/* an abstraction of an interrupt request which is generated exhaustively */
-inline irq(gen_id)
+/* an abstraction of SysTick interrupt request */
+inline syst_irq(gen_id)
 {
     do
     :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
@@ -158,7 +158,6 @@ inline exp_return(temp_var)
     :: HAS_PENDING_EXPS ->
         tail_chaining(temp_var)
     :: else ->
-        stack_check(EP);
         pop(EP)
     fi
 }

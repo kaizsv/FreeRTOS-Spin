@@ -26,7 +26,6 @@
 #define xSemaphoreCreateMutex(pxNewQueue, QueueID, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id) \
     xQueueCreateMutex(queueQUEUE_TYPE_MUTEX, pxNewQueue, QueueID, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
 
-// TODO: recursive version of semaphore take and give
 // TODO: FromISR version of semaphore
 // TODO: xSemaphoreCreateCounting
 // FIXME: CountingSemaphore has zero queue length.

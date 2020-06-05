@@ -518,7 +518,8 @@ do
         if
         :: SELE(_id, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY])) ->
             taskYIELD(_id, temp_var)
-        :: ELSE(_id, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY]))
+        :: ELSE(_id, listLIST_LENGTH_IS_EXCEEDING_ONE(LISTs[pxReadyTasksLists + tskIDLE_PRIORITY])) ->
+            AWAIT_A(_id, skip) // TODO: redesign SELE and ELSE to set syst_count
         fi;
     #endif
 od

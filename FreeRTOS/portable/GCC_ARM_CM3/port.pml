@@ -10,6 +10,8 @@
 
 #define RUN_ALL_EXPS()          \
     atomic {                    \
+        assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP);  \
+        CLEAR_SYST_FLAG(); \
         run PendSV_Handler();   \
         run SysTick_Handler();  \
     }
@@ -30,6 +32,10 @@ TODO RISC-V: portCRITICAL_NESTING_IN_TCB     0
 
 byte uxCriticalNesting = 170; /* 0xaa */
 
+#define vPortSVCHandler \
+    EP = pxCurrentTCB;  \
+    MSR_BASEPRI(0)
+
 inline xPortStartScheduler()
 {
     assert(configMAX_SYSCALL_INTERRUPT_PRIORITY);
@@ -41,16 +47,9 @@ inline xPortStartScheduler()
     uxCriticalNesting = 0;
 
     /* prvPortStartFirstTask */
-    assert(EP == NULL_byte);
     RUN_ALL_EXPS();
 
-    /* vPortSVCHandler */
-    atomic {
-        EP = pxCurrentTCB;
-        MSR_BASEPRI(0)
-    };
-
-    RUN_ALL_TASKS()
+    RUN_ALL_TASKS(vPortSVCHandler)
 
     /* Should never get vTaskSwitchContext */
 }
@@ -82,7 +81,6 @@ proctype PendSV_Handler()
     byte idx = 0;
     byte local_var = NULL_byte;
     assert(PendSV_ID == _PID);
-    (EP != NULL_byte);
 loop:
     soft_gen_irq(_PID);
     AWAIT_A(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
@@ -100,7 +98,6 @@ proctype SysTick_Handler()
     byte idx = 0;
     byte local_var = NULL_byte;
     assert(SysTick_ID == _PID);
-    (EP != NULL_byte);
 loop:
     irq(_PID);
     portDISABLE_INTERRUPTS(_PID, local_var);

@@ -69,7 +69,7 @@ inline exp_entry(id)
 inline irq(gen_id)
 {
     do
-    :: atomic { BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
+    :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
         assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && EP_Top == 0);
         stack_check(gen_id);
@@ -77,7 +77,7 @@ inline irq(gen_id)
         break
        }
 #if 0
-    :: atomic { BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
+    :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(!GET_PENDING(gen_id) && (gen_id != EP));
         stack_check(gen_id);
         if
@@ -92,7 +92,7 @@ inline irq(gen_id)
         fi
        }
 #endif
-    :: atomic { BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
+    :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
         if
         :: (gen_id == EP) ->
             /* memory barrier or tail-chaining entry */
@@ -107,11 +107,10 @@ inline irq(gen_id)
             set_pending(gen_id)
         fi
        }
-    :: atomic { !BASEPRI_MASK(gen_id) ->
+    :: atomic { SYST && !BASEPRI_MASK(gen_id) ->
         assert(!HAS_INOPERATIVE_EXP);
         set_pending(gen_id)
        }
-    :: else -> assert(false)
     od
 }
 

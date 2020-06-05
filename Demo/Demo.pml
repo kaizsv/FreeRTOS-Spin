@@ -5,8 +5,9 @@
 #define FIRST_TASK              promela_EXP_NUMBER
 #define IDLE_TASK_ID            (FIRST_TASK + promela_TASK_NUMBER)
 
-#define RUN_ALL_TASKS()     \
+#define RUN_ALL_TASKS(stmts) \
     atomic {                \
+        stmts;              \
         run MY_TASK();      \
         run SEC_TASK();     \
         run THIRD_TASK();   \

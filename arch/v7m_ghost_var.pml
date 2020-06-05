@@ -112,4 +112,15 @@ inline clear_exp_inoperative()
     exp_inoperative = 0
 }
 
+/* SysTick control */
+#if (promela_TASK_NUMBER > 7)
+    #error Increase data size of the SysTick counter
+#endif
+byte syst_count = 0;
+
+#define SET_SYST_FLAG(cond) syst_count = (cond -> 1 : syst_count)
+#define CLEAR_SYST_FLAG()   syst_count = 0
+
+#define SYST                        (syst_count)
+
 #endif

@@ -264,11 +264,13 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
     :: atomic { ELSE(_id, temp_var == 0) -> temp_var = NULL_byte }
     fi;
 
+#if (promela_QUEUE_NUMBER > 0)
     if
     :: SELE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte) ->
         AWAIT_D(_id, uxListRemove(QLISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent])], QLIST_SIZE, pxTCB, xEvent, _))
     :: ELSE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
     fi;
+#endif
 
     AWAIT_D(_id, vListInsertEnd(xSuspendedTaskList, SLIST_SIZE, CID_SUSPENDED_TASK, pxTCB, xState));
 
@@ -417,13 +419,13 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
 
             AWAIT_D(_id, uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState, _));
 
+#if (promela_QUEUE_NUMBER > 0)
             if
             :: SELE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte) ->
-                AWAIT_D(_id,
-                    assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) < CID_READY_LISTS);
-                    uxListRemove(QLISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent])], QLIST_SIZE, pxTCB, xEvent, _));
+                AWAIT_D(_id, uxListRemove(QLISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent])], QLIST_SIZE, pxTCB, xEvent, _));
             :: ELSE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
             fi;
+#endif
 
             prvAddTaskToReadyList(_id, pxTCB);
 

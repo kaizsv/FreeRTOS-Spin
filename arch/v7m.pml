@@ -73,11 +73,13 @@ atomic {
     :: SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
         assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && EP_Top == 0);
+        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         exp_entry(gen_id)
 #if 0
     :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(!GET_PENDING(gen_id) && (EP != gen_id));
+        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         if
         :: HAS_INOPERATIVE_EXP ->
@@ -101,6 +103,7 @@ atomic {
 
         /* tail-chaining entry */
         assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         clear_exp_inoperative();
         exp_taken(gen_id)
@@ -114,6 +117,7 @@ atomic {
 
         /* memory barrier entry */
         assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         clear_exp_inoperative();
         exp_taken(gen_id)

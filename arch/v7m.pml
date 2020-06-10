@@ -68,17 +68,16 @@ inline exp_entry(id)
 /* an abstraction of SysTick interrupt request */
 inline syst_irq(gen_id)
 {
-    do
-    :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
+atomic {
+    if
+    :: SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
         assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && EP_Top == 0);
         stack_check(gen_id);
-        exp_entry(gen_id);
-        break
-       }
+        exp_entry(gen_id)
 #if 0
-    :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
-        assert(!GET_PENDING(gen_id) && (gen_id != EP));
+    :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
+        assert(!GET_PENDING(gen_id) && (EP != gen_id));
         stack_check(gen_id);
         if
         :: HAS_INOPERATIVE_EXP ->
@@ -88,61 +87,63 @@ inline syst_irq(gen_id)
             exp_taken(gen_id)
         :: else ->
             /* preemption entry */
+            assert(!HAS_PENDING_EXPS);
             exp_entry(gen_id)
         fi
-       }
 #endif
-    :: atomic { SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
-        if
-        :: (gen_id == EP) ->
-            /* memory barrier or tail-chaining entry */
-            assert(GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
-            stack_check(gen_id);
-            clear_exp_inoperative();
-            exp_taken(gen_id);
-            break
-        :: else ->
-            // TODO: solve the proble of re-setting pending state
-            // assert(!GET_PENDING(gen_id));
-            set_pending(gen_id)
-        fi
-       }
-    :: atomic { SYST && !BASEPRI_MASK(gen_id) ->
-        assert(!HAS_INOPERATIVE_EXP);
-        set_pending(gen_id)
-       }
-    od
-}
+    :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
+        /* generated exception sets itself pending and waits for re-entrying */
+        assert(!GET_PENDING(gen_id) && (EP != gen_id));
+        set_pending(gen_id);
+
+        /* wait for re-entrying from tail-chaining */
+        (EP == gen_id);
+
+        /* tail-chaining entry */
+        assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        stack_check(gen_id);
+        clear_exp_inoperative();
+        exp_taken(gen_id)
+    :: SYST && !BASEPRI_MASK(gen_id) ->
+        /* generated exception sets itself pending and waits for re-entrying */
+        assert(!GET_PENDING(gen_id) && !HAS_INOPERATIVE_EXP && (EP != gen_id));
+        set_pending(gen_id);
+
+        /* wait for re-entrying from memory barrier */
+        (EP == gen_id);
+
+        /* memory barrier entry */
+        assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        stack_check(gen_id);
+        clear_exp_inoperative();
+        exp_taken(gen_id)
+    fi
+}   }
 
 /* an abstraction of a software-generated interrupt request */
 inline soft_gen_irq(gen_id)
 {
-    do
-    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP >= FIRST_TASK) ->
+atomic {
+    if
+    :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
         assert(!HAS_INOPERATIVE_EXP && EP_Top == 0);
         stack_check(gen_id);
         exp_entry(gen_id);
-        assert(!HAS_PENDING_EXPS);
-        break
-       }
-    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
+        assert(!HAS_PENDING_EXPS)
+#if 0
+    :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(false)
-       }
-    :: atomic { BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
-        if
-        :: (gen_id == EP) ->
-            /* memory barrier or tail-chaining entry */
-            assert(HAS_INOPERATIVE_EXP);
-            stack_check(gen_id);
-            clear_exp_inoperative();
-            exp_taken(gen_id);
-            break
-        :: else
-        fi
-       }
-    od
-}
+#endif
+    :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) &&
+       (EP == gen_id) ->
+       /* memory barrier entry */
+       assert(HAS_INOPERATIVE_EXP);
+       stack_check(gen_id);
+       clear_exp_inoperative();
+       exp_taken(gen_id)
+    fi
+}   }
 
 inline tail_chaining(high_pending_exp)
 {

@@ -23,6 +23,7 @@ ltl { <>[](_last != 5) }
 // TODO: vPortSetInterruptHandler
 // TODO: TODO: heap.c; embedded C code               
 // TODO: change bit to byte
+// TODO: check if the waiting statement is blocked in v7m.pml by using ltl
 
 proctype MY_TASK()
 {

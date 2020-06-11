@@ -95,10 +95,9 @@ inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, xReturn, temp_bool, t
 inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsNDTimeOut, temp_var, temp_var2, _id)
 {
     AWAIT_A(_id, xReturn = 0;
-        assert(xYieldRequired == false && xIsNDTimeOut == false);
-        assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
-        assert(!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))));
-        assert(!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1)));
+        assert((!xYieldRequired & !xIsNDTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+            (!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))) &&
+            (!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1))));
 
 loop_send:
     taskENTER_CRITICAL(_id, temp_var);
@@ -196,8 +195,8 @@ return_send:
 inline xQueueReceive(pxQueue, pvBuffer, xTicksToWait, xReturn, xIsNDTimeOut, temp_var, temp_var2, _id)
 {
     AWAIT_A(_id, xReturn = false;
-        assert(xIsNDTimeOut == false && temp_var == NULL_byte && temp_var2 == NULL_byte);
-        assert(!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))));
+        assert((!xIsNDTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+            (!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))))));
 
 loop_receive:
     taskENTER_CRITICAL(_id, temp_var);
@@ -289,9 +288,8 @@ return_receive:
 inline xQueueSemaphoreTake(pxQueue, xTicksToWait, xReturn, xInheritanceOccurred, xIsNDTimeOut, temp_var, temp_var2, _id)
 {
     AWAIT_A(_id, xReturn = false;
-        assert(xInheritanceOccurred == false && xIsNDTimeOut == false);
-        assert(temp_var == NULL_byte && temp_var2 == NULL_byte);
-        assert(queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)));
+        assert((!xInheritanceOccurred & !xIsNDTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+            queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)));
 
 loop_take:
     taskENTER_CRITICAL(_id, temp_var);
@@ -495,7 +493,7 @@ inline prvCopyDataFromQueue(_id, pxQueue, pvBuffer)
 
 inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
 {
-    AWAIT_A(_id, assert(temp_var == NULL_byte && temp_var2 == NULL_byte && temp_xReturn == false));
+    AWAIT_A(_id, assert((temp_var & temp_var2) == NULL_byte && !temp_xReturn));
 
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, temp_var2 = queueGET_cTxLock(pxQueue));
@@ -513,15 +511,15 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
             :: atomic { ELSE(_id, temp_xReturn != false) -> assert(temp_xReturn == false) }
             fi
         :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) ->
-            AWAIT_A(_id, break)
+            AWAIT_A(_id, temp_var2 = NULL_byte; break)
         fi;
         #endif /* configUSE_QUEUE_SETS */
 
         AWAIT_D(_id, temp_var2 = temp_var2 - 1)
     :: ELSE(_id, temp_var2 > queueLOCKED_UNMODIFIED) ->
-        AWAIT_A(_id, break)
+        AWAIT_A(_id, temp_var2 = NULL_byte; break)
     od;
-    AWAIT_A(_id, temp_var2 = NULL_byte; queueSET_cTxLock(pxQueue, queueUNLOCKED));
+    AWAIT_A(_id, queueSET_cTxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id, temp_var);
 
     /* Do the same for the Rx lock. */
@@ -540,12 +538,12 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
 
             AWAIT_D(_id, temp_var2 = temp_var2 - 1)
         :: ELSE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) ->
-            AWAIT_A(_id, break)
+            AWAIT_A(_id, temp_var2 = NULL_byte; break)
         fi;
     :: ELSE(_id, temp_var2 > queueLOCKED_UNMODIFIED) ->
-        AWAIT_A(_id, break)
+        AWAIT_A(_id, temp_var2 = NULL_byte; break)
     od;
-    AWAIT_A(_id, temp_var2 = NULL_byte; queueSET_cRxLock(pxQueue, queueUNLOCKED));
+    AWAIT_A(_id, queueSET_cRxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id, temp_var)
 }
 

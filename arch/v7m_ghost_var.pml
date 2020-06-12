@@ -118,9 +118,10 @@ inline clear_exp_inoperative()
 #endif
 byte syst_count = 0;
 
-#define SET_SYST_FLAG(cond) syst_count = (cond -> 1 : syst_count)
-#define CLEAR_SYST_FLAG()   syst_count = 0
+#define SET_SYST_FLAG(cond, id) syst_count = (cond -> syst_count | (1 << (id - FIRST_TASK)) : syst_count)
+#define CLEAR_SYST_FLAG()       syst_count = 0
 
-#define SYST                        (syst_count)
+#define SYST_USER   (syst_count & (1 << (pxCurrentTCB - FIRST_TASK)))
+#define SYST_EXP    (SYST_USER && (syst_count & ~(1 << (pxCurrentTCB - FIRST_TASK))))
 
 #endif

@@ -70,7 +70,7 @@ inline syst_irq(gen_id)
 {
 atomic {
     if
-    :: SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
+    :: SYST_USER && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
         assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && EP_Top == 0);
         CLEAR_SYST_FLAG();
@@ -93,7 +93,7 @@ atomic {
             exp_entry(gen_id)
         fi
 #endif
-    :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
+    :: SYST_EXP && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
         /* generated exception sets itself pending and waits for re-entrying */
         assert(!GET_PENDING(gen_id) && (EP != gen_id));
         set_pending(gen_id);
@@ -107,7 +107,8 @@ atomic {
         stack_check(gen_id);
         clear_exp_inoperative();
         exp_taken(gen_id)
-    :: SYST && !BASEPRI_MASK(gen_id) ->
+    :: ((SYST_USER && !BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK)) ||
+        (SYST_EXP && !BASEPRI_MASK(gen_id) && (EP < FIRST_TASK))) ->
         /* generated exception sets itself pending and waits for re-entrying */
         assert(!GET_PENDING(gen_id) && !HAS_INOPERATIVE_EXP && (EP != gen_id));
         set_pending(gen_id);

@@ -134,16 +134,7 @@ loop_send:
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
             AWAIT_A(_id, assert(xReturn == false); goto return_send)
-        :: SELE(_id, xTicksToWait != 0 && xTicksToWait != portMAX_DELAY) ->
-            /* non-deterministic timed out */
-            if
-            :: SELE(_id, xIsNDTimeOut == false) ->
-                AWAIT_D(_id, xIsNDTimeOut = false)
-            :: SELE(_id, xIsNDTimeOut == false) ->
-                AWAIT_D(_id, xIsNDTimeOut = true)
-            :: ELSE(_id, xIsNDTimeOut == false)
-            fi
-        :: ELSE(_id, xTicksToWait != portMAX_DELAY)
+        :: ELSE(_id, xTicksToWait == 0)
         fi
 #else /* QUEUE_SEND_EXIT_CRITICAL */
         assert(false)
@@ -173,7 +164,9 @@ loop_send:
             /* Try again. */
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
-        fi
+        fi;
+
+        AWAIT_A(_id, xIsNDTimeOut = true; goto loop_send);
     :: ELSE(_id, xIsNDTimeOut == false) ->
         /* The timeout has expired. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -181,8 +174,6 @@ loop_send:
 
         AWAIT_A(_id, assert(xReturn == false); goto return_send)
     fi;
-
-    AWAIT_A(_id, goto loop_send);
 #else /* QUEUE_SEND_EXIT_CRITICAL */
     assert(false)
 #endif /* QUEUE_SEND_EXIT_CRITICAL */
@@ -225,16 +216,7 @@ loop_receive:
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
             AWAIT_A(_id, assert(xReturn == false); goto return_receive)
-        :: SELE(_id, xTicksToWait != 0 && xTicksToWait != portMAX_DELAY) ->
-            /* non-deterministic timed out */
-            if
-            :: SELE(_id, xIsNDTimeOut == false) ->
-                AWAIT_D(_id, xIsNDTimeOut = false)
-            :: SELE(_id, xIsNDTimeOut == false) ->
-                AWAIT_D(_id, xIsNDTimeOut = true)
-            :: ELSE(_id, xIsNDTimeOut == false)
-            fi
-        :: ELSE(_id, xTicksToWait != portMAX_DELAY)
+        :: ELSE(_id, xTicksToWait == 0)
         fi
 #else /* QUEUE_RECEIVE_EXIT_CRITICAL */
         assert(false)
@@ -263,7 +245,9 @@ loop_receive:
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
-        fi
+        fi;
+
+        AWAIT_A(_id, xIsNDTimeOut = true; goto loop_receive)
     :: ELSE(_id, xIsNDTimeOut == false) ->
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -275,8 +259,6 @@ loop_receive:
         :: ELSE(_id, prvIsQueueEmpty(pxQueue))
         fi
     fi;
-
-    AWAIT_A(_id, goto loop_receive);
 #else /* QUEUE_RECEIVE_EXIT_CRITICAL */
     assert(false)
 #endif /* QUEUE_RECEIVE_EXIT_CRITICAL */
@@ -328,16 +310,7 @@ loop_take:
             #endif
             taskEXIT_CRITICAL(_id, temp_var);
             AWAIT_A(_id, assert(xReturn == false); goto return_take)
-        :: SELE(_id, xTicksToWait != 0 && xTicksToWait != portMAX_DELAY) ->
-            /* non-deterministic timed out */
-            if
-            :: SELE(_id, xIsNDTimeOut == false) ->
-                AWAIT_D(_id, xIsNDTimeOut = false)
-            :: SELE(_id, xIsNDTimeOut == false) ->
-                AWAIT_D(_id, xIsNDTimeOut = true)
-            :: ELSE(_id, xIsNDTimeOut == false)
-            fi
-        :: ELSE(_id, xTicksToWait != portMAX_DELAY)
+        :: ELSE(_id, xTicksToWait == 0)
         fi
 #else /* QUEUE_TAKE_EXIT_CRITICAL */
         assert(false)
@@ -375,7 +348,9 @@ loop_take:
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
-        fi
+        fi;
+
+        AWAIT_A(_id, xIsNDTimeOut = true; goto loop_take)
     :: ELSE(_id, xIsNDTimeOut == false) ->
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -399,8 +374,6 @@ loop_take:
         :: ELSE(_id, prvIsQueueEmpty(pxQueue))
         fi
     fi;
-
-    AWAIT_A(_id, goto loop_take);
 #else /* QUEUE_TAKE_EXIT_CRITICAL */
     assert(false);
 #endif /* QUEUE_TAKE_EXIT_CRITICAL */

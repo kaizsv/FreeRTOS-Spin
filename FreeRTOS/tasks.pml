@@ -525,8 +525,16 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
     if
     :: SELE(_id, uxSchedulerSuspended == 0) ->
         AWAIT_D(_id,
+            /* Reset xTickCount and xState of pxUnblockedTCB as soon as possible */
+            listSET_LIST_ITEM_VALUE(TCB(pxUnblockedTCB).ListItems[xState], 0);
             assert(listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK);
-            uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxUnblockedTCB, xState, _));
+            uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxUnblockedTCB, xState, _);
+            if
+            :: listLIST_IS_EMPTY(pxDelayedTaskList) ->
+                reset_xTickCount()
+            :: else
+            fi
+        );
         prvAddTaskToReadyList(_id, pxUnblockedTCB)
     :: ELSE(_id, uxSchedulerSuspended == 0) ->
         AWAIT_D(_id, vListInsertEnd(xPendingReadyList, PLIST_SIZE, CID_PENDING_READY, pxUnblockedTCB, xEvent))

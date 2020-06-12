@@ -84,7 +84,7 @@ proctype QProdB2()
     assert(_PID == FIRST_TASK + 1);
 do
 ::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    AWAIT_D(_PID, assert(local_xReturn == true));
+    AWAIT_A(_PID, assert(local_xReturn == true));
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue)
 od
 }
@@ -118,7 +118,7 @@ proctype QProdB4()
     assert(_PID == FIRST_TASK + 3);
 do
 ::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    AWAIT_D(_PID, assert(local_xReturn == true));
+    AWAIT_A(_PID, assert(local_xReturn == true));
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue)
 od
 }
@@ -133,7 +133,7 @@ od
 //    assert(_PID == FIRST_TASK + 4);
 //do
 //::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-//    AWAIT_D(_PID, assert(local_xReturn == true));
+//    AWAIT_A(_PID, assert(local_xReturn == true));
 //    INCREASE_VAR_AND_INTOVERFLOW_6(usValue)
 //od
 //}

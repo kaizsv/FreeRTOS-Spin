@@ -71,7 +71,7 @@ do
 ::  do
     :: atomic { SELE(_PID, usLoop < usNumToProduce) -> usLoop = usLoop + 1 };
         xQueueSendToBack(xPolledQueue, usValue, 0, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-        AWAIT_D(_PID, assert(local_xReturn == true));
+        AWAIT_A(_PID, assert(local_xReturn == true));
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: atomic { ELSE(_PID, usLoop < usNumToProduce) -> usLoop = 0; break }
     od;

@@ -42,17 +42,17 @@ proctype prvSemaphoreTest1()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
-::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable - 1; assert(pxFirstSemaphore_pulSharedVariable == 0));
 
-        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
@@ -67,17 +67,17 @@ proctype prvSemaphoreTest2()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable - 1; assert(pxFirstSemaphore_pulSharedVariable == 0));
 
-        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
@@ -92,17 +92,17 @@ proctype prvSemaphoreTest3()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable - 1; assert(pxSecondSemaphore_pulSharedVariable == 0));
 
-        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
@@ -116,17 +116,17 @@ proctype prvSemaphoreTest4()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable - 1; assert(pxSecondSemaphore_pulSharedVariable == 0));
 
-        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
@@ -139,13 +139,13 @@ init {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
 
     xSemaphoreCreateBinary(pxFirstSemaphore_xSemaphore, 0);
-    xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, EP);
+    xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, EP);
 
     xSemaphoreCreateBinary(pxSecondSemaphore_xSemaphore, 1);
-    xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, EP);
+    xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, EP);
     skip; /* prevent Spin Error: jump into d_step sequence */
 
     d_step {

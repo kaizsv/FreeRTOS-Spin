@@ -28,13 +28,13 @@ proctype MY_TASK()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
-::  xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT_D(_PID, assert(local_xReturn == true); assert(mutex == 0); mutex = mutex + 1);
     AWAIT_D(_PID, assert(mutex == 1); mutex = mutex - 1);
-    xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
 od
 }
 
@@ -43,13 +43,13 @@ proctype SEC_TASK()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(mysemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT_D(_PID, assert(local_xReturn == true); assert(mutex == 0); mutex = mutex + 1);
     AWAIT_D(_PID, assert(mutex == 1); mutex = mutex - 1);
-    xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreGive(mysemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
 od
 }
 
@@ -57,9 +57,9 @@ init {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
 
-    xSemaphoreCreateMutex(mysemaphore, 0, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, EP);
+    xSemaphoreCreateMutex(mysemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, EP);
 
     d_step {
         prvInitialiseTaskLists(local_var1);

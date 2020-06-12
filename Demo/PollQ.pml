@@ -37,14 +37,14 @@ proctype QConsNB()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
 
     byte usData, usExpectedValue = 0;
     assert(_PID == FIRST_TASK + 0);
 do
 ::  do
     :: SELE(_PID, uxQueueMessagesWaiting(xPolledQueue)) ->
-        xQueueReceive(xPolledQueue, usData, 0, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive(xPolledQueue, usData, 0, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         if
         :: SELE(_PID, local_xReturn == true) ->
             AWAIT_D(_PID, assert(usData == usExpectedValue));
@@ -63,14 +63,14 @@ proctype QProdNB()
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
+    bit local_xIsTimeOut = false;
 
     byte usValue = 0, usLoop = 0;
     assert(_PID == FIRST_TASK + 1);
 do
 ::  do
     :: atomic { SELE(_PID, usLoop < usNumToProduce) -> usLoop = usLoop + 1 };
-        xQueueSendToBack(xPolledQueue, usValue, 0, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+        xQueueSendToBack(xPolledQueue, usValue, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT_A(_PID, assert(local_xReturn == true));
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: atomic { ELSE(_PID, usLoop < usNumToProduce) -> usLoop = 0; break }

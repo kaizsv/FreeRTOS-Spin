@@ -19,17 +19,17 @@
 #define xQueueCreate(xQueue, QueueID, uxQueueLength) \
     xQueueGenericCreate_fixed(xQueue, QueueID, uxQueueLength, queueQUEUE_TYPE_BASE)
 
-#define xQueueSendToFront(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id) \
-    xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_FRONT, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+#define xQueueSendToFront(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+    xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_FRONT, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
-#define xQueueSendToBack(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id) \
-    xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+#define xQueueSendToBack(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+    xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
-#define xQueueSend(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id) \
-    xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+#define xQueueSend(xQueue, pvItemToQueue, xTicksToWait, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+    xQueueGenericSend(xQueue, pvItemToQueue, xTicksToWait, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
-#define xQueueOverwrite(xQueue, pvItemToQueue, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id) \
-    xQueueGenericSend(xQueue, pvItemToQueue, 0, queueOVERWRITE, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+#define xQueueOverwrite(xQueue, pvItemToQueue, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+    xQueueGenericSend(xQueue, pvItemToQueue, 0, queueOVERWRITE, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
 // TODO: xQueueSendFromISR
 // TODO: xQueueReset

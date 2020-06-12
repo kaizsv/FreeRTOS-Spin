@@ -75,27 +75,27 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
 
 #if (configUSE_MUTEXES == 1)
 
-inline prvInitialiseMutex(pxNewQueue, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+inline prvInitialiseMutex(pxNewQueue, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 {
     pxNewQueue.xSemaphore.xMutexHolder = NULL_byte;
     pxNewQueue.xSemaphore.uxRecursiveCallCount = 0;
     assert(queueQUEUE_IS_MUTEX(pxNewQueue));
 
-    xQueueGenericSend(pxNewQueue, NULL_byte, 0, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+    xQueueGenericSend(pxNewQueue, NULL_byte, 0, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 }
 
-inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 {
     xQueueGenericCreate_fixed(pxNewQueue, QueueID, 1, ucQueueType);
-    prvInitialiseMutex(pxNewQueue, xReturn, temp_bool, temp_xIsNDTimeOut, temp_var, temp_var2, _id)
+    prvInitialiseMutex(pxNewQueue, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 }
 
 #endif /* configUSE_MUTEXES */
 
-inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsNDTimeOut, temp_var, temp_var2, _id)
+inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2, _id)
 {
     AWAIT_A(_id, xReturn = 0;
-        assert((!xYieldRequired & !xIsNDTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+        assert((!xYieldRequired & !xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
             (!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))) &&
             (!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1))));
 
@@ -127,13 +127,13 @@ do
 
         taskEXIT_CRITICAL(_id, temp_var);
 
-        AWAIT_A(_id, xIsNDTimeOut = false; xReturn = true; break)
+        AWAIT_A(_id, xIsTimeOut = false; xReturn = true; break)
     :: ELSE(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength || xCopyPosition == queueOVERWRITE) ->
 #ifdef QUEUE_SEND_EXIT_CRITICAL
         if
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
-            AWAIT_A(_id, assert(!xIsNDTimeOut && xReturn == false); break)
+            AWAIT_A(_id, assert(!xIsTimeOut && xReturn == false); break)
         :: ELSE(_id, xTicksToWait == 0)
         fi
 #else /* QUEUE_SEND_EXIT_CRITICAL */
@@ -147,7 +147,7 @@ do
     prvLockQueue(_id, pxQueue, temp_var);
 
     if
-    :: SELE(_id, xIsNDTimeOut == false) ->
+    :: SELE(_id, xIsTimeOut == false) ->
         if
         :: SELE(_id, prvIsQueueFull(pxQueue)) ->
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var);
@@ -166,13 +166,13 @@ do
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi;
 
-        AWAIT_D(_id, xIsNDTimeOut = true);
-    :: ELSE(_id, xIsNDTimeOut == false) ->
+        AWAIT_D(_id, xIsTimeOut = true);
+    :: ELSE(_id, xIsTimeOut == false) ->
         /* The timeout has expired. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
 
-        AWAIT_A(_id, xIsNDTimeOut = false; assert(xReturn == false); break)
+        AWAIT_A(_id, xIsTimeOut = false; assert(xReturn == false); break)
     fi;
 #else /* QUEUE_SEND_EXIT_CRITICAL */
     assert(false)
@@ -180,10 +180,10 @@ do
 od
 }
 
-inline xQueueReceive(pxQueue, pvBuffer, xTicksToWait, xReturn, xIsNDTimeOut, temp_var, temp_var2, _id)
+inline xQueueReceive(pxQueue, pvBuffer, xTicksToWait, xReturn, xIsTimeOut, temp_var, temp_var2, _id)
 {
     AWAIT_A(_id, xReturn = false;
-        assert((!xIsNDTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+        assert((!xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
             (!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))))));
 
 do
@@ -206,13 +206,13 @@ do
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
-        AWAIT_A(_id, xIsNDTimeOut = false; xReturn = true; break)
+        AWAIT_A(_id, xIsTimeOut = false; xReturn = true; break)
     :: atomic { ELSE(_id, temp_var2 > 0) -> temp_var2 = NULL_byte };
 #ifdef QUEUE_RECEIVE_EXIT_CRITICAL
         if
         :: SELE(_id, xTicksToWait == 0) ->
             taskEXIT_CRITICAL(_id, temp_var);
-            AWAIT_A(_id, assert(!xIsNDTimeOut && xReturn == false); break)
+            AWAIT_A(_id, assert(!xIsTimeOut && xReturn == false); break)
         :: ELSE(_id, xTicksToWait == 0)
         fi
 #else /* QUEUE_RECEIVE_EXIT_CRITICAL */
@@ -226,7 +226,7 @@ do
     prvLockQueue(_id, pxQueue, temp_var);
 
     if
-    :: SELE(_id, xIsNDTimeOut == false) ->
+    :: SELE(_id, xIsTimeOut == false) ->
         /* The timeout has not expired. */
         if
         :: SELE(_id, prvIsQueueEmpty(pxQueue)) ->
@@ -244,15 +244,15 @@ do
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi;
 
-        AWAIT_D(_id, xIsNDTimeOut = true)
-    :: ELSE(_id, xIsNDTimeOut == false) ->
+        AWAIT_D(_id, xIsTimeOut = true)
+    :: ELSE(_id, xIsTimeOut == false) ->
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
 
         if
         :: SELE(_id, prvIsQueueEmpty(pxQueue)) ->
-            AWAIT_A(_id, xIsNDTimeOut = false; assert(xReturn == false); break)
+            AWAIT_A(_id, xIsTimeOut = false; assert(xReturn == false); break)
         :: ELSE(_id, prvIsQueueEmpty(pxQueue))
         fi
     fi;
@@ -262,10 +262,10 @@ do
 od
 }
 
-inline xQueueSemaphoreTake(pxQueue, xTicksToWait, xReturn, xInheritanceOccurred, xIsNDTimeOut, temp_var, temp_var2, _id)
+inline xQueueSemaphoreTake(pxQueue, xTicksToWait, xReturn, xInheritanceOccurred, xIsTimeOut, temp_var, temp_var2, _id)
 {
     AWAIT_A(_id, xReturn = false;
-        assert((!xInheritanceOccurred & !xIsNDTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+        assert((!xInheritanceOccurred & !xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
             queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)));
 
 do
@@ -295,7 +295,7 @@ do
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var);
-        AWAIT_A(_id, xIsNDTimeOut = false; xReturn = true; break)
+        AWAIT_A(_id, xIsTimeOut = false; xReturn = true; break)
     :: atomic { ELSE(_id, temp_var2 > 0) -> temp_var2 = NULL_byte };
 #ifdef QUEUE_TAKE_EXIT_CRITICAL
         if
@@ -304,7 +304,7 @@ do
             AWAIT_A(_id, assert(xInheritanceOccurred == false));
             #endif
             taskEXIT_CRITICAL(_id, temp_var);
-            AWAIT_A(_id, assert(!xIsNDTimeOut && xReturn == false); break)
+            AWAIT_A(_id, assert(!xIsTimeOut && xReturn == false); break)
         :: ELSE(_id, xTicksToWait == 0)
         fi
 #else /* QUEUE_TAKE_EXIT_CRITICAL */
@@ -318,7 +318,7 @@ do
     prvLockQueue(_id, pxQueue, temp_var);
 
     if
-    :: SELE(_id, xIsNDTimeOut == false) ->
+    :: SELE(_id, xIsTimeOut == false) ->
         if
         :: SELE(_id, prvIsQueueEmpty(pxQueue) != false) ->
             #if (configUSE_MUTEXES == 1)
@@ -345,8 +345,8 @@ do
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi;
 
-        AWAIT_D(_id, xIsNDTimeOut = true)
-    :: ELSE(_id, xIsNDTimeOut == false) ->
+        AWAIT_D(_id, xIsTimeOut = true)
+    :: ELSE(_id, xIsTimeOut == false) ->
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
@@ -365,7 +365,7 @@ do
             fi;
             #endif
 
-            AWAIT_A(_id, xIsNDTimeOut = false; assert(xReturn == false); break)
+            AWAIT_A(_id, xIsTimeOut = false; assert(xReturn == false); break)
         :: ELSE(_id, prvIsQueueEmpty(pxQueue))
         fi
     fi;

@@ -10,10 +10,10 @@
 #define RUN_ALL_TASKS(stmts) \
     atomic {                \
         stmts;              \
-        run QProdB1();      \
-        run QConsB2();      \
-        run QProdB3();      \
-        run QConsB4();      \
+        run QConsB1();      \
+        run QProdB2();      \
+        run QConsB3();      \
+        run QProdB4();      \
     }
 //        run QProdB5();      \
 //        run QConsB6();      \
@@ -25,7 +25,7 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
-#define xBlockTime  portMAX_DELAY
+#define xBlockTime  50
 #define xDontBlock  0
 
 QueueDeclarator(1, byte);
@@ -49,95 +49,77 @@ QueueHandle_t(pxQueueParameters3_xQueue, 1, byte);
 //#define pxQueueParameters6_xQueue           pxQueueParameters5_xQueue
 //#define pxQueueParameters6_xBlockTime       xBlockTime
 
-#define INCREASE_VAR_AND_INTOVERFLOW(var)   \
-    AWAIT_D(_PID, var = var + 1;            \
-        if                                  \
-        :: var == 8 -> var = 0              \
-        :: else                             \
-        fi                                  \
-    )
+#define INCREASE_VAR_AND_INTOVERFLOW_6(var) \
+    AWAIT_D(_PID, var = var + 1; var = var % 6)
 
-proctype QProdB1()
-{
-    byte idx;
-    byte usValue = 0;
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
-    assert(_PID == FIRST_TASK + 0);
-do
-::  xQueueSend(pxQueueParameters1_xQueue, usValue, pxQueueParameters1_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    if
-    :: SELE(_PID, local_xReturn != true) ->
-        AWAIT_D(_PID, assert(false))
-    :: ELSE(_PID, local_xReturn != true) ->
-        INCREASE_VAR_AND_INTOVERFLOW(usValue);
-    fi
-od
-}
+#define INCREASE_VAR_AND_INTOVERFLOW_2(var) \
+    AWAIT_D(_PID, var = var + 1; var = var % 2)
 
-proctype QConsB2()
+proctype QConsB1()
 {
     byte idx;
     byte usData, usExpectedValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
+    bit local_xIsNDTimeOut = false;
+    assert(_PID == FIRST_TASK);
+do
+::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    if
+    :: SELE(_PID, local_xReturn == true) ->
+        AWAIT_D(_PID, assert(usData == usExpectedValue));
+        INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue)
+    :: ELSE(_PID, local_xReturn == true)
+    fi
+od
+}
+
+proctype QProdB2()
+{
+    byte idx;
+    byte usValue = 0;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    bit local_xReturn = false, local_bit = false;
     bit local_xIsNDTimeOut = false;
     assert(_PID == FIRST_TASK + 1);
 do
-::  xQueueReceive(pxQueueParameters2_xQueue, usData, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    if
-    :: SELE(_PID, local_xReturn == true) ->
-        if
-        :: SELE(_PID, usData != usExpectedValue) ->
-            AWAIT_D(_PID, assert(false))
-        :: ELSE(_PID, usData != usExpectedValue) ->
-            INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
-        fi
-    :: ELSE(_PID, local_xReturn == true)
-    fi
+::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    AWAIT_D(_PID, assert(local_xReturn == true));
+    INCREASE_VAR_AND_INTOVERFLOW_2(usValue)
 od
 }
 
-proctype QProdB3()
-{
-    byte idx;
-    byte usValue = 0;
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_bit = false;
-    bit local_xIsNDTimeOut = false;
-    assert(_PID == FIRST_TASK + 2);
-do
-::  xQueueSend(pxQueueParameters3_xQueue, usValue, pxQueueParameters3_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-    if
-    :: SELE(_PID, local_xReturn != true) ->
-        AWAIT_D(_PID, assert(false))
-    :: ELSE(_PID, local_xReturn != true) ->
-        INCREASE_VAR_AND_INTOVERFLOW(usValue);
-    fi
-od
-}
-
-proctype QConsB4()
+proctype QConsB3()
 {
     byte idx;
     byte usData, usExpectedValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
     bit local_xIsNDTimeOut = false;
-    assert(_PID == FIRST_TASK + 3);
+    assert(_PID == FIRST_TASK + 2);
 do
-::  xQueueReceive(pxQueueParameters4_xQueue, usData, pxQueueParameters4_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true) ->
-        if
-        :: SELE(_PID, usData != usExpectedValue) ->
-            AWAIT_D(_PID, assert(false))
-        :: ELSE(_PID, usData != usExpectedValue) ->
-            INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
-        fi
+        AWAIT_D(_PID, assert(usData == usExpectedValue));
+        INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue)
     :: ELSE(_PID, local_xReturn == true)
     fi
+od
+}
+
+proctype QProdB4()
+{
+    byte idx;
+    byte usValue = 0;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    bit local_xReturn = false, local_bit = false;
+    bit local_xIsNDTimeOut = false;
+    assert(_PID == FIRST_TASK + 3);
+do
+::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
+    AWAIT_D(_PID, assert(local_xReturn == true));
+    INCREASE_VAR_AND_INTOVERFLOW_2(usValue)
 od
 }
 
@@ -151,12 +133,8 @@ od
 //    assert(_PID == FIRST_TASK + 4);
 //do
 //::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_bit, local_xIsNDTimeOut, local_var1, local_var2, _PID);
-//    if
-//    :: SELE(_PID, local_xReturn != true) ->
-//        AWAIT_D(_PID, assert(false));
-//    :: ELSE(_PID, local_xReturn != true) ->
-//        INCREASE_VAR_AND_INTOVERFLOW(usValue);
-//    fi
+//    AWAIT_D(_PID, assert(local_xReturn == true));
+//    INCREASE_VAR_AND_INTOVERFLOW_6(usValue)
 //od
 //}
 //
@@ -172,12 +150,8 @@ od
 //::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsNDTimeOut, local_var1, local_var2, _PID);
 //    if
 //    :: SELE(_PID, local_xReturn == true) ->
-//        if
-//        :: SELE(_PID, usData != usExpectedValue) ->
-//            AWAIT_D(_PID, assert(false));
-//        :: ELSE(_PID, usData != usExpectedValue) ->
-//            INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue);
-//        fi
+//        AWAIT_D(_PID, assert(false));
+//        INCREASE_VAR_AND_INTOVERFLOW_6(usExpectedValue)
 //    :: ELSE(_PID, local_xReturn == true)
 //    fi
 //od

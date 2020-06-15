@@ -1,6 +1,6 @@
 /* FreeRTOS/Demo/Common/Full/dynamic.c */
 
-#define promela_TASK_NUMBER     3
+#define promela_TASK_NUMBER     5
 #define promela_QUEUE_NUMBER    1
 
 #define FIRST_TASK              promela_EXP_NUMBER
@@ -12,6 +12,8 @@
         run CONT_INC();     \
         run LIM_INC();      \
         run C_CTRL();       \
+        run SUSP_SEND();    \
+        run SUSP_RECV();    \
     }
 
 #define QUEUE_SEND_EXIT_CRITICAL
@@ -23,6 +25,9 @@
 
 #define xContinousIncrementHandle   FIRST_TASK + 0
 #define xLimitedIncrementHandle     FIRST_TASK + 1
+
+#define xQueueSendWhenSuspendedHandler      FIRST_TASK + 3
+#define xQueueReceiveWhenSuspendedHandler   FIRST_TASK + 4
 
 QueueDeclarator(1, byte);
 QueueHandle_t(xSuspendedTestQueue, 1, byte);
@@ -108,6 +113,44 @@ do
 od
 }
 
+#define ulValueToSend   xQueueSendWhenSuspendedHandler
+#define ulExpectedValue xQueueSendWhenSuspendedHandler
+
+proctype SUSP_SEND()
+{
+    byte idx;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    bit local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
+    assert(_PID == xQueueSendWhenSuspendedHandler);
+do
+::  vTaskSuspendAll(_PID);
+    xQueueSend(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
+    xTaskResumeAll(_PID, local_var1, _, local_var2);
+    vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
+od
+}
+
+proctype SUSP_RECV()
+{
+    byte idx;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulReceivedValue = 0;
+    bit local_xReturn = false, local_xIsTimeOut = false, xGotValue = false;
+    assert(_PID == xQueueReceiveWhenSuspendedHandler);
+do
+::  do
+    :: atomic { SELE(_PID, xGotValue == false) -> assert(local_xReturn == false) /* check */ };
+        vTaskSuspendAll(_PID);
+        vTaskSuspendAll(_PID);
+        xQueueReceive(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xTaskResumeAll(_PID, local_var1, local_xReturn /* check */, local_var2);
+        xTaskResumeAll(_PID, local_var1, _, local_var2);
+    :: atomic { ELSE(_PID, xGotValue == false) -> xGotValue = false; break }
+    od;
+    AWAIT_A(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);
+od
+}
+
 init {
     byte idx;
     byte local_var = NULL_byte;
@@ -120,6 +163,8 @@ init {
         xTaskCreate_fixed(xContinousIncrementHandle, tskIDLE_PRIORITY);
         xTaskCreate_fixed(xLimitedIncrementHandle, tskIDLE_PRIORITY + 1);
         xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY)
+        xTaskCreate_fixed(xQueueSendWhenSuspendedHandler, tskIDLE_PRIORITY);
+        xTaskCreate_fixed(xQueueReceiveWhenSuspendedHandler, tskIDLE_PRIORITY);
     };
 
     vTaskStartScheduler(EP, local_var);

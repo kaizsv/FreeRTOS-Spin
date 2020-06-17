@@ -156,7 +156,7 @@ do
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
             if
-            :: atomic { SELE(_id, xReturn == false) -> assert(xReturn == false) };
+            :: atomic { SELE(_id, xReturn == false) -> xIsTimeOut = true };
                 portYIELD_WITHIN_API(_id, temp_var)
             :: atomic { ELSE(_id, xReturn == false) -> xReturn = false }
             fi
@@ -164,9 +164,7 @@ do
             /* Try again. */
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
-        fi;
-
-        AWAIT_D(_id, xIsTimeOut = true);
+        fi
     :: ELSE(_id, xIsTimeOut == false) ->
         /* The timeout has expired. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -235,16 +233,14 @@ do
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
             if
-            :: atomic { SELE(_id, xReturn == false) -> assert(xReturn == false) };
+            :: atomic { SELE(_id, xReturn == false) -> xIsTimeOut = true };
                 portYIELD_WITHIN_API(_id, temp_var)
             :: atomic { ELSE(_id, xReturn == false) -> xReturn = false }
             fi
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
-        fi;
-
-        AWAIT_D(_id, xIsTimeOut = true)
+        fi
     :: ELSE(_id, xIsTimeOut == false) ->
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
@@ -336,16 +332,14 @@ do
 
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
             if
-            :: atomic { SELE(_id, xReturn == false) -> assert(xReturn == false) };
+            :: atomic { SELE(_id, xReturn == false) -> xIsTimeOut = true };
                 portYIELD_WITHIN_API(_id, temp_var)
             :: atomic { ELSE(_id, xReturn == false) -> xReturn = false }
             fi
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false) ->
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
-        fi;
-
-        AWAIT_D(_id, xIsTimeOut = true)
+        fi
     :: ELSE(_id, xIsTimeOut == false) ->
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);

@@ -297,8 +297,6 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
 
     AWAIT_D(_id, vListInsertEnd(xSuspendedTaskList, SLIST_SIZE, CID_SUSPENDED_TASK, pxTCB, xState));
 
-    // TODO: configUSE_TASK_NOTIFICATIONS
-
     /* Reset the unblock tick in case it referred to the task that is now in
      * the Suspended state */
     prvResetNextTaskUnblockTicks(_id);
@@ -372,7 +370,6 @@ inline vTaskStartScheduler(_id, temp_var)
 inline vTaskSuspendAll(_id)
 {
     AWAIT_D(_id, uxSchedulerSuspended = uxSchedulerSuspended + 1);
-    // portMEMORY_BARRIER(); (optimization barrier)
 }
 
 inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
@@ -384,7 +381,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
     AWAIT_D(_id, uxSchedulerSuspended = uxSchedulerSuspended - 1);
     if
     :: SELE(_id, uxSchedulerSuspended == 0) ->
-        // FIXME: uxCurrentNumberOfTasks must greater than zero if no task is deleted.
+        /* Because no task is delete, uxCurrentNumberOfTasks is greater than zero */
         do
         :: SELE(_id, !listLIST_IS_EMPTY(xPendingReadyList)) ->
             AWAIT_D(_id, pxTCB = listGET_OWNER_OF_HEAD_ENTRY(xPendingReadyList));
@@ -519,7 +516,8 @@ inline vTaskPlaceOnEventList(_id, pxEventList, EventListContainer, xTicksToWait,
 
 inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
 {
-    AWAIT_D(_id, pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList); assert(pxUnblockedTCB != NULL_byte));
+    AWAIT_D(_id, assert(pxUnblockedTCB == NULL_byte);
+        pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList); assert(pxUnblockedTCB != NULL_byte));
     AWAIT_D(_id, uxListRemove(pxEventList, QLIST_SIZE, pxUnblockedTCB, xEvent, _));
 
     if
@@ -558,7 +556,7 @@ inline vTaskIDLE_TASK_BODY(_id, temp_var)
 {
     assert(_id == IDLE_TASK_ID);
 do
-::  // FIXME: ifdef INCLUDE_vTaskDelete then prvCheckTasksWaitingTermination
+::
     #if (configUSE_PREEMPTION == 0)
         taskYIELD(_id, temp_var);
     #endif

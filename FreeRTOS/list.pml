@@ -45,6 +45,8 @@ inline listPOINTER_SET(pxListPointer, tcb, item)
 #define LIST_SIZE5  5
 
 #if 0
+    Only pxReadyTasksLists may have its pxIndex changed
+
     |-- LIST_SIZE --|
     0 -> 1 -> 2 -> ... -> xListEnd
                              /\
@@ -54,19 +56,17 @@ inline listPOINTER_SET(pxListPointer, tcb, item)
 
 #define xListEnd    254
 
-typedef List2_t {
+typedef List5_pxIndex_t {
     byte pxIndex;
+    List_t ps[LIST_SIZE5];
+};
+
+typedef List2_t {
     List_t ps[LIST_SIZE2];
 };
 
 typedef List3_t {
-    byte pxIndex;
     List_t ps[LIST_SIZE3];
-};
-
-typedef List5_t {
-    byte pxIndex;
-    List_t ps[LIST_SIZE5];
 };
 
 #define __OWNER_OF(tcb)                 (tcb) - FIRST_TASK
@@ -114,6 +114,14 @@ inline vListInitialiseItem(pxItem)
 
 inline vListInitialise(pxList, SIZE)
 {
+    for (idx: 0 .. (SIZE - 1)) {
+        vListInitialisePointer(pxList.ps[idx])
+    }
+    idx = 0
+}
+
+inline vListInitialise_pxIndex(pxList, SIZE)
+{
     pxList.pxIndex = xListEnd;
     for (idx: 0 .. (SIZE - 1)) {
         vListInitialisePointer(pxList.ps[idx])
@@ -128,8 +136,23 @@ inline swapListPointers(aListPointer, bListPointer)
     aListPointer.p_tcb_item = aListPointer.p_tcb_item ^ bListPointer.p_tcb_item;
 }
 
-// pxReadyTasksLists (pxIndex), xSuspendedTaskList, xPendingReadyList
 inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
+{
+    assert(listLIST_IS_NOT_FULL(pxList, SIZE));
+
+    for (idx: 0 .. (SIZE - 1)) {
+        if
+        :: listPOINTER_IS_NULL(pxList.ps[idx]) ->
+            listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
+            listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
+            break
+        :: else
+        fi
+    }
+    idx = 0
+}
+
+inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE));
 
@@ -158,7 +181,6 @@ inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
     fi
 }
 
-// pxDelayedTaskList, pxEventList
 inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, temp_var)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE) && temp_var == NULL_byte);
@@ -191,6 +213,37 @@ inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, temp_va
 }
 
 inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uReturn)
+{
+    /* find the index of pxItemToRemove in pxList */
+    for (idx: 0 .. (SIZE - 1)) {
+        if
+        :: (pxList.ps[idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
+            assert((pxList.ps[idx].p_tcb_item & 1) == xStateORxEvent);
+            vListInitialisePointer(pxList.ps[idx]);
+            break
+        :: else -> assert(idx < (SIZE - 1)) /* check reliability */
+        fi
+    }
+
+    if
+    :: idx == (SIZE - 1) ->
+        uReturn = idx
+    :: else ->
+        /* move items behind the index position of pxList forward */
+        for (idx: (idx + 1) .. (SIZE - 1)) {
+            if
+            :: !listPOINTER_IS_NULL(pxList.ps[idx]) ->
+                swapListPointers(pxList.ps[idx - 1], pxList.ps[idx])
+            :: else -> break
+            fi
+        }
+        uReturn = idx - 1
+    fi;
+    idx = 0;
+    vListInitialiseItem(pxItemToRemove)
+}
+
+inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uReturn)
 {
     /* find the index of pxItemToRemove in pxList */
     for (idx: 0 .. (SIZE - 1)) {

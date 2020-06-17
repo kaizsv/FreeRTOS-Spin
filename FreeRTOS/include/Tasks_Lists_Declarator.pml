@@ -8,7 +8,7 @@
 #define SLIST_SIZE  LIST_SIZE2  /* Size of xSuspendedTaskList */
 
 #define QList_t List2_t
-#define RList_t List5_t
+#define RList_t List5_pxIndex_t
 #define DList_t List3_t
 #define PList_t List2_t
 #define SList_t List2_t

@@ -16,8 +16,8 @@
 */
 #define _PID (_pid - 1)
 byte EP = NULL_byte; /* Executing Process */
-#define AWAIT_D(id, stmt) d_step { (id == EP) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID, id); stmt }
-#define AWAIT_A(id, stmt) atomic { (id == EP) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID, id); stmt }
+#define AWAIT_D(id, stmt) d_step { (id == EP) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID); stmt }
+#define AWAIT_A(id, stmt) atomic { (id == EP) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID); stmt }
 #define SELE(id, cond) ((id == EP) && (cond))
 #define ELSE(id, cond) ((id == EP) && !(cond))
 

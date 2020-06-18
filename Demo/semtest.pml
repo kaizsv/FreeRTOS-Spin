@@ -47,7 +47,7 @@ proctype prvSemaphoreTest1()
 do
 ::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE(_PID, local_xReturn == true) ->
+    :: SELE2(_PID, local_xReturn == true);
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable - 1; assert(pxFirstSemaphore_pulSharedVariable == 0));
@@ -56,7 +56,7 @@ do
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
-    :: ELSE(_PID, local_xReturn == true) ->
+    :: ELSE2(_PID, local_xReturn == true);
         taskYIELD(_PID, local_var1)
     fi
 od
@@ -72,7 +72,7 @@ proctype prvSemaphoreTest2()
 do
 ::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE(_PID, local_xReturn == true) ->
+    :: SELE2(_PID, local_xReturn == true);
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable - 1; assert(pxFirstSemaphore_pulSharedVariable == 0));
@@ -81,7 +81,7 @@ do
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
-    :: ELSE(_PID, local_xReturn == true) ->
+    :: ELSE2(_PID, local_xReturn == true);
         taskYIELD(_PID, local_var1)
     fi
 od
@@ -97,7 +97,7 @@ proctype prvSemaphoreTest3()
 do
 ::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE(_PID, local_xReturn == true) ->
+    :: SELE2(_PID, local_xReturn == true);
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable - 1; assert(pxSecondSemaphore_pulSharedVariable == 0));
@@ -106,7 +106,7 @@ do
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
-    :: ELSE(_PID, local_xReturn == true)
+    :: ELSE2(_PID, local_xReturn == true)
     fi
 od
 }
@@ -121,7 +121,7 @@ proctype prvSemaphoreTest4()
 do
 ::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE(_PID, local_xReturn == true) ->
+    :: SELE2(_PID, local_xReturn == true);
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
         AWAIT_D(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1));
         AWAIT_D(_PID, pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable - 1; assert(pxSecondSemaphore_pulSharedVariable == 0));
@@ -130,7 +130,7 @@ do
         AWAIT_A(_PID, assert(local_xReturn); local_xReturn = false);
 
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
-    :: ELSE(_PID, local_xReturn == true)
+    :: ELSE2(_PID, local_xReturn == true)
     fi
 od
 }

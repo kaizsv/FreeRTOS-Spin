@@ -66,10 +66,10 @@ proctype QConsB1()
 do
 ::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE(_PID, local_xReturn == true) ->
+    :: SELE2(_PID, local_xReturn == true);
         AWAIT_D(_PID, assert(usData == usExpectedValue));
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue)
-    :: ELSE(_PID, local_xReturn == true)
+    :: ELSE2(_PID, local_xReturn == true)
     fi
 od
 }
@@ -100,10 +100,10 @@ proctype QConsB3()
 do
 ::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE(_PID, local_xReturn == true) ->
+    :: SELE2(_PID, local_xReturn == true);
         AWAIT_D(_PID, assert(usData == usExpectedValue));
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue)
-    :: ELSE(_PID, local_xReturn == true)
+    :: ELSE2(_PID, local_xReturn == true)
     fi
 od
 }
@@ -149,10 +149,10 @@ od
 //do
 //::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
 //    if
-//    :: SELE(_PID, local_xReturn == true) ->
+//    :: SELE2(_PID, local_xReturn == true);
 //        AWAIT_D(_PID, assert(false));
 //        INCREASE_VAR_AND_INTOVERFLOW_6(usExpectedValue)
-//    :: ELSE(_PID, local_xReturn == true)
+//    :: ELSE2(_PID, local_xReturn == true)
 //    fi
 //od
 //}

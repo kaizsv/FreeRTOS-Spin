@@ -44,9 +44,9 @@ byte pxCurrentTCB = NULL_byte;
 inline taskRECORD_READY_PRIORITY(_id, Priority)
 {
     if
-    :: SELE(_id, Priority > uxTopReadyPriority) ->
+    :: SELE2(_id, Priority > uxTopReadyPriority);
         AWAIT_D(_id, uxTopReadyPriority = Priority)
-    :: ELSE(_id, Priority > uxTopReadyPriority)
+    :: ELSE2(_id, Priority > uxTopReadyPriority)
     fi
 }
 
@@ -54,9 +54,9 @@ inline taskSELECT_HIGHEST_PRIORITY_TASK(_id)
 {
     for (idx: 0 .. uxTopReadyPriority) {
         if
-        :: SELE(_id, !listLIST_IS_EMPTY(pxReadyTasksLists[uxTopReadyPriority - idx])) ->
+        :: SELE2(_id, !listLIST_IS_EMPTY(pxReadyTasksLists[uxTopReadyPriority - idx]));
             AWAIT_A(_id, uxTopReadyPriority = uxTopReadyPriority - idx; break);
-        :: ELSE(_id, !listLIST_IS_EMPTY(pxReadyTasksLists[uxTopReadyPriority - idx]))
+        :: ELSE2(_id, !listLIST_IS_EMPTY(pxReadyTasksLists[uxTopReadyPriority - idx]))
         fi
     }
     AWAIT_A(_id, idx = 0);
@@ -175,17 +175,17 @@ inline xTaskCreate_fixed(pcName, Priority)
 inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
 {
     if
-    :: atomic { SELE(_id, xTicksToDelay > 0) -> assert(uxSchedulerSuspended == 0 && xAlreadyYielded == false) };
+    :: SELE3(_id, xTicksToDelay > 0, assert(uxSchedulerSuspended == 0));
         vTaskSuspendAll(_id);
         prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false, temp_var);
         xTaskResumeAll(_id, temp_var, xAlreadyYielded, temp_var2)
-    :: atomic { ELSE(_id, xTicksToDelay > 0) -> assert(xAlreadyYielded == false) }
+    :: ELSE3(_id, xTicksToDelay > 0, assert(xAlreadyYielded == false))
     fi;
 
     if
-    :: atomic { SELE(_id, xAlreadyYielded == false) -> assert(xAlreadyYielded == false) };
+    :: SELE2(_id, xAlreadyYielded == false);
         portYIELD_WITHIN_API(_id, temp_var)
-    :: atomic { ELSE(_id, xAlreadyYielded == false) -> xAlreadyYielded = false }
+    :: ELSE3(_id, xAlreadyYielded == false, xAlreadyYielded = false)
     fi
 }
 
@@ -201,7 +201,7 @@ inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
 
 inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_var, temp_Priority)
 {
-    AWAIT_D(_id, assert(uxNewPriority < configMAX_PRIORITIES && xYieldRequired == false));
+    AWAIT_D(_id, assert(uxNewPriority < configMAX_PRIORITIES && xYieldRequired == false && temp_var == NULL_byte));
 
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, assert(pxTCB == NULL_byte); pxTCB = prvGetTCBFromHandle(xTask));
@@ -213,19 +213,19 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
 #endif
 
     if
-    :: atomic { SELE(_id, temp_Priority /* uxCurrentBasePriority */ != uxNewPriority) -> assert(temp_var == NULL_byte) };
+    :: SELE2(_id, temp_Priority /* uxCurrentBasePriority */ != uxNewPriority);
         if
-        :: SELE(_id, uxNewPriority > temp_Priority /* uxCurrentBasePriority */) ->
+        :: SELE2(_id, uxNewPriority > temp_Priority /* uxCurrentBasePriority */);
             if
-            :: SELE(_id, pxTCB != pxCurrentTCB && uxNewPriority >= TCB(pxCurrentTCB).uxPriority) ->
+            :: SELE2(_id, pxTCB != pxCurrentTCB && uxNewPriority >= TCB(pxCurrentTCB).uxPriority);
                 AWAIT_D(_id, xYieldRequired = true)
-            :: ELSE(_id, pxTCB != pxCurrentTCB && uxNewPriority >= TCB(pxCurrentTCB).uxPriority)
+            :: ELSE2(_id, pxTCB != pxCurrentTCB && uxNewPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
-        :: ELSE(_id, uxNewPriority > temp_Priority /* uxCurrentBasePriority */) ->
+        :: ELSE2(_id, uxNewPriority > temp_Priority /* uxCurrentBasePriority */);
             if
-            :: SELE(_id, pxTCB == pxCurrentTCB) ->
+            :: SELE2(_id, pxTCB == pxCurrentTCB);
                 AWAIT_D(_id, xYieldRequired = true)
-            :: ELSE(_id, pxTCB == pxCurrentTCB) ->
+            :: ELSE2(_id, pxTCB == pxCurrentTCB)
             fi
         fi;
 
@@ -233,38 +233,38 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
 
 #if (configUSE_MUTEXES == 1)
         if
-        :: SELE(_id, TCB(pxTCB).uxBasePriority == TCB(pxTCB).uxPriority) ->
+        :: SELE2(_id, TCB(pxTCB).uxBasePriority == TCB(pxTCB).uxPriority);
             AWAIT_D(_id, TCB(pxTCB).uxPriority = uxNewPriority)
-        :: ELSE(_id, TCB(pxTCB).uxBasePriority == TCB(pxTCB).uxPriority)
+        :: ELSE2(_id, TCB(pxTCB).uxBasePriority == TCB(pxTCB).uxPriority)
         fi;
         AWAIT_D(_id, TCB(pxTCB).uxBasePriority = uxNewPriority);
 #else
         AWAIT_D(_id, TCB(pxTCB).uxPriority = uxNewPriority);
 #endif
         if
-        :: SELE(_id, (listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0) ->
+        :: SELE2(_id, (listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0);
             AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent], configMAX_PRIORITIES - uxNewPriority))
-        :: ELSE(_id, (listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
+        :: ELSE2(_id, (listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
         fi;
 
         if
-        :: SELE(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + temp_Priority /* uxPriorityUsedOnEntry */, TCB(pxTCB).ListItems[xState]) != false) ->
+        :: SELE2(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + temp_Priority /* uxPriorityUsedOnEntry */, TCB(pxTCB).ListItems[xState]) != false)
             AWAIT_D(_id, uxListRemove_pxIndex(pxReadyTasksLists[temp_Priority], RLIST_SIZE, pxTCB, xState, temp_var));
             if
-            :: atomic { SELE(_id, temp_var == 0) -> temp_var = NULL_byte};
+            :: SELE3(_id, temp_var == 0, temp_var = NULL_byte);
                 portRESET_READY_PRIORITY(_id, temp_Priority /* uxPriorityUsedOnEntry */, uxTopReadyPriority)
-            :: atomic { ELSE(_id, temp_var == 0) -> temp_var = NULL_byte}
+            :: ELSE3(_id, temp_var == 0, temp_var = NULL_byte)
             fi;
             prvAddTaskToReadyList(_id, pxTCB)
-        :: ELSE(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + temp_Priority /* uxPriorityUsedOnEntry */, TCB(pxTCB).ListItems[xState]) != false)
+        :: ELSE2(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + temp_Priority /* uxPriorityUsedOnEntry */, TCB(pxTCB).ListItems[xState]) != false)
         fi;
 
         if
-        :: atomic { SELE(_id, xYieldRequired != false) -> xYieldRequired = false; pxTCB = NULL_byte; temp_Priority = NULL_byte };
+        :: SELE3(_id, xYieldRequired != false, xYieldRequired = false; pxTCB = NULL_byte; temp_Priority = NULL_byte);
             taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
-        :: atomic { ELSE(_id, xYieldRequired != false) -> assert(xYieldRequired == false); pxTCB = NULL_byte; temp_Priority = NULL_byte }
+        :: ELSE3(_id, xYieldRequired != false, assert(xYieldRequired == false); pxTCB = NULL_byte; temp_Priority = NULL_byte)
         fi
-    :: atomic { ELSE(_id, temp_Priority /* uxCurrentBasePriority */ != uxNewPriority) -> pxTCB = NULL_byte; temp_Priority = NULL_byte }
+    :: ELSE3(_id, temp_Priority /* uxCurrentBasePriority */ != uxNewPriority, pxTCB = NULL_byte; temp_Priority = NULL_byte)
     fi;
     taskEXIT_CRITICAL(_id, temp_var)
 }
@@ -282,16 +282,16 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
         assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_READY_LISTS + TCB(pxTCB).uxPriority);
         uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxTCB).uxPriority], RLIST_SIZE, pxTCB, xState, temp_var));
     if
-    :: atomic { SELE(_id, temp_var == 0) -> temp_var = NULL_byte };
+    :: SELE3(_id, temp_var == 0, temp_var = NULL_byte);
         taskRESET_READY_PRIORITY(_id, TCB(pxTCB).uxPriority)
-    :: atomic { ELSE(_id, temp_var == 0) -> temp_var = NULL_byte }
+    :: ELSE3(_id, temp_var == 0, temp_var = NULL_byte)
     fi;
 
 #if (promela_QUEUE_NUMBER > 0)
     if
-    :: SELE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte) ->
+    :: SELE2(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte);
         AWAIT_D(_id, uxListRemove(QLISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent])], QLIST_SIZE, pxTCB, xEvent, _))
-    :: ELSE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
+    :: ELSE2(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
     fi;
 #endif
 
@@ -304,53 +304,53 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
     taskEXIT_CRITICAL(_id, temp_var);
 
     if
-    :: atomic { SELE(_id, pxTCB == pxCurrentTCB) -> pxTCB = NULL_byte };
+    :: SELE3(_id, pxTCB == pxCurrentTCB, pxTCB = NULL_byte);
         /* The scheduler is always running */
         AWAIT_D(_id, assert(xSchedulerRunning != false && uxSchedulerSuspended == 0));
         portYIELD_WITHIN_API(_id, temp_var)
-    :: atomic { ELSE(_id, pxTCB == pxCurrentTCB) -> pxTCB = NULL_byte }
+    :: ELSE3(_id, pxTCB == pxCurrentTCB, pxTCB = NULL_byte)
     fi
 }
 
 inline prvTaskIsTaskSuspended(_id, xTask, xReturn)
 {
     if
-    :: atomic { SELE(_id, listIS_CONTAINED_WITHIN(CID_SUSPENDED_TASK, TCB(xTask).ListItems[xState]) != false) -> assert(xReturn == false) };
+    :: SELE2(_id, listIS_CONTAINED_WITHIN(CID_SUSPENDED_TASK, TCB(xTask).ListItems[xState]) != false);
         if
-        :: SELE(_id, listIS_CONTAINED_WITHIN(CID_PENDING_READY, TCB(xTask).ListItems[xEvent]) == false) ->
+        :: SELE2(_id, listIS_CONTAINED_WITHIN(CID_PENDING_READY, TCB(xTask).ListItems[xEvent]) == false);
             if
-            :: SELE(_id, listIS_CONTAINED_WITHIN(NULL_byte, TCB(xTask).ListItems[xEvent]) != false) ->
-                AWAIT_D(_id, xReturn = true)
-            :: ELSE(_id, listIS_CONTAINED_WITHIN(NULL_byte, TCB(xTask).ListItems[xEvent]) != false)
+            :: SELE2(_id, listIS_CONTAINED_WITHIN(NULL_byte, TCB(xTask).ListItems[xEvent]) != false);
+                AWAIT_D(_id, assert(xReturn == false); xReturn = true)
+            :: ELSE2(_id, listIS_CONTAINED_WITHIN(NULL_byte, TCB(xTask).ListItems[xEvent]) != false)
             fi
-        :: ELSE(_id, listIS_CONTAINED_WITHIN(CID_PENDING_READY, TCB(xTask).ListItems[xEvent]) == false)
+        :: ELSE2(_id, listIS_CONTAINED_WITHIN(CID_PENDING_READY, TCB(xTask).ListItems[xEvent]) == false)
         fi
-    :: atomic { ELSE(_id, listIS_CONTAINED_WITHIN(CID_SUSPENDED_TASK, TCB(xTask).ListItems[xState]) != false) -> assert(xReturn == false) }
+    :: ELSE3(_id, listIS_CONTAINED_WITHIN(CID_SUSPENDED_TASK, TCB(xTask).ListItems[xState]) != false, assert(xReturn == false))
     fi
 }
 
 inline vTaskResume(_id, xTaskToResume, temp_xReturn, temp_var)
 {
     if
-    :: SELE(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte) ->
+    :: SELE2(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte);
         taskENTER_CRITICAL(_id, temp_var);
 
         prvTaskIsTaskSuspended(_id, xTaskToResume, temp_xReturn);
         if
-        :: atomic { SELE(_id, temp_xReturn != false) -> temp_xReturn = false };
+        :: SELE3(_id, temp_xReturn != false, temp_xReturn = false);
             AWAIT_D(_id, uxListRemove(xSuspendedTaskList, SLIST_SIZE, xTaskToResume, xState, _));
             prvAddTaskToReadyList(_id, xTaskToResume);
 
             if
-            :: SELE(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority) ->
+            :: SELE2(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority);
                 taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
-            :: ELSE(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority)
+            :: ELSE2(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
-        :: atomic { ELSE(_id, temp_xReturn != false) -> assert(temp_xReturn == false) }
+        :: ELSE2(_id, temp_xReturn != false)
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var)
-    :: ELSE(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte)
+    :: ELSE2(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte)
     fi
 }
 
@@ -380,10 +380,10 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
     taskENTER_CRITICAL(_id, temp_var);
     AWAIT_D(_id, uxSchedulerSuspended = uxSchedulerSuspended - 1);
     if
-    :: SELE(_id, uxSchedulerSuspended == 0) ->
+    :: SELE2(_id, uxSchedulerSuspended == 0);
         /* Because no task is delete, uxCurrentNumberOfTasks is greater than zero */
         do
-        :: SELE(_id, !listLIST_IS_EMPTY(xPendingReadyList)) ->
+        :: SELE2(_id, !listLIST_IS_EMPTY(xPendingReadyList));
             AWAIT_D(_id, pxTCB = listGET_OWNER_OF_HEAD_ENTRY(xPendingReadyList));
             AWAIT_D(_id,
                 assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) == CID_PENDING_READY);
@@ -394,31 +394,31 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
             prvAddTaskToReadyList(_id, pxTCB);
 
             if
-            :: SELE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority) ->
+            :: SELE2(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority);
                 AWAIT_D(_id, xYieldPending = true)
-            :: ELSE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
+            :: ELSE2(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
-        :: ELSE(_id, !listLIST_IS_EMPTY(xPendingReadyList)) ->
+        :: ELSE2(_id, !listLIST_IS_EMPTY(xPendingReadyList));
             AWAIT_A(_id, break)
         od;
 
         if
-        :: atomic { SELE(_id, pxTCB != NULL_byte) -> pxTCB = NULL_byte };
+        :: SELE3(_id, pxTCB != NULL_byte, pxTCB = NULL_byte);
             prvResetNextTaskUnblockTicks(_id)
-        :: atomic { ELSE(_id, pxTCB != NULL_byte) }
+        :: ELSE2(_id, pxTCB != NULL_byte)
         fi;
 
         /* xPendedTicks can be dismissed in verification */
 
         if
-        :: SELE(_id, xYieldPending != false) ->
+        :: SELE2(_id, xYieldPending != false);
             #if (configUSE_PREEMPTION != 0)
             AWAIT_D(_id, xAlreadyYielded = true);
             #endif
             taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
-        :: ELSE(_id, xYieldPending != false)
+        :: ELSE2(_id, xYieldPending != false)
         fi
-    :: ELSE(_id, uxSchedulerSuspended == 0)
+    :: ELSE2(_id, uxSchedulerSuspended == 0)
     fi;
 
     taskEXIT_CRITICAL(_id, temp_var)
@@ -428,24 +428,24 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
 {
     AWAIT_A(_id, assert(xSwitchRequired == false && pxTCB == NULL_byte));
     if
-    :: SELE(_id, uxSchedulerSuspended == 0) ->
+    :: SELE2(_id, uxSchedulerSuspended == 0);
         AWAIT_D(_id, assert(xTickCount < 256);
             xTickCount = (is_xTickCount_active -> xTickCount + 1 : 0)
         );
         if
-        :: SELE(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks) ->
+        :: SELE2(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks);
             do
-            :: SELE(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false) ->
+            :: SELE2(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
                 /* The delayed list is not empty. */
                 AWAIT_D(_id, pxTCB = listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList));
 
                 if
-                :: SELE(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState])) ->
+                :: SELE2(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]));
                     /* It is not time to unblock this item yet. Record the item
                      * value in xNextTaskUnblockTicks and clear it. */
                     AWAIT_D(_id, update_xTickCount(); pxTCB = NULL_byte);
                     AWAIT_A(_id, break)
-                :: ELSE(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
+                :: ELSE2(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
                 fi;
 
                 AWAIT_D(_id,
@@ -455,9 +455,9 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
 
 #if (promela_QUEUE_NUMBER > 0)
                 if
-                :: SELE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte) ->
+                :: SELE2(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte);
                     AWAIT_D(_id, uxListRemove(QLISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent])], QLIST_SIZE, pxTCB, xEvent, _));
-                :: ELSE(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
+                :: ELSE2(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
                 fi;
 #endif
 
@@ -465,43 +465,43 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
 
                 #if (configUSE_PREEMPTION == 1)
                 if
-                :: SELE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority) ->
+                :: SELE2(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority);
                     AWAIT_D(_id, xSwitchRequired = true)
-                :: ELSE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
+                :: ELSE2(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
                 fi
                 #endif
-            :: ELSE(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false) ->
+            :: ELSE2(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
                 /* The delayed list is empty */
                 AWAIT_A(_id, reset_xTickCount(); pxTCB = NULL_byte; break)
             od
-        :: ELSE(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks)
+        :: ELSE2(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks)
         fi;
 
         #if ((configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
         if
-        :: SELE(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority])) ->
+        :: SELE2(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]));
             AWAIT_D(_id, xSwitchRequired = true)
-        :: ELSE(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
+        :: ELSE2(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
         fi;
         #endif
 
         #if (configUSE_PREEMPTION == 1)
         if
-        :: SELE(_id, xYieldPending != false) ->
+        :: SELE2(_id, xYieldPending != false);
             AWAIT_D(_id, xSwitchRequired = true)
-        :: ELSE(_id, xYieldPending != false)
+        :: ELSE2(_id, xYieldPending != false)
         fi
         #endif
-    :: ELSE(_id, uxSchedulerSuspended == 0) /* xPendedTicks can be dismissed */
+    :: ELSE2(_id, uxSchedulerSuspended == 0) /* xPendedTicks can be dismissed */
     fi
 }
 
 inline vTaskSwitchContext(_id)
 {
     if
-    :: SELE(_id, uxSchedulerSuspended != 0) ->
+    :: SELE2(_id, uxSchedulerSuspended != 0);
         AWAIT_D(_id, xYieldPending = true)
-    :: ELSE(_id, uxSchedulerSuspended != 0) ->
+    :: ELSE2(_id, uxSchedulerSuspended != 0);
         AWAIT_D(_id, xYieldPending = false);
         /* configGENERATE_RUN_TIME_STATS == 0 */
         taskSELECT_HIGHEST_PRIORITY_TASK(_id)
@@ -521,7 +521,7 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
     AWAIT_D(_id, uxListRemove(pxEventList, QLIST_SIZE, pxUnblockedTCB, xEvent, _));
 
     if
-    :: SELE(_id, uxSchedulerSuspended == 0) ->
+    :: SELE2(_id, uxSchedulerSuspended == 0);
         AWAIT_D(_id,
             /* Reset xTickCount and xState of pxUnblockedTCB as soon as possible */
             listSET_LIST_ITEM_VALUE(TCB(pxUnblockedTCB).ListItems[xState], 0);
@@ -534,15 +534,15 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
             fi
         );
         prvAddTaskToReadyList(_id, pxUnblockedTCB)
-    :: ELSE(_id, uxSchedulerSuspended == 0) ->
+    :: ELSE2(_id, uxSchedulerSuspended == 0);
         AWAIT_D(_id, vListInsertEnd(xPendingReadyList, PLIST_SIZE, CID_PENDING_READY, pxUnblockedTCB, xEvent))
     fi;
 
     if
-    :: atomic { SELE(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority) -> pxUnblockedTCB = NULL_byte };
+    :: SELE3(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority, pxUnblockedTCB = NULL_byte);
         AWAIT_D(_id, xReturn = true);
         AWAIT_D(_id, xYieldPending = true)
-    :: atomic { ELSE(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority) -> pxUnblockedTCB = NULL_byte }
+    :: ELSE3(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority, pxUnblockedTCB = NULL_byte);
         AWAIT_D(_id, xReturn = false)
     fi
 }
@@ -563,11 +563,15 @@ do
 
     #if ((configUSE_PREEMPTION == 1) && (configIDLE_SHOULD_YIELD == 1))
         if
-        :: SELE(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[tskIDLE_PRIORITY])) ->
+        :: SELE2(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[tskIDLE_PRIORITY]));
             taskYIELD(_id, temp_var)
-        :: ELSE(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[tskIDLE_PRIORITY])) ->
-            AWAIT_A(_id, skip) // TODO: redesign SELE and ELSE to set syst_count
+        :: ELSE2(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[tskIDLE_PRIORITY]))
         fi;
+    #endif
+
+    #if ((configUSE_PREEMPTION == 1) && (configIDLE_SHOULD_YIELD == 0))
+        /* If the loop is empty, the SysTick flag will never be set */
+        AWAIT_A(_id, skip)
     #endif
 od
 }
@@ -575,9 +579,9 @@ od
 inline prvResetNextTaskUnblockTicks(_id)
 {
     if
-    :: SELE(_id, listLIST_IS_EMPTY(pxDelayedTaskList)) ->
+    :: SELE2(_id, listLIST_IS_EMPTY(pxDelayedTaskList));
         AWAIT_D(_id, reset_xTickCount())
-    :: ELSE(_id, listLIST_IS_EMPTY(pxDelayedTaskList)) ->
+    :: ELSE2(_id, listLIST_IS_EMPTY(pxDelayedTaskList));
         AWAIT_D(_id, update_xTickCount())
     fi
 }
@@ -588,60 +592,60 @@ inline xTaskPriorityInherit(_id, pxMutexHolder, xReturn, temp_var)
 {
     AWAIT_A(_id, assert(xReturn == false && temp_var == NULL_byte));
     if
-    :: SELE(_id, pxMutexHolder != NULL_byte) ->
+    :: SELE2(_id, pxMutexHolder != NULL_byte);
         if
-        :: SELE(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority) ->
+        :: SELE2(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority);
             if
-            :: SELE(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0) ->
+            :: SELE2(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0);
                 AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - TCB(pxCurrentTCB).uxPriority))
-            :: ELSE(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
+            :: ELSE2(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
             fi;
 
             if
-            :: SELE(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + TCB(pxMutexHolder).uxPriority, TCB(pxMutexHolder).ListItems[xState]) != false) ->
+            :: SELE2(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + TCB(pxMutexHolder).uxPriority, TCB(pxMutexHolder).ListItems[xState]) != false);
                 AWAIT_D(_id, uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxMutexHolder).uxPriority], RLIST_SIZE, pxMutexHolder, xState, temp_var));
                 if
-                :: atomic { SELE(_id, temp_var == 0) -> temp_var = NULL_byte };
+                :: SELE3(_id, temp_var == 0, temp_var = NULL_byte);
                     taskRESET_READY_PRIORITY(_id, TCB(pxMutexHolder).uxPriority)
-                :: atomic { ELSE(_id, temp_var == 0) -> temp_var = NULL_byte }
+                :: ELSE3(_id, temp_var == 0, temp_var = NULL_byte)
                 fi;
 
                 AWAIT_D(_id, TCB(pxMutexHolder).uxPriority = TCB(pxCurrentTCB).uxPriority);
                 prvAddTaskToReadyList(_id, pxMutexHolder)
-            :: ELSE(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + TCB(pxMutexHolder).uxPriority, TCB(pxMutexHolder).ListItems[xState]) != false) ->
+            :: ELSE2(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + TCB(pxMutexHolder).uxPriority, TCB(pxMutexHolder).ListItems[xState]) != false);
                 AWAIT_D(_id, TCB(pxMutexHolder).uxPriority = TCB(pxCurrentTCB).uxPriority)
             fi;
 
             AWAIT_D(_id, xReturn = true)
-        :: ELSE(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority) ->
+        :: ELSE2(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority);
             if
-            :: SELE(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority) ->
+            :: SELE2(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority);
                 AWAIT_D(_id, xReturn = true)
-            :: ELSE(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority)
+            :: ELSE2(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority)
             fi
         fi
-    :: ELSE(_id, pxMutexHolder != NULL_byte)
+    :: ELSE2(_id, pxMutexHolder != NULL_byte)
     fi
 }
 
 inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn, temp_var)
 {
     if
-    :: atomic { SELE(_id, pxMutexHolder != NULL_byte) -> assert(xReturn == false) };
+    :: SELE2(_id, pxMutexHolder != NULL_byte);
         AWAIT_D(_id, assert(pxMutexHolder == pxCurrentTCB && TCB(pxMutexHolder).uxMutexesHeld != NULL_byte);
             TCB(pxMutexHolder).uxMutexesHeld = TCB(pxMutexHolder).uxMutexesHeld - 1);
 
         if
-        :: SELE(_id, TCB(pxMutexHolder).uxPriority != TCB(pxMutexHolder).uxBasePriority) ->
+        :: SELE2(_id, TCB(pxMutexHolder).uxPriority != TCB(pxMutexHolder).uxBasePriority);
             if
-            :: SELE(_id, TCB(pxMutexHolder).uxMutexesHeld == 0) ->
+            :: SELE2(_id, TCB(pxMutexHolder).uxMutexesHeld == 0);
                 AWAIT_D(_id,
                     assert(listLIST_ITEM_CONTAINER(TCB(pxMutexHolder).ListItems[xState]) == CID_READY_LISTS + TCB(pxMutexHolder).uxPriority);
                     uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxMutexHolder).uxPriority], RLIST_SIZE, pxMutexHolder, xState, temp_var));
                 if
-                :: atomic { SELE(_id, temp_var == 0) -> temp_var = NULL_byte };
+                :: SELE3(_id, temp_var == 0, temp_var = NULL_byte);
                     taskRESET_READY_PRIORITY(_id, TCB(pxMutexHolder).uxPriority)
-                :: atomic { ELSE(_id, temp_var == 0) -> temp_var = NULL_byte }
+                :: ELSE3(_id, temp_var == 0, temp_var = NULL_byte)
                 fi;
 
                 AWAIT_D(_id, TCB(pxMutexHolder).uxPriority = TCB(pxMutexHolder).uxBasePriority);
@@ -649,21 +653,21 @@ inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn, temp_var)
                 AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - TCB(pxMutexHolder).uxPriority));
                 prvAddTaskToReadyList(_id, pxMutexHolder);
 
-                AWAIT_D(_id, xReturn = true)
-            :: ELSE(_id, TCB(pxMutexHolder).uxMutexesHeld == 0)
+                AWAIT_D(_id, assert(xReturn == false); xReturn = true)
+            :: ELSE2(_id, TCB(pxMutexHolder).uxMutexesHeld == 0)
             fi
-        :: ELSE(_id, TCB(pxMutexHolder).uxPriority != TCB(pxMutexHolder).uxBasePriority)
+        :: ELSE2(_id, TCB(pxMutexHolder).uxPriority != TCB(pxMutexHolder).uxBasePriority)
         fi
-    :: atomic { ELSE(_id, pxMutexHolder != NULL_byte) -> assert(xReturn == false) }
+    :: ELSE3(_id, pxMutexHolder != NULL_byte, assert(xReturn == false))
     fi
 }
 
 inline pvTaskIncrementMutexHeldCount(_id, pxMutexHolder)
 {
     if
-    :: SELE(_id, pxCurrentTCB != NULL_byte) ->
+    :: SELE2(_id, pxCurrentTCB != NULL_byte);
         AWAIT_D(_id, TCB(pxCurrentTCB).uxMutexesHeld = TCB(pxCurrentTCB).uxMutexesHeld + 1)
-    :: ELSE(_id, pxCurrentTCB != NULL_byte)
+    :: ELSE2(_id, pxCurrentTCB != NULL_byte)
     fi;
 
     AWAIT_D(_id, pxMutexHolder = pxCurrentTCB)
@@ -672,52 +676,50 @@ inline pvTaskIncrementMutexHeldCount(_id, pxMutexHolder)
 inline vTaskPriorityDisinheritAfterTimeout(_id, pxMutexHolder, uxHighestPriorityWaitingTask, uxPriorityUsedOnEntry)
 {
     if
-    :: SELE(_id, pxMutexHolder != NULL_byte) ->
+    :: SELE2(_id, pxMutexHolder != NULL_byte);
         AWAIT_A(_id, assert(TCB(pxMutexHolder).uxMutexesHeld != NULL_byte));
         /* The variable uxHighestPriorityWaitingTask will not be referenced at
          * the following of the next statement. To reduce the usage of temporary
          * variables, we reassign the uxHighestPriorityWaitingTask variable. */
         if
-        :: SELE(_id, TCB(pxMutexHolder).uxBasePriority < uxHighestPriorityWaitingTask) ->
+        :: SELE2(_id, TCB(pxMutexHolder).uxBasePriority < uxHighestPriorityWaitingTask);
             AWAIT_D(_id, uxHighestPriorityWaitingTask /* uxPriorityToUse */ = uxHighestPriorityWaitingTask)
-        :: ELSE(_id, TCB(pxMutexHolder).uxBasePriority < uxHighestPriorityWaitingTask) ->
+        :: ELSE2(_id, TCB(pxMutexHolder).uxBasePriority < uxHighestPriorityWaitingTask);
             AWAIT_D(_id, uxHighestPriorityWaitingTask /* uxPriorityToUse */ = TCB(pxMutexHolder).uxBasePriority)
         fi;
 
         if
-        :: atomic { SELE(_id, TCB(pxMutexHolder).uxPriority != uxHighestPriorityWaitingTask /* uxPriorityToUse */) -> assert(uxHighestPriorityWaitingTask != NULL_byte) };
+        :: SELE2(_id, TCB(pxMutexHolder).uxPriority != uxHighestPriorityWaitingTask /* uxPriorityToUse */);
             if
-            :: SELE(_id, TCB(pxMutexHolder).uxMutexesHeld == 1 /* uxOnlyOneMutexHeld */) ->
+            :: SELE2(_id, TCB(pxMutexHolder).uxMutexesHeld == 1 /* uxOnlyOneMutexHeld */);
                 AWAIT_D(_id, assert(pxMutexHolder != pxCurrentTCB && uxPriorityUsedOnEntry == NULL_byte);
                     uxPriorityUsedOnEntry = TCB(pxMutexHolder).uxPriority);
                 AWAIT_D(_id, TCB(pxMutexHolder).uxPriority = uxHighestPriorityWaitingTask /* uxPriorityToUse */);
 
                 if
-                :: SELE(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0) ->
+                :: SELE2(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0);
                     AWAIT_D(_id, listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - uxHighestPriorityWaitingTask/* uxPriorityToUse */);
                         uxHighestPriorityWaitingTask = NULL_byte /* reset variable */)
-                :: ELSE(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
+                :: ELSE2(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
                 fi;
 
                 if
-                :: atomic { SELE(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry, TCB(pxMutexHolder).ListItems[xState])) ->
-                    assert(uxPriorityUsedOnEntry != NULL_byte) };
+                :: SELE2(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry, TCB(pxMutexHolder).ListItems[xState]));
                     AWAIT_D(_id, uxListRemove_pxIndex(pxReadyTasksLists[uxPriorityUsedOnEntry], RLIST_SIZE, pxMutexHolder, xState, _));
                     if
-                    :: atomic { SELE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry])) -> uxPriorityUsedOnEntry = NULL_byte };
+                    :: SELE3(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]), uxPriorityUsedOnEntry = NULL_byte);
                         taskRECORD_READY_PRIORITY(_id, TCB(pxMutexHolder).uxPriority)
-                    :: atomic { ELSE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry])) -> uxPriorityUsedOnEntry = NULL_byte }
+                    :: ELSE3(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]), uxPriorityUsedOnEntry = NULL_byte)
                     fi;
 
                     prvAddTaskToReadyList(_id, pxMutexHolder)
-                :: atomic { ELSE(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry, TCB(pxMutexHolder).ListItems[xState])) ->
-                    uxPriorityUsedOnEntry = NULL_byte }
+                :: ELSE3(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry, TCB(pxMutexHolder).ListItems[xState]), uxPriorityUsedOnEntry = NULL_byte)
                 fi
-            :: ELSE(_id, TCB(pxMutexHolder).uxMutexesHeld == 1 /* uxOnlyOneMutexHeld */)
+            :: ELSE2(_id, TCB(pxMutexHolder).uxMutexesHeld == 1 /* uxOnlyOneMutexHeld */)
             fi
-        :: atomic { ELSE(_id, TCB(pxMutexHolder).uxPriority != uxHighestPriorityWaitingTask /* uxPriorityToUse */) -> uxHighestPriorityWaitingTask = NULL_byte }
+        :: ELSE3(_id, TCB(pxMutexHolder).uxPriority != uxHighestPriorityWaitingTask /* uxPriorityToUse */, uxHighestPriorityWaitingTask = NULL_byte)
         fi
-    :: ELSE(_id, pxMutexHolder != NULL_byte)
+    :: ELSE2(_id, pxMutexHolder != NULL_byte)
     fi
 }
 
@@ -729,16 +731,16 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
         assert(listLIST_ITEM_CONTAINER(TCB(pxCurrentTCB).ListItems[xState]) == CID_READY_LISTS + TCB(pxCurrentTCB).uxPriority);
         uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority], RLIST_SIZE, pxCurrentTCB, xState, temp_var));
     if
-    :: atomic { SELE(_id, temp_var == 0) -> temp_var = NULL_byte };
+    :: SELE3(_id, temp_var == 0, temp_var = NULL_byte);
         portRESET_READY_PRIORITY(_id, TCB(now.pxCurrentTCB).uxPriority, uxTopReadyPriority)
-    :: atomic { ELSE(_id, temp_var == 0) -> temp_var = NULL_byte }
+    :: ELSE3(_id, temp_var == 0, temp_var = NULL_byte)
     fi;
 
 #if (INCLUDE_vTaskSuspend == 1)
     if
-    :: SELE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
+    :: SELE2(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false);
         AWAIT_D(_id, vListInsertEnd(xSuspendedTaskList, SLIST_SIZE, CID_SUSPENDED_TASK, pxCurrentTCB, xState))
-    :: ELSE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false) ->
+    :: ELSE2(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false);
         AWAIT_D(_id,
             assert(xTicksToWait < 256 && listGET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState]) == 0);
             listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait));

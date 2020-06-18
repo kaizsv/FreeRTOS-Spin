@@ -65,8 +65,9 @@ inline vPortExitCritical(_id, temp_var)
 {
     AWAIT_D(_id, assert(uxCriticalNesting); uxCriticalNesting = uxCriticalNesting - 1);
     if
-    :: SELE(_id, uxCriticalNesting == 0) -> portENABLE_INTERRUPTS(_id, temp_var)
-    :: ELSE(_id, uxCriticalNesting == 0)
+    :: SELE2(_id, uxCriticalNesting == 0);
+        portENABLE_INTERRUPTS(_id, temp_var)
+    :: ELSE2(_id, uxCriticalNesting == 0)
     fi
 }
 
@@ -96,9 +97,9 @@ do
     portDISABLE_INTERRUPTS(_PID, local_var);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
-    :: SELE(_PID, local_bit != false) ->
+    :: SELE2(_PID, local_bit != false);
         AWAIT_D(_PID, local_bit = 0; set_pending(PendSV_ID))
-    :: ELSE(_PID, local_bit != false)
+    :: ELSE2(_PID, local_bit != false)
     fi;
     portENABLE_INTERRUPTS(_PID, local_var);
     AWAIT_D(_PID, exp_return(local_var))

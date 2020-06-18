@@ -75,7 +75,6 @@ bool xSchedulerRunning = false;
 bool xYieldPending = false;
 byte uxSchedulerSuspended = 0;
 
-bit xPendedTick = 0;
 byte xTickCount = 0;
 bool is_xTickCount_active = false;
 
@@ -409,17 +408,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
         :: atomic { ELSE(_id, pxTCB != NULL_byte) }
         fi;
 
-        if
-        :: atomic { SELE(_id, xPendedTick) -> temp_var = false };
-            xTaskIncrementTick(_id, temp_var, pxTCB);
-            if
-            :: atomic { SELE(_id, temp_var != false) -> temp_var = NULL_byte };
-                AWAIT_D(_id, xYieldPending = true)
-            :: atomic { ELSE(_id, temp_var != false) -> temp_var = NULL_byte }
-            fi;
-            AWAIT_D(_id, xPendedTick = 0)
-        :: atomic { ELSE(_id, xPendedTick) }
-        fi;
+        /* xPendedTicks can be dismissed in verification */
 
         if
         :: SELE(_id, xYieldPending != false) ->
@@ -503,8 +492,7 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
         :: ELSE(_id, xYieldPending != false)
         fi
         #endif
-    :: ELSE(_id, uxSchedulerSuspended == 0) ->
-        AWAIT_D(_id, xPendedTick = 1)
+    :: ELSE(_id, uxSchedulerSuspended == 0) /* xPendedTicks can be dismissed */
     fi
 }
 

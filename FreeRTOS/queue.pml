@@ -59,7 +59,7 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
     pxNewQueue.uxLength = uxQueueLength;
     // TODO: configUSE_QUEUE_SETS
 
-    /* xQueueReset: FIXME: reuse*/
+    /* xQueueReset */
     pxNewQueue.uxMessagesWaiting = 0;
     queueSET_pcWriteTo(pxNewQueue, 0);
     queueSET_pcReadFrom(pxNewQueue, uxQueueLength - 1);
@@ -69,8 +69,6 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
     /* xNewQueue == true */
     vListInitialise(QLISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToSend], QLIST_SIZE);
     vListInitialise(QLISTs[queueGET_ListIndex(pxNewQueue) + xTasksWaitingToReceive], QLIST_SIZE);
-
-    // TODO: configUSE_QUEUE_SETS
 }
 
 #if (configUSE_MUTEXES == 1)
@@ -94,11 +92,10 @@ inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, xReturn, temp_bool, t
 
 inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2, _id)
 {
-    AWAIT_A(_id, xReturn = 0;
+    AWAIT_D(_id, xReturn = 0;
         assert((!xYieldRequired & !xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
             (!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))) &&
-            (!((xCopyPosition == queueOVERWRITE) && pxQueue.uxLength != 1))));
-
+            (!((xCopyPosition == queueOVERWRITE) && (pxQueue.uxLength != 1)))));
 do
 ::  taskENTER_CRITICAL(_id, temp_var);
     if
@@ -165,12 +162,12 @@ do
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi
-    :: ELSE2(_id, xIsTimeOut == false);
+    :: ELSE3(_id, xIsTimeOut == false, xIsTimeOut = false);
         /* The timeout has expired. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
 
-        AWAIT_A(_id, xIsTimeOut = false; assert(xReturn == false); break)
+        AWAIT_A(_id, assert(xReturn == false); break)
     fi;
 #else /* QUEUE_SEND_EXIT_CRITICAL */
     assert(false)
@@ -180,13 +177,12 @@ od
 
 inline xQueueReceive(pxQueue, pvBuffer, xTicksToWait, xReturn, xIsTimeOut, temp_var, temp_var2, _id)
 {
-    AWAIT_A(_id, xReturn = false;
+    AWAIT_D(_id, xReturn = false;
         assert((!xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
             (!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))))));
-
 do
 ::  taskENTER_CRITICAL(_id, temp_var);
-    AWAIT_D(_id, temp_var2 = pxQueue.uxMessagesWaiting); /* uxMessagesWaiting */
+    AWAIT_D(_id, temp_var2 = pxQueue.uxMessagesWaiting);
     if
     :: SELE2(_id, temp_var2 > 0);
         prvCopyDataFromQueue(_id, pxQueue, pvBuffer);
@@ -258,18 +254,20 @@ do
 od
 }
 
+#define uxSemaphoreCount            temp_var2
+#define uxHighestWaitingPriority    temp_var
+
 inline xQueueSemaphoreTake(pxQueue, xTicksToWait, xReturn, xInheritanceOccurred, xIsTimeOut, temp_var, temp_var2, _id)
 {
-    AWAIT_A(_id, xReturn = false;
+    AWAIT_D(_id, xReturn = false;
         assert((!xInheritanceOccurred & !xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
             queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)));
-
 do
 ::  taskENTER_CRITICAL(_id, temp_var);
-    AWAIT_D(_id, temp_var2 = pxQueue.uxMessagesWaiting); /* uxSemaphoreCount */
+    AWAIT_D(_id, uxSemaphoreCount = pxQueue.uxMessagesWaiting);
     if
-    :: SELE2(_id, temp_var2 > 0);
-        AWAIT_D(_id, pxQueue.uxMessagesWaiting = temp_var2 - 1; temp_var2 = NULL_byte);
+    :: SELE2(_id, uxSemaphoreCount > 0);
+        AWAIT_D(_id, pxQueue.uxMessagesWaiting = uxSemaphoreCount - 1; uxSemaphoreCount = NULL_byte);
 
         #if (configUSE_MUTEXES == 1)
         if
@@ -292,12 +290,12 @@ do
 
         taskEXIT_CRITICAL(_id, temp_var);
         AWAIT_A(_id, xIsTimeOut = false; xReturn = true; break)
-    :: ELSE3(_id, temp_var2 > 0, temp_var2 = NULL_byte);
+    :: ELSE3(_id, uxSemaphoreCount > 0, uxSemaphoreCount = NULL_byte);
 #ifdef QUEUE_TAKE_EXIT_CRITICAL
         if
         :: SELE2(_id, xTicksToWait == 0);
             #if (configUSE_MUTEXES == 1)
-            AWAIT_A(_id, assert(xInheritanceOccurred == false));
+            AWAIT_D(_id, assert(xInheritanceOccurred == false));
             #endif
             taskEXIT_CRITICAL(_id, temp_var);
             AWAIT_A(_id, assert(!xIsTimeOut && xReturn == false); break)
@@ -351,8 +349,8 @@ do
             if
             :: SELE3(_id, xInheritanceOccurred != false, xInheritanceOccurred = false);
                 taskENTER_CRITICAL(_id, temp_var);
-                prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, temp_var /* uxHighestWaitingPriority */);
-                vTaskPriorityDisinheritAfterTimeout(_id, pxQueue.xSemaphore.xMutexHolder, temp_var /* uxHighestWaitingPriority */, temp_var2);
+                prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestWaitingPriority);
+                vTaskPriorityDisinheritAfterTimeout(_id, pxQueue.xSemaphore.xMutexHolder, uxHighestWaitingPriority, temp_var2);
 
                 taskEXIT_CRITICAL(_id, temp_var)
             :: ELSE2(_id, xInheritanceOccurred != false)
@@ -389,8 +387,7 @@ inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWai
 
 inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, temp_var, uMessagesWaiting)
 {
-    AWAIT_D(_id, xReturn = false);
-    AWAIT_D(_id, uMessagesWaiting = pxQueue.uxMessagesWaiting);
+    AWAIT_D(_id, assert(xReturn == false); uMessagesWaiting = pxQueue.uxMessagesWaiting);
     if
     :: SELE2(_id, queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue));
         #if (configUSE_MUTEXES == 1)
@@ -405,7 +402,7 @@ inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, temp_
     :: ELSE2(_id, queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue));
         if
         :: SELE2(_id, xPosition == queueSEND_TO_BACK);
-            AWAIT_D(_id, pxQueue.xQueue.pucQueueStorage(queueGET_pcWriteTo(pxQueue)) = pvItemToQueue); // FIXME: memcpy
+            AWAIT_D(_id, pxQueue.xQueue.pucQueueStorage(queueGET_pcWriteTo(pxQueue)) = pvItemToQueue);
             AWAIT_D(_id, queueSET_pcWriteTo(pxQueue, queueGET_pcWriteTo(pxQueue) + 1));
             if
             :: SELE2(_id, queueGET_pcWriteTo(pxQueue) >= pxQueue.uxLength);
@@ -413,7 +410,7 @@ inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, temp_
             :: ELSE2(_id, queueGET_pcWriteTo(pxQueue) >= pxQueue.uxLength)
             fi
         :: ELSE2(_id, xPosition == queueSEND_TO_BACK);
-            AWAIT_D(_id, pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)) = pvItemToQueue); // FIXME: memcpy
+            AWAIT_D(_id, pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)) = pvItemToQueue);
             if
             :: SELE2(_id, queueGET_pcReadFrom(pxQueue) == 0);
                 AWAIT_D(_id, queueSET_pcReadFrom(pxQueue, pxQueue.uxLength - 1))
@@ -443,21 +440,22 @@ inline prvCopyDataFromQueue(_id, pxQueue, pvBuffer)
         :: ELSE2(_id, queueGET_pcReadFrom(pxQueue) >= pxQueue.uxLength)
         fi;
 
-        AWAIT_D(_id, pvBuffer = pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)); // FIXME: memcpy
+        AWAIT_D(_id, pvBuffer = pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue));
             /* reset data in queue as soon as possible */
             pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)) = NULL_byte);
     :: ELSE2(_id, !queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))
     fi
 }
 
+#define cTxLock temp_var2
+#define cRxLock temp_var2
+
 inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
 {
-    AWAIT_A(_id, assert((temp_var & temp_var2) == NULL_byte && !temp_xReturn));
-
     taskENTER_CRITICAL(_id, temp_var);
-    AWAIT_D(_id, temp_var2 = queueGET_cTxLock(pxQueue));
+    AWAIT_D(_id, assert(cTxLock == NULL_byte); cTxLock = queueGET_cTxLock(pxQueue));
     do
-    :: SELE2(_id, temp_var2 > queueLOCKED_UNMODIFIED);
+    :: SELE2(_id, cTxLock > queueLOCKED_UNMODIFIED);
         #if (configUSE_QUEUE_SETS == 1)
         // TODO
         #else /* configUSE_QUEUE_SETS */
@@ -470,22 +468,21 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
             :: ELSE2(_id, temp_xReturn != false)
             fi
         :: ELSE2(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]));
-            AWAIT_A(_id, temp_var2 = NULL_byte; break)
+            AWAIT_A(_id, cTxLock = NULL_byte; break)
         fi;
         #endif /* configUSE_QUEUE_SETS */
 
-        AWAIT_D(_id, temp_var2 = temp_var2 - 1)
-    :: ELSE2(_id, temp_var2 > queueLOCKED_UNMODIFIED);
-        AWAIT_A(_id, temp_var2 = NULL_byte; break)
+        AWAIT_D(_id, cTxLock = cTxLock - 1)
+    :: ELSE3(_id, cTxLock > queueLOCKED_UNMODIFIED, cTxLock = NULL_byte; break)
     od;
     AWAIT_A(_id, queueSET_cTxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id, temp_var);
 
     /* Do the same for the Rx lock. */
     taskENTER_CRITICAL(_id, temp_var);
-    AWAIT_D(_id, temp_var2 = queueGET_cRxLock(pxQueue));
+    AWAIT_D(_id, assert(cRxLock == NULL_byte); cRxLock = queueGET_cRxLock(pxQueue));
     do
-    :: SELE2(_id, temp_var2 > queueLOCKED_UNMODIFIED);
+    :: SELE2(_id, cRxLock > queueLOCKED_UNMODIFIED);
         if
         :: SELE2(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]));
             xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], temp_xReturn);
@@ -495,12 +492,11 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, temp_xReturn)
             :: ELSE2(_id, temp_xReturn != false)
             fi;
 
-            AWAIT_D(_id, temp_var2 = temp_var2 - 1)
+            AWAIT_D(_id, cRxLock = cRxLock - 1)
         :: ELSE2(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]));
-            AWAIT_A(_id, temp_var2 = NULL_byte; break)
+            AWAIT_A(_id, cRxLock = NULL_byte; break)
         fi;
-    :: ELSE2(_id, temp_var2 > queueLOCKED_UNMODIFIED);
-        AWAIT_A(_id, temp_var2 = NULL_byte; break)
+    :: ELSE3(_id, cRxLock > queueLOCKED_UNMODIFIED, cRxLock = NULL_byte; break)
     od;
     AWAIT_A(_id, queueSET_cRxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id, temp_var)

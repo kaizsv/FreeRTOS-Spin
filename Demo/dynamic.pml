@@ -33,7 +33,7 @@ QueueDeclarator(1, byte);
 QueueHandle_t(xSuspendedTestQueue, 1, byte);
 
 #define ULCOUNTER_IS_ACCESSED_BY(id, var)   \
-    AWAIT_A(_PID, var = id)
+    AWAIT_D(_PID, var = id)
 
 #define priSLEEP_TIME   50
 #define priLOOPS        5

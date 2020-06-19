@@ -58,7 +58,7 @@ inline vPortEnterCritical(_id, temp_var)
     AWAIT_D(_id, uxCriticalNesting = uxCriticalNesting + 1);
     /* ensure VECTACTIVE is zero. In other words, the running task can only be
      * user tasks. */
-    AWAIT_A(_id, assert((uxCriticalNesting != 1) || (EP >= FIRST_TASK)));
+    AWAIT_D(_id, assert((uxCriticalNesting != 1) || (EP >= FIRST_TASK)));
 }
 
 inline vPortExitCritical(_id, temp_var)
@@ -78,7 +78,7 @@ proctype PendSV_Handler()
     assert(PendSV_ID == _PID);
 do
 ::  soft_gen_irq(_PID);
-    AWAIT_A(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
+    AWAIT_D(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
     vTaskSwitchContext(_PID);
     AWAIT_D(_PID, MSR_BASEPRI(0));
     AWAIT_D(_PID, switch_context(pxCurrentTCB));
@@ -97,8 +97,8 @@ do
     portDISABLE_INTERRUPTS(_PID, local_var);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
-    :: SELE2(_PID, local_bit != false);
-        AWAIT_D(_PID, local_bit = 0; set_pending(PendSV_ID))
+    :: SELE3(_PID, local_bit != false, local_bit = false);
+        AWAIT_D(_PID, set_pending(PendSV_ID))
     :: ELSE2(_PID, local_bit != false)
     fi;
     portENABLE_INTERRUPTS(_PID, local_var);

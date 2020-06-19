@@ -51,8 +51,7 @@ do
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue)
         :: ELSE2(_PID, local_xReturn == true)
         fi
-    :: ELSE2(_PID, uxQueueMessagesWaiting(xPolledQueue));
-        AWAIT_A(_PID, break)
+    :: ELSE3(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
     od;
     vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2);
 od

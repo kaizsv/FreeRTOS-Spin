@@ -35,7 +35,7 @@ inline queueSET_pcReadFrom(pxQueue, value)
     set_lower_byte(pxQueue.xQueue.pcWriteTo_pcReadFrom, value)
 }
 
-/* The two List_t's are declared in the array, LISTs. */
+/* The two List_t's are declared at QLISTs. */
 #define xTasksWaitingToSend     0
 #define xTasksWaitingToReceive  1
 

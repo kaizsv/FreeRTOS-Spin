@@ -45,13 +45,23 @@ inline listPOINTER_SET(pxListPointer, tcb, item)
 #define LIST_SIZE5  5
 
 #if 0
-    Only pxReadyTasksLists may have its pxIndex changed
+    In the model, only pxReadyTasksLists may have a changed pxIndex
+    because co-routine is not established and
+    configUSE_TRACE_FACILITY and INCLUDE_xTaskGetHandle are undefined.
 
     |-- LIST_SIZE --|
     0 -> 1 -> 2 -> ... -> xListEnd
                              /\
                              ||
                            pxIndex
+#endif
+
+#if defined(configUSE_CO_ROUTINES) && defined(configUSE_TRACE_FACILITY)
+    #error Redesign pxIndex, vListInsert, and the macros for referencing HEAD_ENTRY
+#endif
+
+#if defined(INCLUDE_xTaskGetHandle)
+    #error Redesign pxIndex, vListInsert, and the macros for referencing HEAD_ENTRY
 #endif
 
 #define xListEnd    254

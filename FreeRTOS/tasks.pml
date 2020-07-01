@@ -52,16 +52,15 @@ inline taskRECORD_READY_PRIORITY(_id, Priority)
 
 inline taskSELECT_HIGHEST_PRIORITY_TASK(_id)
 {
-    for (idx: 0 .. uxTopReadyPriority) {
-        if
-        :: SELE2(_id, !listLIST_IS_EMPTY(pxReadyTasksLists[uxTopReadyPriority - idx]));
-            AWAIT_A(_id, uxTopReadyPriority = uxTopReadyPriority - idx; break);
-        :: ELSE2(_id, !listLIST_IS_EMPTY(pxReadyTasksLists[uxTopReadyPriority - idx]))
-        fi
-    }
-    AWAIT_A(_id, idx = 0);
+    AWAIT_D(_id, idx = uxTopReadyPriority);
+    do
+    :: SELE2(_id, listLIST_IS_EMPTY(pxReadyTasksLists[idx]));
+        AWAIT_D(_id, assert(idx > 0); idx = idx - 1)
+    :: ELSE3(_id, listLIST_IS_EMPTY(pxReadyTasksLists[idx]), break);
+    od;
 
-    listGET_OWNER_OF_NEXT_ENTRY(_id, pxCurrentTCB, pxReadyTasksLists[uxTopReadyPriority], RLIST_SIZE)
+    listGET_OWNER_OF_NEXT_ENTRY(_id, pxCurrentTCB, pxReadyTasksLists[idx], RLIST_SIZE);
+    AWAIT_D(_id, uxTopReadyPriority = idx; idx = 0)
 }
 
     #define taskRESET_READY_PRIORITY(_id, uxPriority)

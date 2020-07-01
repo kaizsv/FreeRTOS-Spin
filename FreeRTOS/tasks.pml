@@ -721,7 +721,7 @@ inline vTaskPriorityDisinheritAfterTimeout(_id, pxMutexHolder, uxHighestPriority
                     AWAIT_D(_id, uxListRemove_pxIndex(pxReadyTasksLists[uxPriorityUsedOnEntry], RLIST_SIZE, pxMutexHolder, xState, _));
                     if
                     :: SELE3(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]), uxPriorityUsedOnEntry = NULL_byte);
-                        taskRECORD_READY_PRIORITY(_id, TCB(pxMutexHolder).uxPriority)
+                        portRESET_READY_PRIORITY(_id, TCB(pxMutexHolder).uxPriority, uxTopReadyPriority)
                     :: ELSE3(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]), uxPriorityUsedOnEntry = NULL_byte)
                     fi;
 

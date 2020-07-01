@@ -70,8 +70,15 @@ inline taskSELECT_HIGHEST_PRIORITY_TASK(_id)
 // TODO: configUSE_PORT_OPTIMISED_TASK_SELECTION
 #endif
 
+#if 0
+    Because vTaskEndScheduler is not established, xSchedulerRunning
+    is always true after starting the scheduler. To check whether
+    the scheduler is started, the variable EP is a sound judgment.
+#endif
+
+#define xIsSchedulerRunning (EP != NULL_byte)
+
 byte uxTopReadyPriority = tskIDLE_PRIORITY;
-bool xSchedulerRunning = false;
 bool xYieldPending = false;
 byte uxSchedulerSuspended = 0;
 
@@ -159,7 +166,7 @@ inline xTaskCreate_fixed(pcName, Priority)
         assert(listLIST_IS_EMPTY(pxReadyTasksLists[0]));
     :: else ->
         pxCurrentTCB = (
-            (xSchedulerRunning == false) &&
+            (!xIsSchedulerRunning) &&
             (TCB(pxCurrentTCB).uxPriority <= TCB(pcName).uxPriority) ->
                 pcName : pxCurrentTCB)
     fi;
@@ -167,7 +174,7 @@ inline xTaskCreate_fixed(pcName, Priority)
     prvAddTaskToReadyList_fixed(pcName);
 
     /* yield the task if the assertion violated. */
-    assert(!((xSchedulerRunning != false) && (TCB(pxCurrentTCB).uxPriority < TCB(pcName).uxPriority)))
+    assert(!((xIsSchedulerRunning) && (TCB(pxCurrentTCB).uxPriority < TCB(pcName).uxPriority)))
 }
 
 #if (INCLUDE_vTaskDelay == 1)
@@ -309,7 +316,7 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
     if
     :: SELE3(_id, pxTCB == pxCurrentTCB, pxTCB = NULL_byte);
         /* The scheduler is always running */
-        AWAIT_D(_id, assert(xSchedulerRunning != false && uxSchedulerSuspended == 0));
+        AWAIT_D(_id, assert(xIsSchedulerRunning && uxSchedulerSuspended == 0));
         portYIELD_WITHIN_API(_id, temp_var)
     :: ELSE3(_id, pxTCB == pxCurrentTCB, pxTCB = NULL_byte)
     fi
@@ -365,7 +372,6 @@ inline vTaskStartScheduler(_id, temp_var)
 
     portDISABLE_INTERRUPTS(_id, temp_var);
     reset_xTickCount();
-    xSchedulerRunning = true;
 
     xPortStartScheduler()
 }

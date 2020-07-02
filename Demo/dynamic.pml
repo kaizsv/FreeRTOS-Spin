@@ -1,4 +1,4 @@
-/* FreeRTOS/Demo/Common/Full/dynamic.c */
+/* FreeRTOS/Demo/Common/Minimal/dynamic.c */
 
 #define promela_TASK_NUMBER     5
 #define promela_QUEUE_NUMBER    1
@@ -55,6 +55,10 @@ do
 ::  vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2, local_var3);
     ULCOUNTER_IS_ACCESSED_BY(xContinousIncrementHandle, ulCounter);
     vTaskPrioritySet(_PID, NULL_byte, uxOurPriority, local_var1, local_bit, local_var2, local_var3);
+
+    #if (configUSE_PREEMPTION == 0)
+    taskYIELD(_PID, local_var1);
+    #endif
 od
 }
 
@@ -66,8 +70,7 @@ proctype LIM_INC()
     assert(_PID == xLimitedIncrementHandle);
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
 do
-::  AWAIT_A(_PID, assert(ulCounter == 0));
-    ULCOUNTER_IS_ACCESSED_BY(xLimitedIncrementHandle, ulCounter);
+::  ULCOUNTER_IS_ACCESSED_BY(xLimitedIncrementHandle, ulCounter);
         vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
 od
 }
@@ -78,38 +81,45 @@ proctype C_CTRL()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false;
 
-    byte sLoops;
+    byte sLoops = 0;
     assert(_PID == FIRST_TASK + 2);
 do
-::  AWAIT_A(_PID, ulCounter = 0);
-
-    for (sLoops: 0 .. (priLOOPS - 1)) {
+::  /* Reset ulCounter will not help in verification */
+    do
+    :: SELE3(_PID, sLoops < priLOOPS, sLoops = sLoops + 1);
         vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
-        ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
+            ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
         vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
+
+        #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+        #endif
 
         vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
 
         vTaskSuspendAll(_PID);
-        AWAIT_D(_PID, assert(ulCounter == xContinousIncrementHandle));
+            AWAIT_D(_PID, assert(ulCounter == xContinousIncrementHandle));
         xTaskResumeAll(_PID, local_var1, _, local_var2);
-    }
+    :: ELSE3(_PID, sLoops < priLOOPS, sLoops = 0; break)
+    od;
 
     vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
 
     AWAIT_D(_PID, ulCounter = 0);
 
-    vTaskSuspendAll(_PID);
-        vTaskResume(_PID, xLimitedIncrementHandle, local_bit, local_var1);
-    xTaskResumeAll(_PID, local_var1, _, local_var2);
+    vTaskResume(_PID, xLimitedIncrementHandle, local_bit, local_var1);
+
+    #if (configUSE_PREEMPTION == 0)
+    taskYIELD(_PID, local_var1);
+    #endif
 
     AWAIT_D(_PID, assert(ulCounter == xLimitedIncrementHandle));
 
-#if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
-#endif
-
     vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
+
+    #if (configUSE_PREEMPTION == 0)
+    taskYIELD(_PID, local_var1);
+    #endif
 od
 }
 

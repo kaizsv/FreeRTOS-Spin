@@ -1,4 +1,4 @@
-/* FreeRTOS/Demo/Common/Full/PollQ.c */
+/* FreeRTOS/Demo/Common/Minimal/PollQ.c */
 
 #define promela_TASK_NUMBER     2
 #define promela_QUEUE_NUMBER    1
@@ -30,7 +30,9 @@ QueueHandle_t(xPolledQueue, 10, byte);
 #define INCREASE_VAR_AND_INTOVERFLOW(var)   \
     AWAIT_D(_PID, var = var + 1; var = var % (usNumToProduce + 1))
 
-#define xDelay  50
+#define pollqPRODUCER_DELAY 50
+#define pollqCONSUMER_DELAY 40
+#define pollqNO_DELAY   0
 
 proctype QConsNB()
 {
@@ -46,14 +48,14 @@ do
     :: SELE2(_PID, uxQueueMessagesWaiting(xPolledQueue));
         xQueueReceive(xPolledQueue, usData, 0, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         if
-        :: SELE2(_PID, local_xReturn == true);
+        :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
             AWAIT_D(_PID, assert(usData == usExpectedValue));
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue)
         :: ELSE2(_PID, local_xReturn == true)
         fi
     :: ELSE3(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
     od;
-    vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1, local_var2);
 od
 }
 
@@ -69,12 +71,12 @@ proctype QProdNB()
 do
 ::  do
     :: SELE3(_PID, usLoop < usNumToProduce, usLoop = usLoop + 1);
-        xQueueSendToBack(xPolledQueue, usValue, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-        AWAIT_A(_PID, assert(local_xReturn == true));
+        xQueueSend(xPolledQueue, usValue, pollqNO_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+        AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: ELSE3(_PID, usLoop < usNumToProduce, usLoop = 0; break)
     od;
-    vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1, local_var2);
 od
 }
 

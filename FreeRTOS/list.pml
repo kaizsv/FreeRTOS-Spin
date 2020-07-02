@@ -222,7 +222,13 @@ inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, temp_va
     temp_var = NULL_byte
 }
 
-inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uReturn)
+#if 0
+    In FreeRTOS, the return value of uxListRemove only compares with zero.
+    In the model, the comparison can be establishtd by listLIST_IS_EMPTY
+    macro since pxList is known.
+#endif
+
+inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
 {
     /* find the index of pxItemToRemove in pxList */
     for (idx: 0 .. (SIZE - 1)) {
@@ -236,9 +242,7 @@ inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uReturn)
     }
 
     if
-    :: idx == (SIZE - 1) ->
-        uReturn = idx
-    :: else ->
+    :: idx < (SIZE - 1) ->
         /* move items behind the index position of pxList forward */
         for (idx: (idx + 1) .. (SIZE - 1)) {
             if
@@ -247,13 +251,13 @@ inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uReturn)
             :: else -> break
             fi
         }
-        uReturn = idx - 1
+    :: else
     fi;
     idx = 0;
     vListInitialiseItem(pxItemToRemove)
 }
 
-inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uReturn)
+inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
 {
     /* find the index of pxItemToRemove in pxList */
     for (idx: 0 .. (SIZE - 1)) {
@@ -274,9 +278,7 @@ inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uRe
     fi;
 
     if
-    :: idx == (SIZE - 1) ->
-        uReturn = idx
-    :: else ->
+    :: idx < (SIZE - 1) ->
         /* move items behind the index position of pxList forward */
         for (idx: (idx + 1) .. (SIZE - 1)) {
             if
@@ -285,7 +287,7 @@ inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, uRe
             :: else -> break
             fi
         }
-        uReturn = idx - 1
+    :: else
     fi;
     idx = 0;
     vListInitialiseItem(pxItemToRemove)

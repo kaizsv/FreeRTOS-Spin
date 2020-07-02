@@ -103,7 +103,7 @@ do
         #if (configUSE_QUEUE_SETS == 1)
             // TODO: configUSE_QUEUE_SETS
         #else
-        prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xCopyPosition, xYieldRequired, temp_var, temp_var2);
+        prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xCopyPosition, xYieldRequired, temp_var2);
 
         if
         :: SELE2(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]));
@@ -319,7 +319,7 @@ do
             if
             :: SELE2(_id, queueQUEUE_IS_MUTEX(pxQueue));
                 taskENTER_CRITICAL(_id, temp_var);
-                xTaskPriorityInherit(_id, pxQueue.xSemaphore.xMutexHolder, xInheritanceOccurred, temp_var);
+                xTaskPriorityInherit(_id, pxQueue.xSemaphore.xMutexHolder, xInheritanceOccurred);
                 taskEXIT_CRITICAL(_id, temp_var)
             :: ELSE2(_id, queueQUEUE_IS_MUTEX(pxQueue))
             fi;
@@ -385,7 +385,7 @@ inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWai
 
 #endif /* configUSE_MUTEXES */
 
-inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, temp_var, uMessagesWaiting)
+inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, uMessagesWaiting)
 {
     AWAIT_D(_id, assert(xReturn == false); uMessagesWaiting = pxQueue.uxMessagesWaiting);
     if
@@ -394,7 +394,7 @@ inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, temp_
         if
         :: SELE2(_id, queueQUEUE_IS_MUTEX(pxQueue));
             /* The mutex is no longer being held. */
-            xTaskPriorityDisinherit(_id, pxQueue.xSemaphore.xMutexHolder, xReturn, temp_var);
+            xTaskPriorityDisinherit(_id, pxQueue.xSemaphore.xMutexHolder, xReturn);
             AWAIT_D(_id, pxQueue.xSemaphore.xMutexHolder = NULL_byte)
         :: ELSE2(_id, queueQUEUE_IS_MUTEX(pxQueue))
         fi

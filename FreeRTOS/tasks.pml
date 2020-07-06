@@ -306,10 +306,12 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
 
     AWAIT_D(_id, vListInsertEnd(xSuspendedTaskList, SLIST_SIZE, CID_SUSPENDED_TASK, pxTCB, xState));
 
+    taskEXIT_CRITICAL(_id, temp_var);
+
+    taskENTER_CRITICAL(_id, temp_var);
     /* Reset the unblock tick in case it referred to the task that is now in
      * the Suspended state */
     prvResetNextTaskUnblockTicks(_id);
-
     taskEXIT_CRITICAL(_id, temp_var);
 
     if

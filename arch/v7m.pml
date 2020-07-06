@@ -76,7 +76,6 @@ atomic {
         CLEAR_SYST_FLAG();
         stack_check(gen_id);
         exp_entry(gen_id)
-#if 0
     :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(!GET_PENDING(gen_id) && (EP != gen_id));
         CLEAR_SYST_FLAG();
@@ -92,7 +91,6 @@ atomic {
             assert(!HAS_PENDING_EXPS);
             exp_entry(gen_id)
         fi
-#endif
     :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
         /* generated exception sets itself pending and waits for re-entrying */
         assert(!GET_PENDING(gen_id) && (EP != gen_id));
@@ -135,10 +133,8 @@ atomic {
         stack_check(gen_id);
         exp_entry(gen_id);
         assert(!HAS_PENDING_EXPS)
-#if 0
     :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(false)
-#endif
     :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) &&
        (EP == gen_id) ->
        /* memory barrier entry */

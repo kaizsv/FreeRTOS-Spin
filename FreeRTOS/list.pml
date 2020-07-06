@@ -103,8 +103,9 @@ inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList, SIZE)
     AWAIT_D(_id,
         pxList.pxIndex = (
             (pxList.pxIndex < (SIZE - 1) && !listPOINTER_IS_NULL(pxList.ps[pxList.pxIndex + 1])) ->
-                pxList.pxIndex + 1 : 0
+                pxList.pxIndex + 1 : xListEnd
     )   );
+    AWAIT_D(_id, pxList.pxIndex = (pxList.pxIndex == xListEnd -> 0 : pxList.pxIndex));
     AWAIT_D(_id,
         assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB);
         pxTCB = pxList.ps[pxList.pxIndex].p_tcb_item >> 1

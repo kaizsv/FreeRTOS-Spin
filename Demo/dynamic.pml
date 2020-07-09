@@ -172,7 +172,7 @@ init {
 
         xTaskCreate_fixed(xContinousIncrementHandle, tskIDLE_PRIORITY);
         xTaskCreate_fixed(xLimitedIncrementHandle, tskIDLE_PRIORITY + 1);
-        xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY)
+        xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY);
         xTaskCreate_fixed(xQueueSendWhenSuspendedHandler, tskIDLE_PRIORITY);
         xTaskCreate_fixed(xQueueReceiveWhenSuspendedHandler, tskIDLE_PRIORITY);
     };

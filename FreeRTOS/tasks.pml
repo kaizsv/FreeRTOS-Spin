@@ -90,10 +90,14 @@ bool is_xTickCount_active = false;
 #define reset_xTickCount()  \
     is_xTickCount_active = false; xTickCount = 0
 
+/* 255 delayed ticks represents the task will in Delayed or Suspended List
+permanently. 254 delayed ticks ensures the task is reported as Delayed state
+rather than the Suspended. Both delayed tick count are free from decreas. */
 #define update_xTickCount() \
     for (idx: 0 .. (DLIST_SIZE - 1)) { \
         if \
-        :: !listPOINTER_IS_NULL(pxDelayedTaskList.ps[idx]) -> \
+        :: !listPOINTER_IS_NULL(pxDelayedTaskList.ps[idx]) && \
+           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx)) < 254) -> \
             assert(listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx)) > xTickCount); \
             listSET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx), \
                 listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx)) - xTickCount) \
@@ -525,7 +529,7 @@ inline vTaskPlaceOnEventList(_id, pxEventList, EventListContainer, xTicksToWait,
 
 inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
 {
-    AWAIT_D(_id, assert(pxUnblockedTCB == NULL_byte && xReturn == false);
+    AWAIT_D(_id, xReturn = false; assert(pxUnblockedTCB == NULL_byte);
         pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList); assert(pxUnblockedTCB != NULL_byte));
     AWAIT_D(_id, uxListRemove(pxEventList, QLIST_SIZE, pxUnblockedTCB, xEvent));
 

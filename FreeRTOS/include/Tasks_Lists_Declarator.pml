@@ -1,17 +1,17 @@
 #ifndef _LIST_DECLARATOR_
 #define _LIST_DECLARATOR_
 
-#define QLIST_SIZE  LIST_SIZE2  /* Size of the Queue lists */
+#define QLIST_SIZE  LIST_SIZE3  /* Size of the Queue lists */
 #define RLIST_SIZE  LIST_SIZE5  /* Size of pxReadyTasksLists */
 #define DLIST_SIZE  LIST_SIZE3  /* Size of pxDelayedTaskList */
 #define PLIST_SIZE  LIST_SIZE2  /* Size of xPendingReadyList */
-#define SLIST_SIZE  LIST_SIZE2  /* Size of xSuspendedTaskList */
+#define SLIST_SIZE  LIST_SIZE3  /* Size of xSuspendedTaskList */
 
-#define QList_t List2_t
+#define QList_t List3_t
 #define RList_t List5_pxIndex_t
 #define DList_t List3_t
 #define PList_t List2_t
-#define SList_t List2_t
+#define SList_t List3_t
 
 #if (promela_QUEUE_NUMBER > 0)
     QList_t QLISTs[promela_QUEUE_NUMBER * 2];

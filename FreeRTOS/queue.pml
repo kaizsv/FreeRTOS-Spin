@@ -181,7 +181,7 @@ do
     prvLockQueue(_id, pxQueue, temp_var);
 
     if
-    :: SELE2(_id, xIsTimeOut == false);
+    :: SELE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
         if
         :: SELE2(_id, prvIsQueueFull(pxQueue));
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var);
@@ -199,7 +199,7 @@ do
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi
-    :: ELSE3(_id, xIsTimeOut == false, xIsTimeOut = false);
+    :: ELSE3(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait), xIsTimeOut = false);
         /* The timeout has expired. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
@@ -257,7 +257,7 @@ do
     prvLockQueue(_id, pxQueue, temp_var);
 
     if
-    :: SELE2(_id, xIsTimeOut == false);
+    :: SELE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
         /* The timeout has not expired. */
         if
         :: SELE2(_id, prvIsQueueEmpty(pxQueue));
@@ -274,7 +274,7 @@ do
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi
-    :: ELSE2(_id, xIsTimeOut == false);
+    :: ELSE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
@@ -288,6 +288,76 @@ do
 #else /* QUEUE_RECEIVE_EXIT_CRITICAL */
     assert(false)
 #endif /* QUEUE_RECEIVE_EXIT_CRITICAL */
+od
+}
+
+#define pcOriginalReadPosition  temp_var2
+
+inline xQueuePeek(_id, pxQueue, pvBuffer, xTicksToWait, xReturn, xIsTimeOut, temp_var, temp_var2)
+{
+    AWAIT_D(_id, assert((!xReturn & !xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) &&
+        (!((pvBuffer == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))))));
+do
+::  taskENTER_CRITICAL(_id, temp_var);
+    if
+    :: SELE2(_id, pxQueue.uxMessagesWaiting > 0);
+        AWAIT_D(_id, pcOriginalReadPosition = queueGET_pcReadFrom(pxQueue));
+        prvCopyDataFromQueue_NO_RESET_QUEUE(_id, pxQueue, pvBuffer);
+
+        AWAIT_D(_id, queueSET_pcReadFrom(pxQueue, pcOriginalReadPosition); pcOriginalReadPosition = NULL_byte);
+
+        if
+        :: SELE2(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]));
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], xReturn);
+            if
+            :: SELE3(_id, xReturn != false, xReturn = false);
+                queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
+            :: ELSE2(_id, xReturn != false)
+            fi
+        :: ELSE2(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
+        fi;
+
+        taskEXIT_CRITICAL(_id, temp_var);
+        AWAIT_A(_id, xIsTimeOut = false; xReturn = true; break)
+    :: ELSE2(_id, pxQueue.uxMessagesWaiting > 0);
+        if
+        :: SELE2(_id, xTicksToWait == 0);
+            taskEXIT_CRITICAL(_id, temp_var);
+            AWAIT_A(_id, assert(!xIsTimeOut && xReturn == false); break)
+        :: ELSE2(_id, xTicksToWait == 0)
+        fi
+    fi;
+    taskEXIT_CRITICAL(_id, temp_var);
+
+    vTaskSuspendAll(_id);
+    prvLockQueue(_id, pxQueue, temp_var);
+
+    if
+    :: SELE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
+        if
+        :: SELE2(_id, prvIsQueueEmpty(pxQueue) != false);
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var);
+            prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
+
+            xTaskResumeAll(_id, temp_var, xReturn, temp_var2);
+            if
+            :: SELE3(_id, xReturn == false, xIsTimeOut = true);
+                portYIELD_WITHIN_API(_id, temp_var)
+            :: ELSE3(_id, xReturn == false, xReturn = false)
+            fi
+        :: ELSE2(_id, prvIsQueueEmpty(pxQueue) != false);
+            prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
+            xTaskResumeAll(_id, temp_var, _, temp_var2)
+        fi
+    :: ELSE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
+        prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
+        xTaskResumeAll(_id, temp_var, _, temp_var2);
+
+        if
+        :: SELE3(_id, prvIsQueueEmpty(pxQueue), xIsTimeOut = false; assert(!xReturn); break)
+        :: ELSE2(_id, prvIsQueueEmpty(pxQueue))
+        fi
+    fi
 od
 }
 
@@ -346,7 +416,7 @@ do
     prvLockQueue(_id, pxQueue, temp_var);
 
     if
-    :: SELE2(_id, xIsTimeOut == false);
+    :: SELE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
         if
         :: SELE2(_id, prvIsQueueEmpty(pxQueue) != false);
             #if (configUSE_MUTEXES == 1)
@@ -372,7 +442,7 @@ do
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
             xTaskResumeAll(_id, temp_var, _, temp_var2)
         fi
-    :: ELSE2(_id, xIsTimeOut == false);
+    :: ELSE2(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait));
         /* Timed out. */
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2, xReturn);
         xTaskResumeAll(_id, temp_var, _, temp_var2);
@@ -477,6 +547,23 @@ inline prvCopyDataFromQueue(_id, pxQueue, pvBuffer)
         AWAIT_D(_id, pvBuffer = pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue));
             /* reset data in queue as soon as possible */
             pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)) = NULL_byte);
+    :: ELSE2(_id, !queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))
+    fi
+}
+
+/* For xQueuePeek only */
+inline prvCopyDataFromQueue_NO_RESET_QUEUE(_id, pxQueue, pvBuffer)
+{
+    if
+    :: SELE2(_id, !queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue));
+        AWAIT_D(_id, queueSET_pcReadFrom(pxQueue, queueGET_pcReadFrom(pxQueue) + 1));
+        if
+        :: SELE2(_id, queueGET_pcReadFrom(pxQueue) >= pxQueue.uxLength);
+            AWAIT_D(_id, queueSET_pcReadFrom(pxQueue, 0))
+        :: ELSE2(_id, queueGET_pcReadFrom(pxQueue) >= pxQueue.uxLength)
+        fi;
+
+        AWAIT_D(_id, pvBuffer = pxQueue.xQueue.pucQueueStorage(queueGET_pcReadFrom(pxQueue)))
     :: ELSE2(_id, !queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue))
     fi
 }

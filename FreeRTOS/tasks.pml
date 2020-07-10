@@ -538,12 +538,22 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
         AWAIT_D(_id,
             /* Reset xTickCount and xState of pxUnblockedTCB as soon as possible */
             listSET_LIST_ITEM_VALUE(TCB(pxUnblockedTCB).ListItems[xState], 0);
-            assert(listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK);
-            uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxUnblockedTCB, xState);
             if
-            :: listLIST_IS_EMPTY(pxDelayedTaskList) ->
-                reset_xTickCount()
-            :: else
+            :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK ->
+                uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxUnblockedTCB, xState);
+                if
+                :: listLIST_IS_EMPTY(pxDelayedTaskList) -> reset_xTickCount()
+                :: else
+                fi
+#if (INCLUDE_vTaskSuspend == 1)
+            :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
+                uxListRemove(xSuspendedTaskList, SLIST_SIZE, pxUnblockedTCB, xState);
+                if
+                :: listLIST_IS_EMPTY(xSuspendedTaskList) -> reset_xTickCount()
+                :: else
+                fi
+#endif
+            :: else -> assert(false)
             fi
         );
         prvAddTaskToReadyList(_id, pxUnblockedTCB)
@@ -558,6 +568,12 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
         AWAIT_D(_id, xReturn = false)
     fi
 }
+
+#if (INCLUDE_vTaskSuspend == 1)
+    #define xTaskCheckForTimeOut(pxTimeOut, pxTicksToWait)  (!pxTimeOut || pxTicksToWait == NULL_byte)
+#else
+    #define xTaskCheckForTimeOut(pxTimeOut, pxTicksToWait)  (!pxTimeOut)
+#endif
 
 inline vTaskMissedYield(_id)
 {

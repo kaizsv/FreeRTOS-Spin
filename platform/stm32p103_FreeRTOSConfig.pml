@@ -32,7 +32,9 @@ INCLUDE_VTaskDelete                         0
 #define configUSE_TIME_SLICING              1
 #define configIDLE_SHOULD_YIELD             1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0 // TODO
-#define configMAX_PRIORITIES                3
+#ifndef APP_DEFINED_PRIORITY
+    #define configMAX_PRIORITIES            3
+#endif
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         1
 #define configUSE_QUEUE_SETS                0 // TODO

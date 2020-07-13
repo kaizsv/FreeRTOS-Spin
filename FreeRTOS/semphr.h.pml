@@ -44,8 +44,11 @@
         xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX, pxNewQueue, QueueID, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 #endif
 
+#define xSemaphoreCreateCounting_fixed(xHandle, xHandleQueueID, uxMaxCount, uxInitialCount) \
+    xQueueCreateCountingSemaphore_fixed(xHandle, xHandleQueueID, uxMaxCount, uxInitialCount)
+
+#define uxSemaphoreGetCount(xSemaphore) uxQueueMessagesWaiting(xSemaphore)
+
 // TODO: FromISR version of semaphore
-// TODO: xSemaphoreCreateCounting
-// FIXME: CountingSemaphore has zero queue length.
 
 #endif

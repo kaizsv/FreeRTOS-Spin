@@ -1,0 +1,124 @@
+/* FreeRTOS/Demo/Common/Minimal/countsem.c */
+
+#define promela_TASK_NUMBER     2
+#define promela_QUEUE_NUMBER    2
+
+#define FIRST_TASK              promela_EXP_NUMBER
+#define IDLE_TASK_ID            (FIRST_TASK + promela_TASK_NUMBER)
+
+#define RUN_ALL_TASKS(stmts) \
+    atomic {        \
+        stmts;      \
+        run CNT1(); \
+        run CNT2(); \
+    }
+
+#include "../FreeRTOS.pml"
+#include "../FreeRTOS/tasks.pml"
+#include "../FreeRTOS/semphr.h.pml"
+
+#define countMAX_COUNT_VALUE    10
+
+#define countSTART_AT_MAX_COUNT 170 /* 0xaa */
+#define countSTART_AT_ZERO      85  /* 0x55 */
+
+#define countNUM_TEST_TASKS 2
+#define countDONT_BLOCK     0
+
+QueueDeclarator(10, byte);
+
+SemaphoreHandle_t(xP1_xSemaphore, 10, byte);
+SemaphoreHandle_t(xP2_xSemaphore, 10, byte);
+
+inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
+{
+    xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    AWAIT_A(_id, assert(xReturn == false));
+
+    for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
+        AWAIT_D(_id, assert(uxSemaphoreGetCount(xSemaphore) == (countMAX_COUNT_VALUE - ux)));
+
+        xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+        AWAIT_A(_id, assert(xReturn == true); xReturn = false);
+    }
+
+#if (configUSE_PREEMPTION == 0)
+    taskYIELD(_PID, temp_var);
+#endif
+
+    AWAIT_A(_id, ux = 0; assert(uxSemaphoreGetCount(xSemaphore) == 0));
+    xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    AWAIT_A(_id, assert(xReturn == false))
+}
+
+inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
+{
+    xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    AWAIT_A(_id, assert(xReturn == false));
+
+    for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
+        AWAIT_D(_id, assert(uxSemaphoreGetCount(xSemaphore) == ux));
+
+        xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+        AWAIT_A(_id, assert(xReturn == true); xReturn = false);
+    }
+
+#if (configUSE_PREEMPTION == 0)
+    taskYIELD(_PID, temp_var);
+#endif
+
+    xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    AWAIT_A(_id, ux = 0; assert(xReturn == false));
+}
+
+proctype CNT1()
+{
+    byte idx = 0;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
+    bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
+    assert(_PID == FIRST_TASK);
+    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+
+    xSemaphoreTake_NB(xP1_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    AWAIT_A(_PID, assert(local_xReturn == false));
+do
+::  prvIncrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2)
+od
+}
+
+proctype CNT2()
+{
+    byte idx = 0;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
+    bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
+    assert(_PID == (FIRST_TASK + 1));
+
+    xSemaphoreTake_NB(xP2_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    AWAIT_A(_PID, assert(local_xReturn == false));
+do
+::  prvIncrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+    prvDecrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2)
+od
+}
+
+init
+{
+    byte idx;
+    byte local_var1 = NULL_byte;
+
+    d_step {
+        xSemaphoreCreateCounting_fixed(xP1_xSemaphore, 0, countMAX_COUNT_VALUE, countMAX_COUNT_VALUE);
+        xSemaphoreCreateCounting_fixed(xP2_xSemaphore, 1, countMAX_COUNT_VALUE, 0);
+
+        prvInitialiseTaskLists(local_var1);
+
+        xTaskCreate_fixed(FIRST_TASK + 0, tskIDLE_PRIORITY);
+        xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY)
+    };
+
+    vTaskStartScheduler(EP, local_var1);
+
+    /* Start the IDLE TASK */
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+}

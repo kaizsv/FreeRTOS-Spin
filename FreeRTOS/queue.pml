@@ -127,6 +127,16 @@ inline xQueueTakeMutexRecursive(_id, pxMutex, xTicksToWait, xReturn, xInheritanc
 
 #endif
 
+#if (configUSE_COUNTING_SEMAPHORES == 1)
+
+inline xQueueCreateCountingSemaphore_fixed(xHandle, xHandleQueueID, uxMaxCount, uxInitialCount)
+{
+    xQueueGenericCreate_fixed(xHandle, xHandleQueueID, uxMaxCount, queueQUEUE_TYPE_COUNTING_SEMAPHORE);
+    xHandle.uxMessagesWaiting = uxInitialCount
+}
+
+#endif
+
 #if (configUSE_QUEUE_SETS == 1)
     #error Define another __xQueueGenericSend_BODY
 #endif

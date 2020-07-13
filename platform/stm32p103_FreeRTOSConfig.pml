@@ -38,6 +38,7 @@ INCLUDE_VTaskDelete                         0
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         1
 #define configUSE_QUEUE_SETS                0 // TODO
+#define configUSE_COUNTING_SEMAPHORES       1
 
 #define configKERNEL_INTERRUPT_PRIORITY         240 /* 0xf0 */
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    80  /* 0x50 */

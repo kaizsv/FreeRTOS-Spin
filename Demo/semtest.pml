@@ -15,8 +15,6 @@
         run prvSemaphoreTest4(); \
     }
 
-#define QUEUE_TAKE_EXIT_CRITICAL
-
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
@@ -45,7 +43,7 @@ proctype prvSemaphoreTest1()
     bit local_xIsTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
-::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
@@ -71,7 +69,7 @@ proctype prvSemaphoreTest2()
     bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch

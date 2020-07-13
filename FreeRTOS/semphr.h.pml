@@ -17,6 +17,9 @@
 #define xSemaphoreCreateBinary(xSemaphore, QueueID) \
     xQueueGenericCreate_fixed(xSemaphore, QueueID, 1, queueQUEUE_TYPE_BINARY_SEMAPHORE)
 
+#define xSemaphoreTake_NB(xSemaphore, xBlockTime, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id) \
+    xQueueSemaphoreTake_NB(xSemaphore, xBlockTime, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id)
+
 #define xSemaphoreTake(xSemaphore, xBlockTime, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id) \
     xQueueSemaphoreTake(xSemaphore, xBlockTime, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id)
 
@@ -26,7 +29,7 @@
 #endif
 
 #define xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
-    xQueueGenericSend(xSemaphore, NULL_byte, semGIVE_BLOCK_TIME, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+    xQueueGenericSend_NB(xSemaphore, NULL_byte, semGIVE_BLOCK_TIME, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
 #if (configUSE_RECURSIVE_MUTEXES == 1)
     #define xSemaphoreGiveRecursive(_id, pxMutex, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2) \

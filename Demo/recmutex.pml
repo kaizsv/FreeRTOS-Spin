@@ -14,8 +14,6 @@
         run Rec3();         \
     }
 
-#define QUEUE_TAKE_EXIT_CRITICAL
-
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"

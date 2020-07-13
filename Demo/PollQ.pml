@@ -13,11 +13,6 @@
         run QProdNB();      \
     }
 
-#if 0
-#define QUEUE_SEND_EXIT_CRITICAL
-#define QUEUE_RECEIVE_EXIT_CRITICAL
-#endif
-
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
@@ -46,7 +41,7 @@ proctype QConsNB()
 do
 ::  do
     :: SELE2(_PID, uxQueueMessagesWaiting(xPolledQueue));
-        xQueueReceive(xPolledQueue, usData, 0, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive_NB(xPolledQueue, usData, pollqNO_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         if
         :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
             AWAIT_D(_PID, assert(usData == usExpectedValue));
@@ -71,7 +66,7 @@ proctype QProdNB()
 do
 ::  do
     :: SELE3(_PID, usLoop < usNumToProduce, usLoop = usLoop + 1);
-        xQueueSend(xPolledQueue, usValue, pollqNO_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueSendToBack_NB(xPolledQueue, usValue, pollqNO_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: ELSE3(_PID, usLoop < usNumToProduce, usLoop = 0; break)

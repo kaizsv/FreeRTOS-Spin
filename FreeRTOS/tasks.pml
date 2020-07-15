@@ -548,10 +548,6 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
 #if (INCLUDE_vTaskSuspend == 1)
             :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
                 uxListRemove(xSuspendedTaskList, SLIST_SIZE, pxUnblockedTCB, xState);
-                if
-                :: listLIST_IS_EMPTY(xSuspendedTaskList) -> reset_xTickCount()
-                :: else
-                fi
 #endif
             :: else -> assert(false)
             fi

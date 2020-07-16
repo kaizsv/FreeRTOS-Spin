@@ -39,4 +39,4 @@ clean:
 	rm -rf $(PAN)*
 
 distclean: clean
-	rm -rf *.pml.trail _spin_nvr.tmp
+	rm -rf *.pml.trail _spin_nvr.tmp ./outputs

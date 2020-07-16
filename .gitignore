@@ -3,3 +3,5 @@
 pan*
 *.trail
 *.tmp
+
+outputs/

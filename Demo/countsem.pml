@@ -43,7 +43,7 @@ inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_
     }
 
 #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, temp_var);
+    taskYIELD(_PID, temp_var1);
 #endif
 
     AWAIT_A(_id, ux = 0; assert(uxSemaphoreGetCount(xSemaphore) == 0));
@@ -64,7 +64,7 @@ inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_
     }
 
 #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, temp_var);
+    taskYIELD(_PID, temp_var1);
 #endif
 
     xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);

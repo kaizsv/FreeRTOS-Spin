@@ -15,7 +15,7 @@
 #define queueMUTEX_GIVE_BLOCK_TIME          0
 
 #if (configUSE_PREEMPTION == 0)
-    #define queueYIELD_IF_USING_PREEMPTION()
+    #define queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
 #else
     #define queueYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_WITHIN_API(_id, temp_var)
 #endif

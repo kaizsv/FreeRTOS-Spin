@@ -11,7 +11,7 @@
 #define taskEXIT_CRITICAL(_id, temp_var)     portEXIT_CRITICAL(_id, temp_var)
 
 #if (configUSE_PREEMPTION == 0)
-    #define taskYIELD_IF_USING_PREEMPTION()
+    #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
 #else
     #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_WITHIN_API(_id, temp_var)
 #endif

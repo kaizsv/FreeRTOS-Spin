@@ -259,13 +259,13 @@ do
 ::  prvTakeTwoMutexesReturnInDifferentOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, local_var3);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_PID, local_var1);
     #endif
 
     prvTakeTwoMutexesReturnInSameOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_PID, local_var1);
     #endif
 od
 }

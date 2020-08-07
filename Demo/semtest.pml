@@ -31,9 +31,9 @@ byte pxFirstSemaphore_pulSharedVariable = 0;
 
 SemaphoreHandle_t(pxSecondSemaphore_xSemaphore, 1, byte);
 byte pxSecondSemaphore_pulSharedVariable = 0;
-#define pxSecondSemaphore_xBlockTime 50
+#define pxSecondSemaphore_xBlockTime 20
 
-#define xDelay  50
+#define xDelay  200
 
 proctype prvSemaphoreTest1()
 {

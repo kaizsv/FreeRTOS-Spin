@@ -135,13 +135,12 @@ atomic {
         assert(!HAS_PENDING_EXPS)
     :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(false)
-    :: BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) &&
-       (EP == gen_id) ->
-       /* memory barrier entry */
-       assert(HAS_INOPERATIVE_EXP);
-       stack_check(gen_id);
-       clear_exp_inoperative();
-       exp_taken(gen_id)
+    :: GET_PENDING(gen_id) && (EP == gen_id) ->
+        /* entry of memory barrier or tail-chaining */
+        assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        stack_check(gen_id);
+        clear_exp_inoperative();
+        exp_taken(gen_id)
     fi
 }   }
 

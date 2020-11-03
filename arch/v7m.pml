@@ -144,10 +144,11 @@ atomic {
     fi
 }   }
 
+// TODO: redesign tail chaining if the last process in the stack is an interrupt.
 inline tail_chaining(high_pending_exp)
 {
     get_high_prio_pending(high_pending_exp);
-    assert(BASEPRI_MASK(high_pending_exp) && !HAS_INOPERATIVE_EXP);
+    assert(BASEPRI_MASK(high_pending_exp) && !HAS_INOPERATIVE_EXP && LAST_EP_STACK >= FIRST_TASK);
     inoperative_exp_taken(high_pending_exp);
     high_pending_exp = NULL_byte /* reset local variable */
 }

@@ -44,7 +44,7 @@ inline xPortStartScheduler()
     uxCriticalNesting = 0;
 
     /* prvPortStartFirstTask */
-    assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && !syst_count);
+    assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP);
     RUN_ALL_EXPS();
 
     RUN_ALL_TASKS(vPortSVCHandler)

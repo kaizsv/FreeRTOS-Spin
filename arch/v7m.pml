@@ -72,13 +72,11 @@ atomic {
     if
     :: SYST && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
-        assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP && EP_Top == 0);
-        CLEAR_SYST_FLAG();
+        assert(!HAS_INOPERATIVE_EXP && EP_Top == 0);
         stack_check(gen_id);
         exp_entry(gen_id)
     :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(!GET_PENDING(gen_id) && (EP != gen_id));
-        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         if
         :: HAS_INOPERATIVE_EXP ->
@@ -87,35 +85,28 @@ atomic {
             clear_exp_inoperative();
             exp_taken(gen_id)
         :: else ->
-            /* preemption entry */
-            assert(!HAS_PENDING_EXPS);
+            /* interrupt entry */
             exp_entry(gen_id)
         fi
     :: SYST && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
-        /* generated exception sets itself pending and waits for re-entrying */
-        assert(!GET_PENDING(gen_id) && (EP != gen_id));
-        set_pending(gen_id);
+        assert((EP != gen_id) || HAS_INOPERATIVE_EXP);
 
         /* wait for re-entrying from tail-chaining */
         (EP == gen_id);
 
         /* tail-chaining entry */
         assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
-        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         clear_exp_inoperative();
         exp_taken(gen_id)
     :: SYST && !BASEPRI_MASK(gen_id) ->
-        /* generated exception sets itself pending and waits for re-entrying */
-        assert(!GET_PENDING(gen_id) && !HAS_INOPERATIVE_EXP && (EP != gen_id));
-        set_pending(gen_id);
+        assert(!HAS_INOPERATIVE_EXP && (EP != gen_id));
 
         /* wait for re-entrying from memory barrier */
         (EP == gen_id);
 
         /* memory barrier entry */
         assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
-        CLEAR_SYST_FLAG();
         stack_check(gen_id);
         clear_exp_inoperative();
         exp_taken(gen_id)

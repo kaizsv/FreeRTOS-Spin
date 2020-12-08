@@ -71,7 +71,7 @@ do
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        // pxQueueParameters1_xBlockTime is not zero
         #endif
     :: ELSE2(_PID, local_xReturn == true)
     fi
@@ -114,6 +114,7 @@ do
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)
+        // pxQueueParameters3_xBlockTime is zero
         taskYIELD(_PID, local_var1);
         #endif
     :: ELSE2(_PID, local_xReturn == true)
@@ -176,7 +177,7 @@ do
         INCREASE_VAR_AND_INTOVERFLOW_3(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        // pxQueueParameters6_xBlockTime is not zero
         #endif
     :: ELSE2(_PID, local_xReturn == true)
     fi

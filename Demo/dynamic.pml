@@ -155,6 +155,10 @@ do
         xQueueReceive(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
         xTaskResumeAll(_PID, local_var1, local_xReturn /* check */, local_var2);
         xTaskResumeAll(_PID, local_var1, _, local_var2);
+
+        #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+        #endif
     :: ELSE3(_PID, xGotValue == false, xGotValue = false; break)
     od;
     AWAIT_A(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);

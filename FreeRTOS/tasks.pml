@@ -78,6 +78,7 @@ inline taskSELECT_HIGHEST_PRIORITY_TASK(_id)
 #define xIsSchedulerRunning (EP != NULL_byte)
 
 byte uxTopReadyPriority = tskIDLE_PRIORITY;
+bit xPendedTicks = 0;
 bool xYieldPending = false;
 byte uxSchedulerSuspended = 0;
 
@@ -421,7 +422,60 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
         :: ELSE2(_id, pxTCB != NULL_byte)
         fi;
 
-        /* xPendedTicks can be dismissed in verification */
+        if
+        :: SELE2(_id, xPendedTicks);
+            // xTaskIncrementTick
+            if
+            :: SELE3(_id, uxSchedulerSuspended == 0, assert(pxTCB == NULL_byte));
+                AWAIT_D(_id, assert(xTickCount < 256);
+                    xTickCount = (is_xTickCount_active -> xTickCount + 1 : 0));
+                if
+                :: SELE2(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks);
+                    do
+                    :: SELE2(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
+                        AWAIT_D(_id, pxTCB = listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList));
+                        if
+                        :: SELE2(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]));
+                            AWAIT_D(_id, update_xTickCount(); pxTCB = NULL_byte);
+                            AWAIT_A(_id, break)
+                        :: ELSE2(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
+                        fi;
+                        AWAIT_D(_id,
+                            uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState);
+                            listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0));
+#if (promela_QUEUE_NUMBER > 0)
+                        if
+                        :: SELE2(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte);
+                            AWAIT_D(_id, uxListRemove(QLISTs[listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent])], QLIST_SIZE, pxTCB, xEvent));
+                        :: ELSE2(_id, listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
+                        fi;
+#endif
+                        prvAddTaskToReadyList(_id, pxTCB);
+                        #if (configUSE_PREEMPTION == 1)
+                        if
+                        :: SELE2(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority);
+                            AWAIT_D(_id, xYieldPending = true)
+                        :: ELSE2(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
+                        fi
+                        #endif
+                    :: ELSE2(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
+                        AWAIT_A(_id, reset_xTickCount(); pxTCB = NULL_byte; break)
+                    od;
+                :: ELSE2(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks);
+                fi;
+                #if ((configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
+                if
+                :: SELE2(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]));
+                    AWAIT_D(_id, xYieldPending = true)
+                :: ELSE2(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
+                fi;
+                #endif
+            :: ELSE2(_id, uxSchedulerSuspended == 0)
+            fi;
+            // end xTaskIncrementTick
+            AWAIT_A(_id, xPendedTicks = 0)
+        :: ELSE2(_id, xPendedTicks)
+        fi;
 
         if
         :: SELE2(_id, xYieldPending != false);
@@ -504,8 +558,8 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
         :: ELSE2(_id, xYieldPending != false)
         fi
         #endif
-    :: ELSE3(_id, uxSchedulerSuspended == 0, assert(xSwitchRequired == false && pxTCB == NULL_byte))
-        /* xPendedTicks can be dismissed in verification */
+    :: ELSE3(_id, uxSchedulerSuspended == 0, assert(xSwitchRequired == false && pxTCB == NULL_byte));
+        AWAIT_D(_id, xPendedTicks = 1);
     fi
 }
 

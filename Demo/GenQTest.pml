@@ -75,7 +75,8 @@ do
     xQueueReceive_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
 
-    AWAIT_D(_PID, assert(ulLoopCounter == ulData); ulData = 0);
+    AWAIT_D(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 0 && ulLoopCounter == ulData);
+        ulData = 0);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);

@@ -33,34 +33,34 @@ SemaphoreHandle_t(xP2_xSemaphore, 10, byte);
 inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
 {
     xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT_A(_id, assert(xReturn == false));
+    AWAIT(_id, assert(xReturn == false));
 
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
-        AWAIT_D(_id, assert(uxSemaphoreGetCount(xSemaphore) == (countMAX_COUNT_VALUE - ux)));
+        AWAIT(_id, assert(uxSemaphoreGetCount(xSemaphore) == (countMAX_COUNT_VALUE - ux)));
 
         xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-        AWAIT_A(_id, assert(xReturn == true); xReturn = false);
+        AWAIT(_id, assert(xReturn == true); xReturn = false);
     }
 
 #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, temp_var1);
 #endif
 
-    AWAIT_A(_id, ux = 0; assert(uxSemaphoreGetCount(xSemaphore) == 0));
+    AWAIT(_id, ux = 0; assert(uxSemaphoreGetCount(xSemaphore) == 0));
     xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT_A(_id, assert(xReturn == false))
+    AWAIT(_id, assert(xReturn == false))
 }
 
 inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
 {
     xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT_A(_id, assert(xReturn == false));
+    AWAIT(_id, assert(xReturn == false));
 
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
-        AWAIT_D(_id, assert(uxSemaphoreGetCount(xSemaphore) == ux));
+        AWAIT(_id, assert(uxSemaphoreGetCount(xSemaphore) == ux));
 
         xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-        AWAIT_A(_id, assert(xReturn == true); xReturn = false);
+        AWAIT(_id, assert(xReturn == true); xReturn = false);
     }
 
 #if (configUSE_PREEMPTION == 0)
@@ -68,7 +68,7 @@ inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_
 #endif
 
     xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT_A(_id, ux = 0; assert(xReturn == false));
+    AWAIT(_id, ux = 0; assert(xReturn == false));
 }
 
 proctype CNT1()
@@ -80,7 +80,7 @@ proctype CNT1()
     prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
     xSemaphoreTake_NB(xP1_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, assert(local_xReturn == false));
+    AWAIT(_PID, assert(local_xReturn == false));
 do
 ::  prvIncrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
     prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2)
@@ -95,7 +95,7 @@ proctype CNT2()
     assert(_PID == (FIRST_TASK + 1));
 
     xSemaphoreTake_NB(xP2_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, assert(local_xReturn == false));
+    AWAIT(_PID, assert(local_xReturn == false));
 do
 ::  prvIncrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
     prvDecrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2)

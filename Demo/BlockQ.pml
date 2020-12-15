@@ -49,10 +49,10 @@ QueueHandle_t(pxQueueParameters5_xQueue, 2, byte);
 #define pxQueueParameters6_xBlockTime       xBlockTime
 
 #define INCREASE_VAR_AND_INTOVERFLOW_3(var) \
-    AWAIT_D(_PID, var = var + 1; var = var % 3)
+    AWAIT(_PID, var = var + 1; var = var % 3)
 
 #define INCREASE_VAR_AND_INTOVERFLOW_2(var) \
-    AWAIT_D(_PID, var = var + 1; var = var % 2)
+    AWAIT(_PID, var = var + 1; var = var % 2)
 
 proctype QConsB1()
 {
@@ -66,7 +66,7 @@ do
 ::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
-        AWAIT_D(_PID, assert(usData == usExpectedValue));
+        AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
@@ -88,7 +88,7 @@ proctype QProdB2()
     assert(_PID == FIRST_TASK + 1);
 do
 ::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
     #if (configUSE_PREEMPTION == 0)
@@ -109,7 +109,7 @@ do
 ::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
-        AWAIT_D(_PID, assert(usData == usExpectedValue));
+        AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
@@ -132,7 +132,7 @@ proctype QProdB4()
     assert(_PID == FIRST_TASK + 3);
 do
 ::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
     #if (configUSE_PREEMPTION == 0)
@@ -151,7 +151,7 @@ proctype QProdB5()
     assert(_PID == FIRST_TASK + 4);
 do
 ::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     INCREASE_VAR_AND_INTOVERFLOW_3(usValue);
 
     #if (configUSE_PREEMPTION == 0)
@@ -172,7 +172,7 @@ do
 ::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
-        AWAIT_D(_PID, assert(usData == usExpectedValue));
+        AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
         INCREASE_VAR_AND_INTOVERFLOW_3(usExpectedValue);
 

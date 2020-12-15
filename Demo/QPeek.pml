@@ -49,26 +49,26 @@ proctype PeekL()
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK);
 do
-::  AWAIT_D(_PID, ulValue = MAGIC_VAL1);
+::  AWAIT(_PID, ulValue = MAGIC_VAL1);
     xQueueSendToBack_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
     #endif
 
-    AWAIT_D(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 0);
+    AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 0);
         ulValue = MAGIC_VAL2);
 
     xQueueSendToBack_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
     #endif
 
     xQueueReceive_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
@@ -84,9 +84,9 @@ do
         taskYIELD(_PID, local_var1);
     #endif
 
-    AWAIT_D(_PID, ulValue = MAGIC_VAL3);
+    AWAIT(_PID, ulValue = MAGIC_VAL3);
     xQueueSendToFront_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
@@ -94,7 +94,7 @@ do
 
     /* The queue should be empty */
     xQueuePeek_NB(_PID, xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
-    AWAIT_A(_PID, assert(local_xReturn == false));
+    AWAIT(_PID, assert(local_xReturn == false));
 
     vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
     vTaskResume(_PID, xHighestPriorityTask, local_bit, local_var1);
@@ -112,12 +112,12 @@ proctype PeekM()
     assert(_PID == xMediumPriorityTask);
 do
 ::  xQueuePeek_PR(_PID, xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    AWAIT_D(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
+    AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
 od
@@ -131,17 +131,17 @@ proctype PeekH1()
     assert(_PID == xHighPriorityTask);
 do
 ::  xQueuePeek_PR(_PID, xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    AWAIT_D(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
+    AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
 
     xQueueReceive(xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL3); ulValue = 0
     );
@@ -158,33 +158,33 @@ proctype PeekH2()
     assert(_PID == xHighestPriorityTask);
 do
 ::  xQueuePeek_PR(_PID, xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL1); ulValue = 0
     );
 
-    AWAIT_D(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
+    AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
     xQueueReceive_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL1); ulValue = 0
     );
 
     /* Block again */
     xQueuePeek_PR(_PID, xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    AWAIT_D(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
+    AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
     /* Only peeked the data */
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
 
     xQueuePeek_PR(_PID, xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
-    AWAIT_A(_PID,
+    AWAIT(_PID,
         assert(local_xReturn == true); local_xReturn = false;
         assert(ulValue == MAGIC_VAL3); ulValue = 0
     );

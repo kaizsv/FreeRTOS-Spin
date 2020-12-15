@@ -19,7 +19,7 @@ inline MSR_BASEPRI(val)
 * SHPR3: exp_prio[0] and exp_prio[1]
 * NVIC IP register: other exceptions
 */
-byte exp_prio[promela_EXP_NUMBER] = 0;
+byte exp_prio[promela_EXP_NUMBER] = 16;
 #define GET_PRIO_EXP(PID)       exp_prio[PID]
 
 inline SET_PRIO_EXP(id, prio)
@@ -113,7 +113,7 @@ inline clear_exp_inoperative()
 }
 
 /* SysTick control */
-#define SET_SYST_FLAG(cond) pending_exp = (cond -> (pending_exp | (1 << SysTick_ID)) : pending_exp)
+#define SET_SYST_FLAG()     pending_exp = pending_exp | 2
 #define CLEAR_SYST_FLAG()   clear_pending(SysTick_ID)
 
 #define SYST                GET_PENDING(SysTick_ID)

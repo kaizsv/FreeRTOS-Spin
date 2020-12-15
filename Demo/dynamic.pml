@@ -33,7 +33,7 @@ QueueDeclarator(1, byte);
 QueueHandle_t(xSuspendedTestQueue, 1, byte);
 
 #define ULCOUNTER_IS_ACCESSED_BY(id, var)   \
-    AWAIT_D(_PID, var = id)
+    AWAIT(_PID, var = id)
 
 #define priSLEEP_TIME   50
 #define priLOOPS        5
@@ -50,7 +50,7 @@ proctype CONT_INC()
 
     byte uxOurPriority;
     assert(_PID == xContinousIncrementHandle);
-    AWAIT_D(_PID, uxOurPriority = uxTaskPriorityGet(NULL_byte));
+    AWAIT(_PID, uxOurPriority = uxTaskPriorityGet(NULL_byte));
 do
 ::  vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2, local_var3);
     ULCOUNTER_IS_ACCESSED_BY(xContinousIncrementHandle, ulCounter);
@@ -98,14 +98,14 @@ do
         vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
 
         vTaskSuspendAll(_PID);
-            AWAIT_D(_PID, assert(ulCounter == xContinousIncrementHandle));
+            AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
         xTaskResumeAll(_PID, local_var1, _, local_var2);
     :: ELSE3(_PID, sLoops < priLOOPS, sLoops = 0; break)
     od;
 
     vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
 
-    AWAIT_D(_PID, ulCounter = 0);
+    AWAIT(_PID, ulCounter = 0);
 
     vTaskResume(_PID, xLimitedIncrementHandle, local_bit, local_var1);
 
@@ -113,7 +113,7 @@ do
     taskYIELD(_PID, local_var1);
     #endif
 
-    AWAIT_D(_PID, assert(ulCounter == xLimitedIncrementHandle));
+    AWAIT(_PID, assert(ulCounter == xLimitedIncrementHandle));
 
     vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
 
@@ -135,7 +135,7 @@ proctype SUSP_SEND()
 do
 ::  vTaskSuspendAll(_PID);
     xQueueSend(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT_A(_PID, assert(local_xReturn == true); local_xReturn = false);
+    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     xTaskResumeAll(_PID, local_var1, _, local_var2);
     vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
 od
@@ -161,7 +161,7 @@ do
         #endif
     :: ELSE3(_PID, xGotValue == false, xGotValue = false; break)
     od;
-    AWAIT_A(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);
+    AWAIT(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);
 od
 }
 

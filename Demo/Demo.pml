@@ -29,7 +29,7 @@ proctype MY_TASK()
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
-::  AWAIT_A(_PID, printf("Task1 %d\n", _PID));
+::  AWAIT(_PID, printf("Task1 %d\n", _PID));
     vTaskDelay(_PID, 50, local_bit, local_var1, local_var2);
 od
 }
@@ -41,7 +41,7 @@ proctype SEC_TASK()
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  AWAIT_A(_PID, printf("Task2 %d\n", _PID));
+::  AWAIT(_PID, printf("Task2 %d\n", _PID));
     vTaskDelay(_PID, 50, local_bit, local_var1, local_var2);
 od
 }
@@ -50,7 +50,7 @@ proctype THIRD_TASK()
 {
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  AWAIT_A(_PID, printf("Task3 %d low priority\n", _PID));
+::  AWAIT(_PID, printf("Task3 %d low priority\n", _PID));
 od
 }
 

@@ -16,13 +16,19 @@
 */
 #define _PID (_pid - 1)
 byte EP = NULL_byte; /* Executing Process */
-#define AWAIT_D(id, stmnt) d_step { (id == EP) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID); stmnt }
-#define AWAIT_A(id, stmnt) atomic { (id == EP) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID); stmnt }
-#define SELE2(id, cond) atomic { ((id == EP) && (cond)) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID) }
-#define ELSE2(id, cond) atomic { ((id == EP) && !(cond)) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID) }
+#define AWAIT_DS(id, stmnt) d_step { assert(id == EP); stmnt }
+#define AWAIT_AS(id, stmnt) atomic { assert(id == EP); stmnt }
+#define AWAIT(id, stmnt)    atomic { if :: (id == EP) && (FIRST_TASK <= id && id <= IDLE_TASK_ID) -> SET_SYST_FLAG() :: (id == EP) fi; stmnt }
+#define SELE2(id, cond) atomic { ((id == EP) && (cond)) -> if :: FIRST_TASK <= id && id <= IDLE_TASK_ID -> SET_SYST_FLAG() :: true fi }
+#define ELSE2(id, cond) atomic { ((id == EP) && !(cond)) -> if :: FIRST_TASK <= id && id <= IDLE_TASK_ID -> SET_SYST_FLAG() :: true fi }
 #define SELE3(id, cond, stmnt)  \
-    atomic { ((id == EP) && (cond)) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID); stmnt }
+    atomic { ((id == EP) && (cond)) -> if :: FIRST_TASK <= id && id <= IDLE_TASK_ID -> SET_SYST_FLAG() :: true fi; stmnt }
 #define ELSE3(id, cond, stmnt)  \
-    atomic { ((id == EP) && !(cond)) -> SET_SYST_FLAG(FIRST_TASK <= id && id <= IDLE_TASK_ID); stmnt }
+    atomic { ((id == EP) && !(cond)) -> if :: FIRST_TASK <= id && id <= IDLE_TASK_ID -> SET_SYST_FLAG() :: true fi; stmnt }
+
+#define SELE2_AS(id, cond) atomic { (cond) -> assert(id == EP) }
+#define ELSE2_AS(id, cond) atomic { !(cond) -> assert(id == EP) }
+#define SELE3_AS(id, cond, stmnt) atomic { (cond) -> assert(id == EP); stmnt }
+#define ELSE3_AS(id, cond, stmnt) atomic { !(cond) -> assert(id == EP); stmnt }
 
 #endif

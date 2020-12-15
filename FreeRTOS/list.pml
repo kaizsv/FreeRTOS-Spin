@@ -100,13 +100,13 @@ inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList, SIZE)
 {
     /* Increment the index to the next item and return the item, ensuring */
     /* we don't return the marker used at the end of the list */
-    AWAIT_D(_id,
+    AWAIT_DS(_id,
         pxList.pxIndex = (
             (pxList.pxIndex < (SIZE - 1) && !listPOINTER_IS_NULL(pxList.ps[pxList.pxIndex + 1])) ->
                 pxList.pxIndex + 1 : xListEnd
     )   );
-    AWAIT_D(_id, pxList.pxIndex = (pxList.pxIndex == xListEnd -> 0 : pxList.pxIndex));
-    AWAIT_D(_id,
+    AWAIT_DS(_id, pxList.pxIndex = (pxList.pxIndex == xListEnd -> 0 : pxList.pxIndex));
+    AWAIT_DS(_id,
         assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB);
         pxTCB = pxList.ps[pxList.pxIndex].p_tcb_item >> 1
     )

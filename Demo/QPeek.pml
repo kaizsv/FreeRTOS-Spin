@@ -50,7 +50,7 @@ proctype PeekL()
     assert(_PID == FIRST_TASK);
 do
 ::  AWAIT(_PID, ulValue = MAGIC_VAL1);
-    xQueueSendToBack_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
@@ -60,7 +60,7 @@ do
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 0);
         ulValue = MAGIC_VAL2);
 
-    xQueueSendToBack_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
@@ -85,7 +85,7 @@ do
     #endif
 
     AWAIT(_PID, ulValue = MAGIC_VAL3);
-    xQueueSendToFront_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToFront_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)

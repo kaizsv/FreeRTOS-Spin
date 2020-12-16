@@ -28,20 +28,20 @@
         xQueueTakeMutexRecursive(_id, pxMutex, xTicksToWait, xReturn, xInheritanceOccurred, xIsTimeOut, temp_var, temp_var2)
 #endif
 
-#define xSemaphoreGive(xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
-    xQueueGenericSend_NB(xSemaphore, NULL_byte, semGIVE_BLOCK_TIME, queueSEND_TO_BACK, xReturn, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+#define xSemaphoreGive(xSemaphore, xReturn, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+    xQueueGenericSend_NB(xSemaphore, NULL_byte, semGIVE_BLOCK_TIME, queueSEND_TO_BACK, xReturn, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
 #if (configUSE_RECURSIVE_MUTEXES == 1)
-    #define xSemaphoreGiveRecursive(_id, pxMutex, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2) \
-        xQueueGiveMutexRecursive(_id, pxMutex, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2)
+    #define xSemaphoreGiveRecursive(_id, pxMutex, xReturn, xIsTimeOut, temp_var, temp_var2) \
+        xQueueGiveMutexRecursive(_id, pxMutex, xReturn, xIsTimeOut, temp_var, temp_var2)
 #endif
 
-#define xSemaphoreCreateMutex(pxNewQueue, QueueID, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
-    xQueueCreateMutex(queueQUEUE_TYPE_MUTEX, pxNewQueue, QueueID, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+#define xSemaphoreCreateMutex(pxNewQueue, QueueID, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+    xQueueCreateMutex(queueQUEUE_TYPE_MUTEX, pxNewQueue, QueueID, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
 #if (configUSE_RECURSIVE_MUTEXES == 1)
-    #define xSemaphoreCreateRecursiveMutex(pxNewQueue, QueueID, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id) \
-        xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX, pxNewQueue, QueueID, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+    #define xSemaphoreCreateRecursiveMutex(pxNewQueue, QueueID, temp_xIsTimeOut, temp_var, temp_var2, _id) \
+        xQueueCreateMutex(queueQUEUE_TYPE_RECURSIVE_MUTEX, pxNewQueue, QueueID, temp_xIsTimeOut, temp_var, temp_var2, _id)
 #endif
 
 #define xSemaphoreCreateCounting_fixed(xHandle, xHandleQueueID, uxMaxCount, uxInitialCount) \

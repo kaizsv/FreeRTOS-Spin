@@ -83,11 +83,10 @@ proctype QProdB2()
     byte idx;
     byte usValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
+    bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 1);
 do
-::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
@@ -127,11 +126,10 @@ proctype QProdB4()
     byte idx;
     byte usValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
+    bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 3);
 do
-::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
@@ -146,11 +144,10 @@ proctype QProdB5()
     byte idx;
     byte usValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
+    bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 4);
 do
-::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     INCREASE_VAR_AND_INTOVERFLOW_3(usValue);
 

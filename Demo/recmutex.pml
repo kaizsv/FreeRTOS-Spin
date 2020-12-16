@@ -49,7 +49,7 @@ proctype Rec1()
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xControllingTaskHandle);
 do
-::  xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+::  xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
     /* Should not be able to 'give' the mutex, as we have not yet 'taken' it */
     AWAIT(_PID, assert(local_xReturn == false));
 
@@ -64,7 +64,7 @@ do
     do
     :: SELE3(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
         vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1, local_var2);
-        xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+        xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
         #if (configUSE_PREEMPTION == 0)
@@ -73,7 +73,7 @@ do
     :: ELSE3(_PID, ux < recmuMAX_COUNT, ux = 0; break)
     od;
 
-    xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+    xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
     AWAIT(_PID, assert(local_xReturn == false));
 
     AWAIT(_PID, uxControllingCycles = INC_AND_WRAP_AROUND(uxControllingCycles));
@@ -94,7 +94,7 @@ do
 ::  xSemaphoreTakeRecursive(_PID, xMutex, 254, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
         AWAIT(_PID, assert(xControllingIsSuspended == true));
-            xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+            xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
             AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
             AWAIT(_PID, xBlockingIsSuspended = true);
@@ -134,7 +134,7 @@ do
         AWAIT(_PID, assert(uxTaskPriorityGet(NULL_byte) == recmuCONTROLLING_TASK_PRIORITY));
         #endif
 
-        xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+        xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
         #if (INCLUDE_uxTaskPriorityGet == 1)
@@ -153,9 +153,9 @@ init
 {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bool local_bit = false, local_xIsTimeOut = false;
+    bool local_xIsTimeOut = false;
 
-    xSemaphoreCreateRecursiveMutex(xMutex, 0, local_bit, local_xIsTimeOut, local_var1, local_var2, EP);
+    xSemaphoreCreateRecursiveMutex(xMutex, 0, local_xIsTimeOut, local_var1, local_var2, EP);
     skip;
 
     d_step {

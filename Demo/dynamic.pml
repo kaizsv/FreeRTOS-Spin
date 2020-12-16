@@ -130,11 +130,11 @@ proctype SUSP_SEND()
 {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
+    bit local_bit = false, local_xReturn = false;
     assert(_PID == xQueueSendWhenSuspendedHandler);
 do
 ::  vTaskSuspendAll(_PID);
-    xQueueSend(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSend(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     xTaskResumeAll(_PID, local_var1, _, local_var2);
     vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);

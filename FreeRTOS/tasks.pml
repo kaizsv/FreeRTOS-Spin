@@ -710,7 +710,7 @@ inline xTaskPriorityInherit(_id, pxMutexHolder, xReturn)
 inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn)
 {
     if
-    :: SELE3_AS(_id, pxMutexHolder != NULL_byte, assert(xReturn == false));
+    :: SELE2_AS(_id, pxMutexHolder != NULL_byte);
         AWAIT_DS(_id, assert(pxMutexHolder == pxCurrentTCB && TCB(pxMutexHolder).uxMutexesHeld != NULL_byte);
             TCB(pxMutexHolder).uxMutexesHeld = TCB(pxMutexHolder).uxMutexesHeld - 1);
 
@@ -732,7 +732,7 @@ inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn)
                 AWAIT_DS(_id, listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - TCB(pxMutexHolder).uxPriority));
                 prvAddTaskToReadyList(_id, pxMutexHolder);
 
-                AWAIT_DS(_id, xReturn = true)
+                AWAIT_DS(_id, assert(xReturn == false); xReturn = true)
             :: ELSE2_AS(_id, TCB(pxMutexHolder).uxMutexesHeld == 0)
             fi
         :: ELSE2_AS(_id, TCB(pxMutexHolder).uxPriority != TCB(pxMutexHolder).uxBasePriority)

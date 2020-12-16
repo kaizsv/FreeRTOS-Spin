@@ -76,26 +76,26 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
 
 #if (configUSE_MUTEXES == 1)
 
-inline prvInitialiseMutex(pxNewQueue, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+inline prvInitialiseMutex(pxNewQueue, temp_xIsTimeOut, temp_var, temp_var2, _id)
 {
     pxNewQueue.xSemaphore.xMutexHolder = NULL_byte;
     pxNewQueue.xSemaphore.uxRecursiveCallCount = 0;
     assert(queueQUEUE_IS_MUTEX(pxNewQueue));
 
-    xQueueGenericSend_NB(pxNewQueue, NULL_byte, 0, queueSEND_TO_BACK, _, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+    xQueueGenericSend_NB(pxNewQueue, NULL_byte, 0, queueSEND_TO_BACK, _, temp_xIsTimeOut, temp_var, temp_var2, _id)
 }
 
-inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, temp_xIsTimeOut, temp_var, temp_var2, _id)
 {
     xQueueGenericCreate_fixed(pxNewQueue, QueueID, 1, ucQueueType);
-    prvInitialiseMutex(pxNewQueue, temp_bool, temp_xIsTimeOut, temp_var, temp_var2, _id)
+    prvInitialiseMutex(pxNewQueue, temp_xIsTimeOut, temp_var, temp_var2, _id)
 }
 
 #endif /* configUSE_MUTEXES */
 
 #if (configUSE_RECURSIVE_MUTEXES == 1)
 
-inline xQueueGiveMutexRecursive(_id, pxMutex, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2)
+inline xQueueGiveMutexRecursive(_id, pxMutex, xReturn, xIsTimeOut, temp_var, temp_var2)
 {
     if
     :: SELE3(_id, pxMutex.xSemaphore.xMutexHolder == pxCurrentTCB, assert(xReturn == false); xReturn = true);
@@ -103,7 +103,7 @@ inline xQueueGiveMutexRecursive(_id, pxMutex, xReturn, xYieldRequired, xIsTimeOu
 
         if
         :: SELE2(_id, pxMutex.xSemaphore.uxRecursiveCallCount == 0);
-            xQueueGenericSend_NB(pxMutex, NULL_byte, queueMUTEX_GIVE_BLOCK_TIME, queueSEND_TO_BACK, _, xYieldRequired, xIsTimeOut, temp_var, temp_var2, _id)
+            xQueueGenericSend_NB(pxMutex, NULL_byte, queueMUTEX_GIVE_BLOCK_TIME, queueSEND_TO_BACK, _, xIsTimeOut, temp_var, temp_var2, _id)
         :: ELSE2(_id, pxMutex.xSemaphore.uxRecursiveCallCount == 0);
         fi
     :: ELSE3(_id, pxMutex.xSemaphore.xMutexHolder == pxCurrentTCB, assert(xReturn == false))
@@ -141,38 +141,41 @@ inline xQueueCreateCountingSemaphore_fixed(xHandle, xHandleQueueID, uxMaxCount, 
     #error Define another __xQueueGenericSend_BODY
 #endif
 
+// xYieldRequired does not conflict with xIsTimeOut
+#define alias_xYieldRequired xIsTimeOut
+
 #define __xQueueGenericSend_BODY(__BH) \
     AWAIT(_id, xReturn = 0; \
-        assert((!xYieldRequired & !xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) && \
+        assert((!xIsTimeOut) && ((temp_var & temp_var2) == NULL_byte) && \
             (!((pvItemToQueue == NULL_byte) && (!queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue)))) && \
             (!((xCopyPosition == queueOVERWRITE) && (pxQueue.uxLength != 1))))); \
 do \
 ::  taskENTER_CRITICAL(_id, temp_var); \
     if \
     :: SELE2_AS(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength || xCopyPosition == queueOVERWRITE); \
-        prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xCopyPosition, xYieldRequired, temp_var2); \
+        prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xCopyPosition, alias_xYieldRequired, temp_var2); \
         if \
         :: SELE2_AS(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])); \
-            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], xYieldRequired); \
+            xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], alias_xYieldRequired); \
             if \
-            :: SELE3_AS(_id, xYieldRequired != false, xYieldRequired = false); \
+            :: SELE3_AS(_id, alias_xYieldRequired != false, alias_xYieldRequired = false); \
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var); \
-            :: ELSE2_AS(_id, xYieldRequired != false) \
+            :: ELSE2_AS(_id, alias_xYieldRequired != false) \
             fi \
         :: ELSE2_AS(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])); \
             if \
-            :: SELE3_AS(_id, xYieldRequired != false, xYieldRequired = false); \
+            :: SELE3_AS(_id, alias_xYieldRequired != false, alias_xYieldRequired = false); \
                 queueYIELD_IF_USING_PREEMPTION(_id, temp_var) \
-            :: ELSE2_AS(_id, xYieldRequired != false) \
+            :: ELSE2_AS(_id, alias_xYieldRequired != false) \
             fi \
         fi; \
         taskEXIT_CRITICAL(_id, temp_var); \
-        AWAIT(_id, xIsTimeOut = false; xReturn = true; break) \
+        AWAIT(_id, xReturn = true; break) \
     :: ELSE2_AS(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength || xCopyPosition == queueOVERWRITE); \
         if \
         :: SELE2_AS(_id, xTicksToWait == 0); \
             taskEXIT_CRITICAL(_id, temp_var); \
-            AWAIT(_id, assert(!xIsTimeOut); xReturn = false; break) \
+            AWAIT(_id, xReturn = false; break) \
         :: ELSE2_AS(_id, xTicksToWait == 0) \
         fi \
     fi; \
@@ -208,12 +211,12 @@ od
     fi;
 
 /* Simply for 0 xTicksToWait by removing the bottom half statements */
-inline xQueueGenericSend_NB(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2, _id)
+inline xQueueGenericSend_NB(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xIsTimeOut, temp_var, temp_var2, _id)
 {
     __xQueueGenericSend_BODY(assert(false))
 }
 
-inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xYieldRequired, xIsTimeOut, temp_var, temp_var2, _id)
+inline xQueueGenericSend(pxQueue, pvItemToQueue, xTicksToWait, xCopyPosition, xReturn, xIsTimeOut, temp_var, temp_var2, _id)
 {
     __xQueueGenericSend_BODY(__xQueueGenericSend_BH)
 }
@@ -501,7 +504,7 @@ inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWai
 
 inline prvCopyDataToQueue(_id, pxQueue, pvItemToQueue, xPosition, xReturn, uMessagesWaiting)
 {
-    AWAIT_DS(_id, assert(xReturn == false); uMessagesWaiting = pxQueue.uxMessagesWaiting);
+    AWAIT_DS(_id, xReturn = false; uMessagesWaiting = pxQueue.uxMessagesWaiting);
     if
     :: SELE2_AS(_id, queueQUEUE_IS_ITEMSIZE_ZERO(pxQueue));
         #if (configUSE_MUTEXES == 1)

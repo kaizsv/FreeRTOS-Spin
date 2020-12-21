@@ -24,7 +24,7 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
-#define xBlockTime  50
+#define xBlockTime  100
 #define xDontBlock  0
 
 QueueDeclarator(1, byte);

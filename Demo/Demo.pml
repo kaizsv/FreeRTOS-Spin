@@ -16,9 +16,6 @@
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 
-/* Found a trace that the lowest priority task (THIRD_TASK) loops forever. */
-ltl { <>[](_last != 5) }
-
 // TODO: verify List, Queue; using embedded C code
 // TODO: vPortSetInterruptHandler
 // TODO: TODO: heap.c; embedded C code               
@@ -32,8 +29,8 @@ proctype MY_TASK()
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
-::  AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task1 %d\n", _PID));
-    vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
+::  AWAIT_A(_PID, printf("Task1 %d\n", _PID));
+    vTaskDelay(_PID, 50, local_bit, local_var1, local_var2);
 od
 }
 
@@ -44,8 +41,8 @@ proctype SEC_TASK()
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task2 %d\n", _PID));
-    vTaskDelay(_PID, 1, local_bit, local_var1, local_var2);
+::  AWAIT_A(_PID, printf("Task2 %d\n", _PID));
+    vTaskDelay(_PID, 50, local_bit, local_var1, local_var2);
 od
 }
 
@@ -53,7 +50,7 @@ proctype THIRD_TASK()
 {
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  AWAIT_A(_PID, assert(!HAS_PENDING_EXPS); printf("Task3 %d low priority\n", _PID));
+::  AWAIT_A(_PID, printf("Task3 %d low priority\n", _PID));
 od
 }
 

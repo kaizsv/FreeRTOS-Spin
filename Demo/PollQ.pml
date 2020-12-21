@@ -17,6 +17,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
+#ifdef LTL
+    #include "../property/PollQ.ltl"
+#endif
+
 #define usNumToProduce 3
 
 QueueDeclarator(10, byte);
@@ -45,6 +49,7 @@ do
         if
         :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
             AWAIT(_PID, assert(usData == usExpectedValue));
+running:
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue)
         :: ELSE2(_PID, local_xReturn == true)
         fi
@@ -67,6 +72,7 @@ do
     :: SELE3(_PID, usLoop < usNumToProduce, usLoop = usLoop + 1);
         xQueueSendToBack_NB(xPolledQueue, usValue, pollqNO_DELAY, local_xReturn, local_bit, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+running:
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: ELSE3(_PID, usLoop < usNumToProduce, usLoop = 0; break)
     od;

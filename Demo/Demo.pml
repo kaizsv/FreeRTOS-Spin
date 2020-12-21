@@ -16,6 +16,10 @@
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 
+#ifdef LTL
+    #include "../property/Demo.ltl"
+#endif
+
 // TODO: verify List, Queue; using embedded C code
 // TODO: vPortSetInterruptHandler
 // TODO: TODO: heap.c; embedded C code               

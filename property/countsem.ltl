@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> ([]<>CNT1@runningDec && []<>CNT1@runningInc && []<>CNT2@runningDec && []<>CNT2@runningInc) }

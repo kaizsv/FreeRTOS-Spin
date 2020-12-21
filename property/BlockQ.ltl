@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> ([]<>QConsB1@running && []<>QProdB2@running && []<>QConsB3@running && []<>QProdB4@running && []<>QProdB5@running && []<>QConsB6@running) }

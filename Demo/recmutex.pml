@@ -18,6 +18,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
 
+#ifdef LTL
+    #include "../property/recmutex.ltl"
+#endif
+
 #ifndef recmuCONTROLLING_TASK_PRIORITY
     #define recmuCONTROLLING_TASK_PRIORITY  (tskIDLE_PRIORITY + 2)
 #endif
@@ -76,6 +80,7 @@ do
     xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
     AWAIT(_PID, assert(local_xReturn == false));
 
+running:
     AWAIT(_PID, uxControllingCycles = INC_AND_WRAP_AROUND(uxControllingCycles));
 
     AWAIT(_PID, xControllingIsSuspended = true);
@@ -102,6 +107,7 @@ do
             AWAIT(_PID, xBlockingIsSuspended = false);
 
     AWAIT(_PID, assert(uxControllingCycles == INC_AND_WRAP_AROUND(uxBlockingCycles)));
+running:
     AWAIT(_PID, uxBlockingCycles = INC_AND_WRAP_AROUND(uxBlockingCycles));
 od
 }
@@ -118,6 +124,7 @@ do
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(xBlockingIsSuspended && xControllingIsSuspended));
 
+running:
         vTaskResume(_PID, xBlockingTaskHandle, local_bit, local_var1);
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);

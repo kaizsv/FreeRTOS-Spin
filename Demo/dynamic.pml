@@ -23,6 +23,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
+#ifdef LTL
+    #include "../property/dynamic.ltl"
+#endif
+
 #define xContinousIncrementHandle   FIRST_TASK + 0
 #define xLimitedIncrementHandle     FIRST_TASK + 1
 
@@ -113,6 +117,7 @@ do
     taskYIELD(_PID, local_var1);
     #endif
 
+running:
     AWAIT(_PID, assert(ulCounter == xLimitedIncrementHandle));
 
     vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
@@ -161,6 +166,7 @@ do
         #endif
     :: ELSE3(_PID, xGotValue == false, xGotValue = false; break)
     od;
+running:
     AWAIT(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);
 od
 }

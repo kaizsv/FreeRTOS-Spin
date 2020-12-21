@@ -20,7 +20,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-#include "../property/semtest_check_lower_priority.pml"
+    #include "../property/semtest.ltl"
 #endif
 
 QueueDeclarator(1, byte);
@@ -54,6 +54,7 @@ do
         xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
+running:
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
     :: ELSE2(_PID, local_xReturn == true);
         taskYIELD(_PID, local_var1)
@@ -80,6 +81,7 @@ do
         xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
+running:
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
     :: ELSE2(_PID, local_xReturn == true);
         taskYIELD(_PID, local_var1)
@@ -106,6 +108,7 @@ do
         xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
+running:
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
     :: ELSE2(_PID, local_xReturn == true)
     fi
@@ -131,6 +134,7 @@ do
         xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
+running:
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
     :: ELSE2(_PID, local_xReturn == true)
     fi

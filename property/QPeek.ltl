@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> []<>PeekM@running }

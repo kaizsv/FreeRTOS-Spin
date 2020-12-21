@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> ([]<>C_CTRL@running && []<>SUSP_RECV@running) }

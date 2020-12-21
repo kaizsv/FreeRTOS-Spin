@@ -23,6 +23,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
 
+#ifdef LTL
+    #include "../property/GenQTest.ltl"
+#endif
+
 #define genqQUEUE_LENGTH    5
 #define intsemNO_BLOCK      0
 #define genqSHORT_BLOCK     2
@@ -147,6 +151,7 @@ do
 
     AWAIT(_PID, ulData = 0; assert(uxQueueMessagesWaiting(xQUEUE) == 0));
 
+running:
     AWAIT(_PID, ulLoopCounter = INC_VAR_AND_WRAP_AROUND(ulLoopCounter));
 od
 }
@@ -259,6 +264,7 @@ proctype MuLow()
 do
 ::  prvTakeTwoMutexesReturnInDifferentOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, local_var3);
 
+running:
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
     #endif

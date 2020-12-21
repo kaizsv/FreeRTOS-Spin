@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> ([]<>prvSemaphoreTest1@running && []<>prvSemaphoreTest2@running && []<>prvSemaphoreTest3@running && []<>prvSemaphoreTest4@running) }

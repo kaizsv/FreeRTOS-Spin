@@ -28,12 +28,15 @@ acceptance: clean .ltl $(PAN)
 non-progress: clean .np $(PAN)
 	./$(PAN) $(RUNTIME_FLAGS)
 
-.PHONY: trail trail_full clean distclean
+.PHONY: trail trail_full trail_ltl clean distclean
 trail:
 	$(SPIN) $(TRAIL_FLAGS) $(TARGET_PATH)
 
 trail_full:
 	$(SPIN) -s -r -l -g $(TRAIL_FLAGS) $(TARGET_PATH)
+
+trail_ltl:
+	$(SPIN) -s -r -l -g -X $(TRAIL_FLAGS) $(TARGET_PATH)
 
 clean:
 	rm -rf $(PAN)*

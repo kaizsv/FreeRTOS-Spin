@@ -24,6 +24,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
 
+#ifdef LTL
+    #include "../property/BlockQ.ltl"
+#endif
+
 #define xBlockTime  100
 #define xDontBlock  0
 
@@ -68,6 +72,7 @@ do
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
+running:
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)
@@ -88,6 +93,7 @@ proctype QProdB2()
 do
 ::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+running:
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
     #if (configUSE_PREEMPTION == 0)
@@ -110,6 +116,7 @@ do
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
+running:
         INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)
@@ -131,6 +138,7 @@ proctype QProdB4()
 do
 ::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+running:
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
     #if (configUSE_PREEMPTION == 0)
@@ -149,6 +157,7 @@ proctype QProdB5()
 do
 ::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+running:
     INCREASE_VAR_AND_INTOVERFLOW_3(usValue);
 
     #if (configUSE_PREEMPTION == 0)
@@ -171,6 +180,7 @@ do
     :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
+running:
         INCREASE_VAR_AND_INTOVERFLOW_3(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)

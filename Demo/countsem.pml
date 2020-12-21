@@ -17,6 +17,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
 
+#ifdef LTL
+    #include "../property/countsem.ltl"
+#endif
+
 #define countMAX_COUNT_VALUE    10
 
 #define countSTART_AT_MAX_COUNT 170 /* 0xaa */
@@ -40,6 +44,8 @@ inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_
 
         xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
         AWAIT(_id, assert(xReturn == true); xReturn = false);
+runningDec:
+        AWAIT(_id, skip)
     }
 
 #if (configUSE_PREEMPTION == 0)
@@ -61,6 +67,8 @@ inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_
 
         xSemaphoreGive(xSemaphore, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
         AWAIT(_id, assert(xReturn == true); xReturn = false);
+runningInc:
+        AWAIT(_id, skip)
     }
 
 #if (configUSE_PREEMPTION == 0)
@@ -77,7 +85,22 @@ proctype CNT1()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK);
-    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+    // pxParameter->uxExpectedStartCount == countSTART_AT_MAX_COUNT
+    // prvDecrementSemaphoreCount: remove the running label
+    xSemaphoreGive(xP1_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    AWAIT(_PID, assert(local_xReturn == false));
+    for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
+        AWAIT(_PID, assert(uxSemaphoreGetCount(xP1_xSemaphore) == (countMAX_COUNT_VALUE - ux)));
+        xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+        AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+    }
+#if (configUSE_PREEMPTION == 0)
+    taskYIELD(_PID, local_var1);
+#endif
+    AWAIT(_PID, ux = 0; assert(uxSemaphoreGetCount(xP1_xSemaphore) == 0));
+    xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    AWAIT(_PID, assert(local_xReturn == false))
+    // end prvDecrementSemaphoreCount //////////////////////////////
 
     xSemaphoreTake_NB(xP1_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));

@@ -22,6 +22,10 @@
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
 
+#ifdef LTL
+    #include "../property/QPeek.ltl"
+#endif
+
 #define qpeekQUEUE_LENGTH   5
 #define qpeekNO_BLOCK       0
 #define qpeekSHORT_DELAY    10
@@ -119,6 +123,7 @@ do
 
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
+running:
     vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
 od
 }

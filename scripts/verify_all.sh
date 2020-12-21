@@ -3,7 +3,29 @@
 set -e
 set -o pipefail
 
-DEMOS=Demo/*.pml
+if [ -z "$1" ];
+then
+    OPTION=safety_dfs
+else
+    case "$1" in
+        -dfs)
+            OPTION=safety_dfs
+            ;;
+        -bfs)
+            OPTION=safety_bfs
+            ;;
+        -np|-non-progress)
+            OPTION=non-progress
+            ;;
+        -ltl)
+            OPTION=acceptance
+            ;;
+        *)
+            echo "Usage: -dfs, -bfs, -np, or -ltl"
+            exit 2
+            ;;
+    esac
+fi
 
 if [ -d ./outputs ];
 then
@@ -12,13 +34,14 @@ else
     mkdir -p outputs
 fi
 
+DEMOS=Demo/*.pml
 for demo in $DEMOS
 do
     OUT_FILE=./outputs/$(basename $demo .pml).result
-    make safety_dfs TARGET=$demo | tee $OUT_FILE
+    make $OPTION TARGET=$demo | tee $OUT_FILE
 
     # Polish the output file
-    if command -V awk &> /dev/null
+    if [ -x "$(command -v awk)" ];
     then
         awk 'BEGIN {LAST_LINE=""} /^Depth=/ {LAST_LINE=$0; next}
             /^pan: resizing hashtable to/ {print $0; next}

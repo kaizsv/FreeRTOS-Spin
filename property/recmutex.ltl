@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> ([]<>Rec1@running && []<>Rec2@running && []<>Rec3@running) }

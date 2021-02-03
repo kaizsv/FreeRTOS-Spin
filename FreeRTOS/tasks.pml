@@ -428,7 +428,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
             // xTaskIncrementTick
             if
             :: SELE3_AS(_id, uxSchedulerSuspended == 0, assert(pxTCB == NULL_byte));
-                AWAIT_DS(_id, assert(xTickCount < 256);
+                AWAIT_DS(_id, assert(xTickCount < 254);
                     xTickCount = (is_xTickCount_active -> xTickCount + 1 : 0));
                 if
                 :: SELE2_AS(_id, is_xTickCount_active && xTickCount >= xNextTaskUnblockTicks);
@@ -496,7 +496,7 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
 {
     if
     :: SELE3_AS(_id, uxSchedulerSuspended == 0, assert(xSwitchRequired == false && pxTCB == NULL_byte));
-        AWAIT_DS(_id, assert(xTickCount < 256);
+        AWAIT_DS(_id, assert(xTickCount < 254);
             xTickCount = (is_xTickCount_active -> xTickCount + 1 : 0)
         );
         if

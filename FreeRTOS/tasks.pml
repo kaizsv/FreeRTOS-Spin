@@ -161,7 +161,7 @@ inline xTaskCreate_fixed(pcName, Priority)
 #endif
     vListInitialiseItem(TCB(pcName).ListItems[xState]);
     vListInitialiseItem(TCB(pcName).ListItems[xEvent]);
-    listSET_LIST_ITEM_VALUE(TCB(pcName).ListItems[xEvent], configMAX_PRIORITIES - Priority);
+    listSET_LIST_ITEM_VALUE(TCB(pcName).ListItems[xEvent], configMAX_PRIORITIES - (Priority));
 
     /* prvAddNewTaskToReadyList */
     if
@@ -258,7 +258,7 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
 #endif
         if
         :: SELE2_AS(_id, (listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0);
-            AWAIT_DS(_id, listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent], configMAX_PRIORITIES - uxNewPriority))
+            AWAIT_DS(_id, listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent], configMAX_PRIORITIES - (uxNewPriority)))
         :: ELSE2_AS(_id, (listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
         fi;
 
@@ -784,7 +784,7 @@ inline vTaskPriorityDisinheritAfterTimeout(_id, pxMutexHolder, uxHighestPriority
                 if
                 :: SELE2_AS(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0);
                     AWAIT_DS(_id,
-                        listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - uxPriorityToUse);
+                        listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - (uxPriorityToUse));
                         uxPriorityToUse = NULL_byte /* reset variable */)
                 :: ELSE2_AS(_id, (listGET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent]) & taskEVENT_LIST_ITEM_VALUE_IN_USE) == 0)
                 fi;

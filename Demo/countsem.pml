@@ -40,7 +40,7 @@ inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_
     AWAIT(_id, assert(xReturn == false));
 
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
-        AWAIT(_id, assert(uxSemaphoreGetCount(xSemaphore) == (countMAX_COUNT_VALUE - ux)));
+        AWAIT(_id, assert(uxSemaphoreGetCount(xSemaphore) == (countMAX_COUNT_VALUE - (ux))));
 
         xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
         AWAIT(_id, assert(xReturn == true); xReturn = false);
@@ -90,7 +90,7 @@ proctype CNT1()
     xSemaphoreGive(xP1_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
-        AWAIT(_PID, assert(uxSemaphoreGetCount(xP1_xSemaphore) == (countMAX_COUNT_VALUE - ux)));
+        AWAIT(_PID, assert(uxSemaphoreGetCount(xP1_xSemaphore) == (countMAX_COUNT_VALUE - (ux))));
         xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     }

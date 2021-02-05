@@ -671,7 +671,7 @@ inline prvResetNextTaskUnblockTicks(_id)
 inline xTaskPriorityInherit(_id, pxMutexHolder, xReturn)
 {
     if
-    :: SELE3_AS(_id, pxMutexHolder != NULL_byte, assert(!xReturn));
+    :: SELE3_AS(_id, FIRST_TASK <= pxMutexHolder && pxMutexHolder < NULL_byte, assert(!xReturn));
         if
         :: SELE2_AS(_id, TCB(pxMutexHolder).uxPriority < TCB(pxCurrentTCB).uxPriority);
             if
@@ -703,14 +703,14 @@ inline xTaskPriorityInherit(_id, pxMutexHolder, xReturn)
             :: ELSE2_AS(_id, TCB(pxMutexHolder).uxBasePriority < TCB(pxCurrentTCB).uxPriority)
             fi
         fi
-    :: ELSE3_AS(_id, pxMutexHolder != NULL_byte, assert(!xReturn))
+    :: ELSE3_AS(_id, FIRST_TASK <= pxMutexHolder && pxMutexHolder < NULL_byte, assert(!xReturn))
     fi
 }
 
 inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn)
 {
     if
-    :: SELE2_AS(_id, pxMutexHolder != NULL_byte);
+    :: SELE2_AS(_id, FIRST_TASK <= pxMutexHolder && pxMutexHolder < NULL_byte);
         AWAIT_DS(_id, assert(pxMutexHolder == pxCurrentTCB && TCB(pxMutexHolder).uxMutexesHeld != NULL_byte);
             TCB(pxMutexHolder).uxMutexesHeld = TCB(pxMutexHolder).uxMutexesHeld - 1);
 
@@ -737,7 +737,7 @@ inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn)
             fi
         :: ELSE2_AS(_id, TCB(pxMutexHolder).uxPriority != TCB(pxMutexHolder).uxBasePriority)
         fi
-    :: ELSE3_AS(_id, pxMutexHolder != NULL_byte, assert(xReturn == false))
+    :: ELSE3_AS(_id, FIRST_TASK <= pxMutexHolder && pxMutexHolder < NULL_byte, assert(xReturn == false))
     fi
 }
 

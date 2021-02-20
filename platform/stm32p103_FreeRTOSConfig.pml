@@ -17,7 +17,6 @@ configINCLUDE_FREERTOS_TASK_C_ADDITIONS_H   0
 configUSE_TICKLESS_IDLE                     0
 configUSE_POSIX_ERRNO                       0
 configUSE_NEWLIB_REENTRANT                  0
-configUSE_TICK_HOOK                         0
 configUSE_CO_ROUTINES                       0
 configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES   0
 INCLUDE_xTaskAbortDelay                     0
@@ -34,6 +33,9 @@ INCLUDE_VTaskDelete                         0
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0 // TODO
 #ifndef APP_DEFINED_PRIORITY
     #define configMAX_PRIORITIES            3
+#endif
+#ifndef configUSE_TICK_HOOK
+    #define configUSE_TICK_HOOK             0
 #endif
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         1

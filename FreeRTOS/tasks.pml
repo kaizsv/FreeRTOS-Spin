@@ -471,6 +471,8 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
                 :: ELSE2_AS(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
                 fi;
                 #endif
+                /* Because xPendedTicks is still positive, vApplicationTickHook
+                 * is not executed. */
             :: ELSE2_AS(_id, uxSchedulerSuspended == 0)
             fi;
             // end xTaskIncrementTick
@@ -550,6 +552,14 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
             AWAIT_DS(_id, xSwitchRequired = true)
         :: ELSE2_AS(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
         fi;
+        #endif
+
+        #if (configUSE_TICK_HOOK == 1)
+            if
+            :: SELE2_AS(_id, xPendedTicks == 0);
+                vApplicationTickHook();
+            :: ELSE2_AS(_id, xPendedTicks == 0);
+            fi;
         #endif
 
         #if (configUSE_PREEMPTION == 1)

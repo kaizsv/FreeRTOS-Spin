@@ -46,6 +46,30 @@ inline prvLockQueue(_id, pxQueue, temp_var)
     taskEXIT_CRITICAL(_id, temp_var)
 }
 
+inline xQueueGenericReset(_id, pxQueue, temp_var, temp_bit)
+{
+    taskENTER_CRITICAL(_id, temp_var);
+    AWAIT_DS(_id,
+        assert(pxQueue.uxLength != 0); // The queue is already declared.
+        pxQueue.uxMessagesWaiting = 0;
+        queueSET_pcWriteTo(pxQueue, 0);
+        queueSET_pcReadFrom(pxQueue, pxQueue.uxLength - 1);
+        queueSET_cRxLock(pxQueue, queueUNLOCKED);
+        queueSET_cTxLock(pxQueue, queueUNLOCKED);
+    );
+    if
+    :: SELE2_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]) == false);
+        xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], temp_bit);
+        if
+        :: SELE3_AS(_id, temp_bit != false, temp_bit = false);
+            queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
+        :: ELSE2_AS(_id, temp_bit != false);
+        fi
+    :: ELSE2_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]) == false);
+    fi;
+    taskEXIT_CRITICAL(_id, temp_var);
+}
+
 inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType)
 {
     assert(QueueID < promela_QUEUE_NUMBER && 0 < uxQueueLength);

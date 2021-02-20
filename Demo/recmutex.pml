@@ -58,15 +58,15 @@ do
     AWAIT(_PID, assert(local_xReturn == false));
 
     do
-    :: SELE3(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
+    :: SELE(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
         xSemaphoreTakeRecursive(_PID, xMutex, recmu15ms_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
         vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1, local_var2);
-    :: ELSE3(_PID, ux < recmuMAX_COUNT, ux = 0; break)
+    :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0; break)
     od;
 
     do
-    :: SELE3(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
+    :: SELE(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
         vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1, local_var2);
         xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
@@ -74,7 +74,7 @@ do
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
         #endif
-    :: ELSE3(_PID, ux < recmuMAX_COUNT, ux = 0; break)
+    :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0; break)
     od;
 
     xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
@@ -121,7 +121,7 @@ proctype Rec3()
 do
 ::  xSemaphoreTakeRecursive(_PID, xMutex, recmuNO_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(xBlockingIsSuspended && xControllingIsSuspended));
 
 running:
@@ -147,7 +147,7 @@ running:
         #if (INCLUDE_uxTaskPriorityGet == 1)
         AWAIT(_PID, assert(uxTaskPriorityGet(NULL_byte) == recmuPOLLING_TASK_PRIORITY));
         #endif
-    :: ELSE2(_PID, local_xReturn == true)
+    :: ELSE(_PID, local_xReturn == true)
     fi;
 
     #if (configUSE_PREEMPTION == 0)

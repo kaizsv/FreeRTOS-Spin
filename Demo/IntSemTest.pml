@@ -36,18 +36,18 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #define vApplicationTickHook() /* vInterruptSemaphorePeriodicTest */ \
     AWAIT_DS(_PID, xTimeNow = ((xOkToGiveMutex || xOkToGiveCountingSemaphore) -> xTimeNow + 1 : 0)); \
     if \
-    :: SELE3_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD, xTimeNow = 0); \
+    :: SELE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD, xTimeNow = 0); \
         if \
-        :: SELE2_AS(_PID, xOkToGiveMutex != false); \
+        :: SELE_AS(_PID, xOkToGiveMutex != false); \
             xQueueGiveFromISR(_PID, xISRMutex, pxTCB); \
-        :: ELSE2_AS(_PID, xOkToGiveMutex != false); \
+        :: ELSE_AS(_PID, xOkToGiveMutex != false); \
         fi; \
         if \
-        :: SELE2_AS(_PID, xOkToGiveCountingSemaphore != false); \
+        :: SELE_AS(_PID, xOkToGiveCountingSemaphore != false); \
             xQueueGiveFromISR(_PID, xISRCountingSemaphore, pxTCB); \
-        :: ELSE2_AS(_PID, xOkToGiveCountingSemaphore != false); \
+        :: ELSE_AS(_PID, xOkToGiveCountingSemaphore != false); \
         fi; \
-    :: ELSE2_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD); \
+    :: ELSE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD); \
     fi
 
 #include "../FreeRTOS.pml"

@@ -44,16 +44,16 @@ proctype QConsNB()
     assert(_PID == FIRST_TASK + 0);
 do
 ::  do
-    :: SELE2(_PID, uxQueueMessagesWaiting(xPolledQueue));
+    :: SELE(_PID, uxQueueMessagesWaiting(xPolledQueue));
         xQueueReceive_NB(xPolledQueue, usData, pollqNO_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         if
-        :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+        :: SELE(_PID, local_xReturn == true, local_xReturn = false);
             AWAIT(_PID, assert(usData == usExpectedValue));
 running:
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue)
-        :: ELSE2(_PID, local_xReturn == true)
+        :: ELSE(_PID, local_xReturn == true)
         fi
-    :: ELSE3(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
+    :: ELSE(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
     od;
     vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1, local_var2);
 od
@@ -69,12 +69,12 @@ proctype QProdNB()
     assert(_PID == FIRST_TASK + 1);
 do
 ::  do
-    :: SELE3(_PID, usLoop < usNumToProduce, usLoop = usLoop + 1);
+    :: SELE(_PID, usLoop < usNumToProduce, usLoop = usLoop + 1);
         xQueueSendToBack_NB(xPolledQueue, usValue, pollqNO_DELAY, local_xReturn, local_bit, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 running:
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
-    :: ELSE3(_PID, usLoop < usNumToProduce, usLoop = 0; break)
+    :: ELSE(_PID, usLoop < usNumToProduce, usLoop = 0; break)
     od;
     vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1, local_var2);
 od

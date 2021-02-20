@@ -9,20 +9,20 @@
     /* Skip interrupt priority test */ \
     /* uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR(_id, pxTCB);*/ \
     if \
-    :: SELE2_AS(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength); \
+    :: SELE_AS(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength); \
         AWAIT_DS(_id, pxQueue.uxMessagesWaiting = pxQueue.uxMessagesWaiting + 1); \
         if \
-        :: SELE2_AS(_id, queueGET_cTxLock(pxQueue) == 15); \
+        :: SELE_AS(_id, queueGET_cTxLock(pxQueue) == 15); \
             if \
-            :: SELE2_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]) == false); \
+            :: SELE_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]) == false); \
                 /* TODO: pxHigherPriorityTaskWoken */ \
                 xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], _); \
-            :: ELSE2_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]) == false); \
+            :: ELSE_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]) == false); \
             fi; \
-        :: ELSE2_AS(_id, queueGET_cTxLock(pxQueue) == 15); \
+        :: ELSE_AS(_id, queueGET_cTxLock(pxQueue) == 15); \
             AWAIT_DS(_id, queueSET_cTxLock(pxQueue, queueGET_cTxLock(pxQueue) + 1)); \
         fi; \
-    :: ELSE2_AS(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength); \
+    :: ELSE_AS(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength); \
     fi; \
     /* portCLEAR_INTERRUPT_MASK_FROM_ISR(_id, 0, pxTCB); */
 

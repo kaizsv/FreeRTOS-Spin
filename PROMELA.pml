@@ -31,4 +31,11 @@ byte EP = NULL_byte; /* Executing Process */
 #define SELE3_AS(id, cond, stmnt) atomic { (cond) -> assert(id == EP); stmnt }
 #define ELSE3_AS(id, cond, stmnt) atomic { !(cond) -> assert(id == EP); stmnt }
 
+#define __SELECT23__(_1, _2, _3, NAME, ...) NAME
+
+#define SELE(...)       __SELECT23__(__VA_ARGS__, SELE3, SELE2)(__VA_ARGS__)
+#define ELSE(...)       __SELECT23__(__VA_ARGS__, ELSE3, ELSE2)(__VA_ARGS__)
+#define SELE_AS(...)    __SELECT23__(__VA_ARGS__, SELE3_AS, SELE2_AS)(__VA_ARGS__)
+#define ELSE_AS(...)    __SELECT23__(__VA_ARGS__, ELSE3_AS, ELSE2_AS)(__VA_ARGS__)
+
 #endif

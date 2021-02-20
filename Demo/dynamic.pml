@@ -90,7 +90,7 @@ proctype C_CTRL()
 do
 ::  /* Reset ulCounter will not help in verification */
     do
-    :: SELE3(_PID, sLoops < priLOOPS, sLoops = sLoops + 1);
+    :: SELE(_PID, sLoops < priLOOPS, sLoops = sLoops + 1);
         vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
             ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
         vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
@@ -104,7 +104,7 @@ do
         vTaskSuspendAll(_PID);
             AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
         xTaskResumeAll(_PID, local_var1, _, local_var2);
-    :: ELSE3(_PID, sLoops < priLOOPS, sLoops = 0; break)
+    :: ELSE(_PID, sLoops < priLOOPS, sLoops = 0; break)
     od;
 
     vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
@@ -154,7 +154,7 @@ proctype SUSP_RECV()
     assert(_PID == xQueueReceiveWhenSuspendedHandler);
 do
 ::  do
-    :: SELE3(_PID, xGotValue == false, assert(local_xReturn == false) /* check */);
+    :: SELE(_PID, xGotValue == false, assert(local_xReturn == false) /* check */);
         vTaskSuspendAll(_PID);
         vTaskSuspendAll(_PID);
         xQueueReceive(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
@@ -164,7 +164,7 @@ do
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
         #endif
-    :: ELSE3(_PID, xGotValue == false, xGotValue = false; break)
+    :: ELSE(_PID, xGotValue == false, xGotValue = false; break)
     od;
 running:
     AWAIT(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);

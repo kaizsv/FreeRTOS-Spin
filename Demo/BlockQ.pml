@@ -69,7 +69,7 @@ proctype QConsB1()
 do
 ::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
 running:
@@ -78,7 +78,7 @@ running:
         #if (configUSE_PREEMPTION == 0)
         // pxQueueParameters1_xBlockTime is not zero
         #endif
-    :: ELSE2(_PID, local_xReturn == true)
+    :: ELSE(_PID, local_xReturn == true)
     fi
 od
 }
@@ -113,7 +113,7 @@ proctype QConsB3()
 do
 ::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
 running:
@@ -123,7 +123,7 @@ running:
         // pxQueueParameters3_xBlockTime is zero
         taskYIELD(_PID, local_var1);
         #endif
-    :: ELSE2(_PID, local_xReturn == true)
+    :: ELSE(_PID, local_xReturn == true)
     fi
 od
 }
@@ -177,7 +177,7 @@ proctype QConsB6()
 do
 ::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue));
         /* Catch-up */
 running:
@@ -186,7 +186,7 @@ running:
         #if (configUSE_PREEMPTION == 0)
         // pxQueueParameters6_xBlockTime is not zero
         #endif
-    :: ELSE2(_PID, local_xReturn == true)
+    :: ELSE(_PID, local_xReturn == true)
     fi
 od
 }

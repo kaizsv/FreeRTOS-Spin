@@ -45,7 +45,7 @@ proctype prvSemaphoreTest1()
 do
 ::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
         AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
@@ -56,7 +56,7 @@ do
 
 running:
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
-    :: ELSE2(_PID, local_xReturn == true);
+    :: ELSE(_PID, local_xReturn == true);
         taskYIELD(_PID, local_var1)
     fi
 od
@@ -72,7 +72,7 @@ proctype prvSemaphoreTest2()
 do
 ::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
         AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
@@ -83,7 +83,7 @@ do
 
 running:
         vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
-    :: ELSE2(_PID, local_xReturn == true);
+    :: ELSE(_PID, local_xReturn == true);
         taskYIELD(_PID, local_var1)
     fi
 od
@@ -99,7 +99,7 @@ proctype prvSemaphoreTest3()
 do
 ::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
         AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
@@ -110,7 +110,7 @@ do
 
 running:
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
-    :: ELSE2(_PID, local_xReturn == true)
+    :: ELSE(_PID, local_xReturn == true)
     fi
 od
 }
@@ -125,7 +125,7 @@ proctype prvSemaphoreTest4()
 do
 ::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
-    :: SELE3(_PID, local_xReturn == true, local_xReturn = false);
+    :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
         AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
@@ -136,7 +136,7 @@ do
 
 running:
         vTaskDelay(_PID, xDelay, local_bit, local_var1, local_var2)
-    :: ELSE2(_PID, local_xReturn == true)
+    :: ELSE(_PID, local_xReturn == true)
     fi
 od
 }

@@ -39,7 +39,7 @@
 #define xMediumPriorityMutexTask    (FIRST_TASK + 2)
 #define xHighPriorityMutexTask      (FIRST_TASK + 3)
 
-QueueDeclarator(1, byte);
+SemaphoreDeclarator(1, byte);
 QueueDeclarator(5, byte);
 
 QueueHandle_t(xQUEUE, 5, byte);

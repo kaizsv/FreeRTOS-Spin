@@ -21,6 +21,13 @@
         uxItemType multi_bytes[uxQueueLength];          \
     }
 
+/* A counter is enough for a mutex or semaphore. */
+#define __UnionSemDeclarator(uxQueueLength, uxItemType)     \
+    typedef __UnionSem_ ## uxItemType ## uxQueueLength {    \
+        byte single_byte;                                   \
+        uxItemType multi_bytes[1];                          \
+    }
+
 #define queueGET_pcWriteTo(pxQueue) get_upper_byte(pxQueue.xQueue.pcWriteTo_pcReadFrom)
 inline queueSET_pcWriteTo(pxQueue, value)
 {
@@ -42,21 +49,34 @@ inline queueSET_pcReadFrom(pxQueue, value)
 #define __QueueDeclarator(uxQueueLength, uxItemType)            \
     typedef __QueueHandle_t_ ## uxItemType ## uxQueueLength {   \
         byte ListIndex_uxQueueType;                             \
-                                                                \
         __Union_ ## uxItemType ## uxQueueLength u;              \
-                                                                \
         byte uxMessagesWaiting;                                 \
         byte uxLength;                                          \
-                                                                \
         byte cRxLock_cTxLock;                                   \
     }
 
+#define __SemDeclarator(uxQueueLength, uxItemType)          \
+    typedef __SemHandle_t_ ## uxItemType ## uxQueueLength { \
+        byte ListIndex_uxQueueType;                         \
+        __UnionSem_ ## uxItemType ## uxQueueLength u;       \
+        byte uxMessagesWaiting;                             \
+        byte uxLength;                                      \
+        byte cRxLock_cTxLock;                               \
+    }
+
 #define QueueDeclarator(uxQueueLength, uxItemType)  \
-    __UnionDeclarator(uxQueueLength, uxItemType)    \
+    __UnionDeclarator(uxQueueLength, uxItemType);   \
     __QueueDeclarator(uxQueueLength, uxItemType)
 
+#define SemaphoreDeclarator(uxQueueLength, uxItemType)  \
+    __UnionSemDeclarator(uxQueueLength, uxItemType);    \
+    __SemDeclarator(uxQueueLength, uxItemType)
+
 #define QueueHandle_t(NAME, uxQueueLength, uxItemType)  \
-    __QueueHandle_t_ ## uxItemType ## uxQueueLength NAME;
+    __QueueHandle_t_ ## uxItemType ## uxQueueLength NAME
+
+#define SemaphoreHandle_t(NAME, uxQueueLength, uxItemType)  \
+    __SemHandle_t_ ## uxItemType ## uxQueueLength NAME
 
 #define queueGET_ListIndex(pxQueue) get_upper_byte(pxQueue.ListIndex_uxQueueType)
 inline queueSET_ListIndex(pxQueue, value)

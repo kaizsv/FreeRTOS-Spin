@@ -23,7 +23,7 @@
     #include "../property/semtest.ltl"
 #endif
 
-QueueDeclarator(1, byte);
+SemaphoreDeclarator(1, byte);
 
 SemaphoreHandle_t(pxFirstSemaphore_xSemaphore, 1, byte);
 byte pxFirstSemaphore_pulSharedVariable = 0;

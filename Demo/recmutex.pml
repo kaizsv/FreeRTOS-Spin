@@ -34,7 +34,7 @@
 #define recmuNO_DELAY       0
 #define recmu15ms_DELAY     15
 
-QueueDeclarator(1, byte);
+SemaphoreDeclarator(1, byte);
 SemaphoreHandle_t(xMutex, 1, byte);
 
 #define INC_AND_WRAP_AROUND(val)    ((val + 1) % 8)

@@ -16,13 +16,12 @@
 
 #include "../FreeRTOS/include/Queue_Declarator.pml"
 
-QueueDeclarator(1, byte);
-QueueDeclarator(3, byte);
+SemaphoreDeclarator(1, byte);
+SemaphoreDeclarator(3, byte);
 
-/* Replace SemaphoreHandle_t with QueueHandle_t */
-QueueHandle_t(xISRMutex, 1, byte);
-QueueHandle_t(xISRCountingSemaphore, 3, byte);
-QueueHandle_t(xMasterSlaveMutex, 1, byte);
+SemaphoreHandle_t(xISRMutex, 1, byte);
+SemaphoreHandle_t(xISRCountingSemaphore, 3, byte);
+SemaphoreHandle_t(xMasterSlaveMutex, 1, byte);
 bool xOkToGiveMutex = false, xOkToGiveCountingSemaphore = false;
 
 #include "../FreeRTOS/queueFromISR.pml"

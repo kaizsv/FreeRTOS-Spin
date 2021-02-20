@@ -75,10 +75,15 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
     assert(QueueID < promela_QUEUE_NUMBER && 0 < uxQueueLength);
 
     /* Initialize Queue Storage */
-    for (idx: 0 .. (uxQueueLength - 1)) {
-        pxNewQueue.u.multi_bytes[idx] = NULL_byte
-    }
-    idx = 0;
+    if
+    :: ucQueueType == queueQUEUE_TYPE_BASE ->
+        for (idx: 0 .. (uxQueueLength - 1)) {
+            pxNewQueue.u.multi_bytes[idx] = NULL_byte
+        }
+        idx = 0;
+    :: else ->
+        pxNewQueue.u.multi_bytes[0] = NULL_byte
+    fi;
 
     /* prvInitialseNewQueue */
     queueSET_ListIndex(pxNewQueue, QueueID * 2);

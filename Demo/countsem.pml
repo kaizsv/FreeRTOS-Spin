@@ -29,7 +29,7 @@
 #define countNUM_TEST_TASKS 2
 #define countDONT_BLOCK     0
 
-QueueDeclarator(10, byte);
+SemaphoreDeclarator(10, byte);
 
 SemaphoreHandle_t(xP1_xSemaphore, 10, byte);
 SemaphoreHandle_t(xP2_xSemaphore, 10, byte);

@@ -3,8 +3,6 @@
 
 #include "queue.h.pml"
 
-#define SemaphoreHandle_t   QueueHandle_t
-
 #define semBINARY_SEMAPHORE_QUEUE_LENGTH    1
 #define semCOUNTING_SEMAPHORE_QUEUE_LENGTH  0
 #define semSEMAPHORE_QUEUE_ITEM_LENGTH      0

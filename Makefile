@@ -4,6 +4,10 @@ TARGET ?= $(DEFAULT_TARGET)
 TARGET_DIR = Demo
 TARGET_PATH = $(addprefix $(TARGET_DIR)/, $(notdir $(TARGET)))
 
+ifdef $(notdir $(basename $(TARGET)))_APP_DEPTH
+	MAX_DEPTH = $($(notdir $(basename $(TARGET)))_APP_DEPTH)
+endif
+
 CC = gcc
 PAN = pan
 SPIN = spin

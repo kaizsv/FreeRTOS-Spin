@@ -53,6 +53,10 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
 
+#ifdef LTL
+    #include "../property/IntSemTest.ltl"
+#endif
+
 #define intsemMASTER_PRIORITY   (tskIDLE_PRIORITY)
 #define intsemSLAVE_PRIORITY    (tskIDLE_PRIORITY + 1)
 
@@ -174,10 +178,12 @@ proctype IntMuM()
 do
 ::  prvTakeAndGiveInTheSameOrder(_PID, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
+running1:
     vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1, local_var2);
 
     prvTakeAndGiveInTheOppositeOrder(_PID, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
+running2:
     vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1, local_var2);
 od
 }
@@ -203,6 +209,7 @@ do
         assert((xISRCountingSemaphore.uxLength - xISRCountingSemaphore.uxMessagesWaiting) == 0)
     );
 
+running1:
     do
     :: xSemaphoreTake_NB(xISRCountingSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
        AWAIT(_PID,
@@ -223,6 +230,11 @@ do
     AWAIT(_PID, xOkToGiveCountingSemaphore = false);
 
     vTaskPrioritySet(_PID, NULL_byte, tskIDLE_PRIORITY, local_var1, local_bit, local_var2, local_var3);
+
+#ifdef LTL
+running2:
+    AWAIT(_PID, skip)
+#endif
 od
 }
 

@@ -1,0 +1,1 @@
+ltl { []<>(_last == 2) -> ([]<>IntMuM@running1 && []<>IntMuM@running2 && []<>IntCnt@running1 && []<>IntCnt@running2) }

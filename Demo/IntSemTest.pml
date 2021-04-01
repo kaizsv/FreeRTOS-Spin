@@ -27,9 +27,9 @@ bool xOkToGiveMutex = false, xOkToGiveCountingSemaphore = false;
 #include "../FreeRTOS/queueFromISR.pml"
 
 local byte xTimeNow = 0; /* Only for SysTick_Handler */
-#define intsemINTERRUPT_MUTEX_GIVE_PERIOD   40
-#define intsemINTERRUPT_MUTEX_GIVE_PERIOD_D 80  /* Double */
-#define intsemINTERRUPT_MUTEX_GIVE_PERIOD_Q 160 /* Quardruple (intsemMAX_COUNT + 1) */
+#define intsemINTERRUPT_MUTEX_GIVE_PERIOD   20
+#define intsemINTERRUPT_MUTEX_GIVE_PERIOD_D 40  /* Double */
+#define intsemINTERRUPT_MUTEX_GIVE_PERIOD_Q 80  /* Quardruple (intsemMAX_COUNT + 1) */
 
 #define configUSE_TICK_HOOK 1
 #define vApplicationTickHook() /* vInterruptSemaphorePeriodicTest */ \

@@ -273,8 +273,8 @@ inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
 
     /* Make sure the index is left pointing to a valid item */
     if
-    :: pxList.pxIndex == idx ->
-        pxList.pxIndex = ((pxList.pxIndex > 0) -> pxList.pxIndex - 1 : xListEnd)
+    :: (pxList.pxIndex >= idx) && (pxList.pxIndex ^ xListEnd) ->
+        pxList.pxIndex = ((pxList.pxIndex ^ 0) -> pxList.pxIndex - 1 : xListEnd)
     :: else
     fi;
 

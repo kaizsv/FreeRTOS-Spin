@@ -167,60 +167,75 @@ inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEve
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE));
 
-    if
-    :: pxList.pxIndex == xListEnd ->
-        for (idx: 0 .. (SIZE - 1)) {
-            if
-            :: listPOINTER_IS_NULL(pxList.ps[idx]) ->
-                listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-                listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
-                break
-            :: else
-            fi
-        }
-        idx = 0
-    :: else ->
-        for (idx: 1 .. (SIZE - pxList.pxIndex - 1)) {
-            swapListPointers(pxList.ps[SIZE - idx], pxList.ps[SIZE - idx - 1])
-        }
-        idx = 0;
+    /* Find the next null item */
+    for (idx: 0 .. (SIZE - 1)) {
+        if
+        :: listPOINTER_IS_NULL(pxList.ps[idx]) -> break
+        :: else
+        fi
+    }
 
-        assert(listPOINTER_IS_NULL(pxList.ps[pxList.pxIndex]));
-        listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-        listPOINTER_SET(pxList.ps[pxList.pxIndex], pxNewListItemTCB, xStateORxEvent);
-        pxList.pxIndex = pxList.pxIndex + 1
-    fi
+    if
+    :: pxList.pxIndex ^ xListEnd ->
+        assert(pxList.pxIndex < idx);
+        do
+        :: pxList.pxIndex < idx ->
+            swapListPointers(pxList.ps[idx - 1], pxList.ps[idx]);
+            idx = idx - 1
+        :: else ->
+            assert(pxList.pxIndex == idx);
+            pxList.pxIndex = pxList.pxIndex + 1;
+            break
+        od
+    :: else
+    fi;
+
+    assert(listPOINTER_IS_NULL(pxList.ps[idx]));
+    listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
+    listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
+    idx = 0
 }
 
 inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, temp_var)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE) && temp_var == NULL_byte);
 
-    /* find the index of pxNewListItem in pxList */
-    for (temp_var: 0 .. (SIZE - 1)) {
+    for (idx: 0 .. (SIZE - 1)) {
+        /* Find the next null item */
         if
-        :: listPOINTER_IS_NULL(pxList.ps[temp_var]) ||
-           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, temp_var)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
-            break
+        :: listPOINTER_IS_NULL(pxList.ps[idx]) -> break;
+        :: else
+        fi;
+        /* Find the first place to insert the new item */
+        if
+        :: (temp_var == NULL_byte) &&
+           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
+            temp_var = idx
         :: else
         fi
     }
 
-    /* replace the item at the index of pxList by the last NULL pointer */
     if
-    :: !listPOINTER_IS_NULL(pxList.ps[temp_var]) ->
-        for (idx: 1 .. (SIZE - temp_var - 1)) {
-            swapListPointers(pxList.ps[SIZE - idx], pxList.ps[SIZE - idx - 1])
-        }
-        idx = 0
+    :: temp_var ^ NULL_byte ->
+        /* replace the item at the temp_var by the last null item */
+        assert(temp_var < idx);
+        do
+        :: temp_var < idx ->
+            swapListPointers(pxList.ps[idx - 1], pxList.ps[idx]);
+            idx = idx - 1
+        :: else ->
+            assert(temp_var == idx);
+            temp_var = NULL_byte;
+            break
+        od
     :: else
     fi;
 
     /* place pxNewListItem at the index position of pxList */
-    assert(listPOINTER_IS_NULL(pxList.ps[temp_var]));
+    assert(listPOINTER_IS_NULL(pxList.ps[idx]));
     listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-    listPOINTER_SET(pxList.ps[temp_var], pxNewListItemTCB, xStateORxEvent);
-    temp_var = NULL_byte
+    listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
+    idx = 0
 }
 
 #if 0

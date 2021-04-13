@@ -15,18 +15,30 @@ inline MSR_BASEPRI(val)
     BASEPRI = NON_IMPLEMENTED_LOW_BITS(val)
 }
 
-/** exception priorities
-* SHPR3: exp_prio[0] and exp_prio[1]
-* NVIC IP register: other exceptions
-*/
-byte exp_prio[promela_EXP_NUMBER] = 16;
-#define GET_PRIO_EXP(PID)       exp_prio[PID]
-
-inline SET_PRIO_EXP(id, prio)
-{
-    assert(0 <= NON_IMPLEMENTED_LOW_BITS(prio) && NON_IMPLEMENTED_LOW_BITS(prio) < 16);
-    exp_prio[id] = NON_IMPLEMENTED_LOW_BITS(prio)
-}
+/* exception priority */
+#ifdef promela_NVIC_NUMBER
+    /*
+    * SHPR3: exp_prio[0] and exp_prio[1]
+    * NVIC IP register: other exceptions
+    */
+    byte exp_prio[promela_EXP_NUMBER] = 16;
+    #define GET_PRIO_EXP(_id)   exp_prio[_id]
+    inline SET_PRIO_EXP(_id, prio)
+    {
+        assert(0 <= NON_IMPLEMENTED_LOW_BITS(prio) && NON_IMPLEMENTED_LOW_BITS(prio) < 16);
+        exp_prio[_id] = NON_IMPLEMENTED_LOW_BITS(prio)
+    }
+#else
+    /* Since the priority of SysTick and PendSV are static, it is unnecessary
+     * to declare the exp_prio array. */
+    #define THE_STATIC_PRIORITY 15
+    #define GET_PRIO_EXP(_id)   THE_STATIC_PRIORITY
+    inline SET_PRIO_EXP(_id, prio)
+    {
+        assert(NON_IMPLEMENTED_LOW_BITS(prio) == THE_STATIC_PRIORITY);
+        assert(_id == PendSV_ID || _id == SysTick_ID);
+    }
+#endif
 
 /** exception pending bits
 * ICSR: SysTick and PendSV pending bits

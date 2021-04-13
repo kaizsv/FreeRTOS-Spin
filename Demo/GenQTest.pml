@@ -156,7 +156,7 @@ running:
 od
 }
 
-inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, temp_var3)
+inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
 {
     xSemaphoreTake(xMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
@@ -173,7 +173,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
 
-    vTaskPrioritySet(_id, NULL_byte, genqMUTEX_TEST_PRIORITY, temp_var1, temp_bool, temp_var2, temp_var3);
+    vTaskPrioritySet(_id, NULL_byte, genqMUTEX_TEST_PRIORITY, temp_var1, temp_bool, temp_var2);
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
 
     vTaskResume(_id, xMediumPriorityMutexTask, temp_bool, temp_var1);
@@ -205,7 +205,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_TEST_PRIORITY));
 
-    vTaskPrioritySet(_id, NULL_byte, genqMUTEX_LOW_PRIORITY, temp_var1, temp_bool, temp_var2, temp_var3);
+    vTaskPrioritySet(_id, NULL_byte, genqMUTEX_LOW_PRIORITY, temp_var1, temp_bool, temp_var2);
 }
 
 inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
@@ -258,11 +258,11 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 proctype MuLow()
 {
     byte idx;
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte, local_var3 = NULL_byte;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == (FIRST_TASK + 1));
 do
-::  prvTakeTwoMutexesReturnInDifferentOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, local_var3);
+::  prvTakeTwoMutexesReturnInDifferentOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
 running:
     #if (configUSE_PREEMPTION == 0)

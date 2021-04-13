@@ -211,10 +211,10 @@ inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
 
 #if (INCLUDE_vTaskPrioritySet == 1)
 
-#define uxCurrentBasePriority   temp_Priority
-#define uxPriorityUsedOnEntry   temp_Priority
+#define uxCurrentBasePriority       temp_var
+#define uxPriorityUsedOnEntry_pset  temp_var
 
-inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_var, temp_Priority)
+inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_var)
 {
     AWAIT(_id, assert(uxNewPriority < configMAX_PRIORITIES && xYieldRequired == false && temp_var == NULL_byte));
 
@@ -230,13 +230,13 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
     if
     :: SELE_AS(_id, uxCurrentBasePriority != uxNewPriority);
         if
-        :: SELE_AS(_id, uxNewPriority > uxCurrentBasePriority);
+        :: SELE_AS(_id, uxNewPriority > uxCurrentBasePriority, uxCurrentBasePriority = NULL_byte);
             if
             :: SELE_AS(_id, pxTCB != pxCurrentTCB && uxNewPriority >= TCB(pxCurrentTCB).uxPriority);
                 AWAIT_DS(_id, xYieldRequired = true)
             :: ELSE_AS(_id, pxTCB != pxCurrentTCB && uxNewPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
-        :: ELSE_AS(_id, uxNewPriority > uxCurrentBasePriority);
+        :: ELSE_AS(_id, uxNewPriority > uxCurrentBasePriority, uxCurrentBasePriority = NULL_byte);
             if
             :: SELE_AS(_id, pxTCB == pxCurrentTCB);
                 AWAIT_DS(_id, xYieldRequired = true)
@@ -244,7 +244,7 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
             fi
         fi;
 
-        AWAIT_DS(_id, uxPriorityUsedOnEntry = TCB(pxTCB).uxPriority);
+        AWAIT_DS(_id, uxPriorityUsedOnEntry_pset = TCB(pxTCB).uxPriority);
 
 #if (configUSE_MUTEXES == 1)
         if
@@ -263,23 +263,23 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
         fi;
 
         if
-        :: SELE_AS(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry, TCB(pxTCB).ListItems[xState]) != false);
-            AWAIT_DS(_id, uxListRemove_pxIndex(pxReadyTasksLists[uxPriorityUsedOnEntry], RLIST_SIZE, pxTCB, xState));
+        :: SELE_AS(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry_pset, TCB(pxTCB).ListItems[xState]) != false);
+            AWAIT_DS(_id, uxListRemove_pxIndex(pxReadyTasksLists[uxPriorityUsedOnEntry_pset], RLIST_SIZE, pxTCB, xState));
             if
-            :: SELE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]));
-                portRESET_READY_PRIORITY(_id, uxPriorityUsedOnEntry, uxTopReadyPriority)
-            :: ELSE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]))
+            :: SELE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry_pset]));
+                portRESET_READY_PRIORITY(_id, uxPriorityUsedOnEntry_pset, uxTopReadyPriority)
+            :: ELSE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry_pset]))
             fi;
             prvAddTaskToReadyList(_id, pxTCB)
-        :: ELSE_AS(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry, TCB(pxTCB).ListItems[xState]) != false)
+        :: ELSE_AS(_id, listIS_CONTAINED_WITHIN(CID_READY_LISTS + uxPriorityUsedOnEntry_pset, TCB(pxTCB).ListItems[xState]) != false)
         fi;
 
         if
-        :: SELE_AS(_id, xYieldRequired != false, xYieldRequired = false; pxTCB = NULL_byte; temp_Priority = NULL_byte);
+        :: SELE_AS(_id, xYieldRequired != false, xYieldRequired = false; pxTCB = NULL_byte; uxPriorityUsedOnEntry_pset = NULL_byte);
             taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
-        :: ELSE_AS(_id, xYieldRequired != false, pxTCB = NULL_byte; temp_Priority = NULL_byte)
+        :: ELSE_AS(_id, xYieldRequired != false, pxTCB = NULL_byte; uxPriorityUsedOnEntry_pset = NULL_byte)
         fi
-    :: ELSE_AS(_id, uxCurrentBasePriority != uxNewPriority, pxTCB = NULL_byte; temp_Priority = NULL_byte)
+    :: ELSE_AS(_id, uxCurrentBasePriority != uxNewPriority, pxTCB = NULL_byte; uxCurrentBasePriority = NULL_byte)
     fi;
     taskEXIT_CRITICAL(_id, temp_var)
 }

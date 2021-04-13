@@ -191,7 +191,7 @@ od
 proctype IntCnt()
 {
     byte idx;
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte, local_var3 = NULL_byte;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
 
     byte xCount = 0;
@@ -222,14 +222,14 @@ running1:
 
     AWAIT(_PID, assert(xCount == intsemMAX_COUNT); xCount = 0);
 
-    vTaskPrioritySet(_PID, NULL_byte, configMAX_PRIORITIES - 1, local_var1, local_bit, local_var2, local_var3);
+    vTaskPrioritySet(_PID, NULL_byte, configMAX_PRIORITIES - 1, local_var1, local_bit, local_var2);
 
     AWAIT(_PID, xOkToGiveCountingSemaphore = true);
     xSemaphoreTake(xISRCountingSemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     xSemaphoreTake(xISRCountingSemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, xOkToGiveCountingSemaphore = false);
 
-    vTaskPrioritySet(_PID, NULL_byte, tskIDLE_PRIORITY, local_var1, local_bit, local_var2, local_var3);
+    vTaskPrioritySet(_PID, NULL_byte, tskIDLE_PRIORITY, local_var1, local_bit, local_var2);
 
 #ifdef LTL
 running2:

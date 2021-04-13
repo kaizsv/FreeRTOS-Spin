@@ -49,16 +49,16 @@ byte ulCounter;
 proctype CONT_INC()
 {
     byte idx;
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte, local_var3 = NULL_byte;
+    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false;
 
     byte uxOurPriority;
     assert(_PID == xContinousIncrementHandle);
     AWAIT(_PID, uxOurPriority = uxTaskPriorityGet(NULL_byte));
 do
-::  vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2, local_var3);
+::  vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2);
     ULCOUNTER_IS_ACCESSED_BY(xContinousIncrementHandle, ulCounter);
-    vTaskPrioritySet(_PID, NULL_byte, uxOurPriority, local_var1, local_bit, local_var2, local_var3);
+    vTaskPrioritySet(_PID, NULL_byte, uxOurPriority, local_var1, local_bit, local_var2);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);

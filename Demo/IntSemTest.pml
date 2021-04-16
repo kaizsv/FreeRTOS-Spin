@@ -33,7 +33,7 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
 
 #define configUSE_TICK_HOOK 1
 #define vApplicationTickHook() /* vInterruptSemaphorePeriodicTest */ \
-    AWAIT_DS(_PID, xTimeNow = ((xOkToGiveMutex || xOkToGiveCountingSemaphore) -> xTimeNow + 1 : 0)); \
+    AWAIT_DS(_PID, xTimeNow = xTimeNow + 1); \
     if \
     :: SELE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD, xTimeNow = 0); \
         if \

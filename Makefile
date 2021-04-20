@@ -40,7 +40,7 @@ trail_full:
 	$(SPIN) -s -r -l -g $(TRAIL_FLAGS) $(TARGET_PATH)
 
 trail_ltl:
-	$(SPIN) -s -r -l -g -X $(TRAIL_FLAGS) $(TARGET_PATH)
+	$(SPIN) -s -r -l -g -DLTL $(TRAIL_FLAGS) $(TARGET_PATH)
 
 clean:
 	rm -rf $(PAN)*

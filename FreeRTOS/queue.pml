@@ -107,16 +107,19 @@ inline xQueueGenericCreate_fixed(pxNewQueue, QueueID, uxQueueLength, ucQueueType
 
 inline prvInitialiseMutex(pxNewQueue, temp_xIsTimeOut, temp_var, temp_var2, _id)
 {
-    pxNewQueue.xSemaphore.xMutexHolder = NULL_byte;
-    pxNewQueue.xSemaphore.uxRecursiveCallCount = 0;
-    assert(queueQUEUE_IS_MUTEX(pxNewQueue));
-
     xQueueGenericSend_NB(pxNewQueue, NULL_byte, 0, queueSEND_TO_BACK, _, temp_xIsTimeOut, temp_var, temp_var2, _id)
 }
 
 inline xQueueCreateMutex(ucQueueType, pxNewQueue, QueueID, temp_xIsTimeOut, temp_var, temp_var2, _id)
 {
-    xQueueGenericCreate_fixed(pxNewQueue, QueueID, 1, ucQueueType);
+    d_step {
+        xQueueGenericCreate_fixed(pxNewQueue, QueueID, 1, ucQueueType);
+
+        /* prvInitialiseMutex */
+        pxNewQueue.xSemaphore.xMutexHolder = NULL_byte;
+        pxNewQueue.xSemaphore.uxRecursiveCallCount = 0;
+        assert(queueQUEUE_IS_MUTEX(pxNewQueue));
+    };
     prvInitialiseMutex(pxNewQueue, temp_xIsTimeOut, temp_var, temp_var2, _id)
 }
 

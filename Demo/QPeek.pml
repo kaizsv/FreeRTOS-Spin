@@ -77,8 +77,7 @@ do
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    /* vTaskDelay is invoked to prevent from starving other tests. Since there
-    is no other test, the invocation can be dismissed. */
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
 
     vTaskResume(_PID, xMediumPriorityTask, local_bit, local_var1);
     vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
@@ -103,8 +102,7 @@ do
     vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
     vTaskResume(_PID, xHighestPriorityTask, local_bit, local_var1);
 
-    /* vTaskDelay is invoked to prevent from starving other tests. Since there
-    is no other test, the invocation can be dismissed. */
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
 od
 }
 

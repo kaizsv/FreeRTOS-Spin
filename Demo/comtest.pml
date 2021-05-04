@@ -68,7 +68,7 @@ proctype COMRx()
     bit xResyncRequired = 0;
     bit local_xReturn = 0, local_xIsTimeOut = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    byte cExpectedByte, cByteRxed = NULL_byte, xErrorOccured = 0;
+    byte cExpectedByte, cByteRxed = 254, xErrorOccured = 0;
     assert(_PID == FIRST_TASK + 1);
 do
 ::  for (cExpectedByte: comFIRST_BYTE .. comLAST_BYTE) {
@@ -78,7 +78,7 @@ do
             if
             :: SELE(_PID, cByteRxed != cExpectedByte);
                 AWAIT(_PID, xResyncRequired = true; break)
-            :: ELSE(_PID, cByteRxed != cExpectedByte);
+            :: ELSE(_PID, cByteRxed != cExpectedByte, cByteRxed = 254);
             fi;
         :: ELSE(_PID, local_xReturn == true);
         fi;
@@ -91,7 +91,7 @@ do
             xSerialGetChar(_PID, cByteRxed, comRX_BLOCK_TIME, local_xReturn, local_xIsTimeOut, local_var1, local_var2)
         :: ELSE(_PID, cByteRxed != comLAST_BYTE, local_xReturn = false; break);
         od;
-        AWAIT(_PID, xErrorOccured = xErrorOccured + 1; xResyncRequired = false);
+        AWAIT(_PID, cByteRxed = 254; xErrorOccured = xErrorOccured + 1; xResyncRequired = false);
     :: ELSE(_PID, xResyncRequired == true);
 running:
         AWAIT(_PID, assert(xErrorOccured < comTOTAL_PERMISSIBLE_ERRORS));

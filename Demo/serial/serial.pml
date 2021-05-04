@@ -50,7 +50,7 @@ inline xSerialGetChar(_id, pcRxedChar, xBlockTime, temp_xReturn, temp_xIsTimeOut
 inline xSerialPutChar(_id, cOutChar, xBlockTime, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2)
 {
     //xQueueSend(xCharsForTx, cOutChar, xBlockTime, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    xQueueGenericSend(xCharsForTx, cOutChar, xBlockTime, queueSEND_TO_BACK, temp_xReturn, temp_xIsTimeOut, temp_var, temp_var2, _id);
+    xQueueGenericSend(xCharsForTx, cOutChar, xBlockTime, queueSEND_TO_BACK, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     if
     :: SELE(_id, temp_xReturn == true);
         AWAIT(_id, USART1.TXEIE = 1);

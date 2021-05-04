@@ -37,6 +37,9 @@
 #define xQueueOverwrite(xQueue, pvItemToQueue, xReturn, temp_xIsTimeOut, temp_var, temp_var2, _id) \
     xQueueGenericSend_NB(xQueue, pvItemToQueue, 0, queueOVERWRITE, xReturn, temp_xIsTimeOut, temp_var, temp_var2, _id)
 
+#define xQueueSendFromISR(_id, pxQueue, pvItemToQueue, temp_var1) \
+    xQueueGenericSendFromISR(_id, pxQueue, pvItemToQueue, queueSEND_TO_BACK, temp_var1)
+
 // TODO: xQueueSendFromISR
 // TODO: xQueueReset
 

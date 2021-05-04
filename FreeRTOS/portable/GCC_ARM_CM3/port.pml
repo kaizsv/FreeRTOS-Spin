@@ -3,7 +3,11 @@
 
 #define SYS_EXP                 2 /* SysTick and PendSV */
 #define NVIC_INT                0 /* number of interrupts */
-#define promela_EXP_NUMBER      (SYS_EXP + NVIC_INT)
+#ifdef promela_NVIC_NUMBER
+    #define promela_EXP_NUMBER      (SYS_EXP + promela_NVIC_NUMBER)
+#else
+    #define promela_EXP_NUMBER      (SYS_EXP)
+#endif
 
 #define PendSV_ID               0 /* ARMv7-M exp number: 14 */
 #define SysTick_ID              1 /* ARMv7-M exp number: 15 */
@@ -46,6 +50,9 @@ inline xPortStartScheduler()
     /* prvPortStartFirstTask */
     assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP);
     RUN_ALL_EXPS();
+#ifdef RUN_ALL_NVICS
+    RUN_ALL_NVICS();
+#endif
 
     RUN_ALL_TASKS(vPortSVCHandler)
 

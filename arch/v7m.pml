@@ -113,6 +113,53 @@ atomic {
     fi
 }   }
 
+inline irq(gen_id, TRIG)
+{
+atomic {
+    if
+    :: TRIG && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
+        /* EP is a user task. */
+        assert(!HAS_INOPERATIVE_EXP && EP_Top == 0);
+        stack_check(gen_id);
+        exp_entry(gen_id)
+    :: TRIG && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
+        assert(!GET_PENDING(gen_id) && (EP != gen_id));
+        stack_check(gen_id);
+        if
+        :: HAS_INOPERATIVE_EXP ->
+            /* late-arriving entry:
+             * EP is inoperative that cannot be pushed onto EP_Stack */
+            clear_exp_inoperative();
+            exp_taken(gen_id)
+        :: else ->
+            /* interrupt entry */
+            exp_entry(gen_id)
+        fi
+    :: TRIG && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
+        assert((EP != gen_id) || HAS_INOPERATIVE_EXP);
+
+        /* wait for re-entrying from tail-chaining */
+        (EP == gen_id);
+
+        /* tail-chaining entry */
+        assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        stack_check(gen_id);
+        clear_exp_inoperative();
+        exp_taken(gen_id)
+    :: TRIG && !BASEPRI_MASK(gen_id) ->
+        assert(!HAS_INOPERATIVE_EXP && (EP != gen_id));
+
+        /* wait for re-entrying from memory barrier */
+        (EP == gen_id);
+
+        /* memory barrier entry */
+        assert(BASEPRI_MASK(gen_id) && GET_PENDING(gen_id) && HAS_INOPERATIVE_EXP);
+        stack_check(gen_id);
+        clear_exp_inoperative();
+        exp_taken(gen_id)
+    fi
+}   }
+
 /* an abstraction of a software-generated interrupt request */
 inline soft_gen_irq(gen_id)
 {

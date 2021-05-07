@@ -35,7 +35,7 @@
 
 #define comNO_BLOCK             0
 
-#define comRX_BLOCK_TIME        253
+#define comRX_BLOCK_TIME        100
 
 #define comFIRST_BYTE           ('A')
 #define comLAST_BYTE            ('B')
@@ -46,18 +46,25 @@
 
 #include "serial/serial.pml"
 
+#define COMRx_IS_BLOCKED    (TCBs[1].ListItems[0].Container == CID_DELAYED_TASK)
+
+ltl { (([](COMRx_IS_BLOCKED -> (COMRx_IS_BLOCKED U (_last == 3 && COMRx_IS_BLOCKED)))) && ([]<>(_last == 2))) -> ([]<>COMRx@running) }
+
 proctype COMTx()
 {
     byte idx;
     bit local_xReturn = 0, local_xIsTimeOut = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     byte cByteToSend;
-    assert(_PID == FIRST_TASK);
+    AWAIT(_PID, assert(_PID == FIRST_TASK));
 do
 ::  for (cByteToSend: comFIRST_BYTE .. comLAST_BYTE) {
         xSerialPutChar(_PID, cByteToSend, comNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, local_xReturn = false);
     }
+
+    //atomic { ASSUMPTION_COMPLETE -> ASSUMPTION_COMPLETE = 0};
+
     vTaskDelay(_PID, 50, local_xReturn, local_var1, local_var2);
 od
 }
@@ -69,10 +76,10 @@ proctype COMRx()
     bit local_xReturn = 0, local_xIsTimeOut = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     byte cExpectedByte, cByteRxed = 254, xErrorOccured = 0;
-    assert(_PID == FIRST_TASK + 1);
+    AWAIT(_PID, assert(_PID == FIRST_TASK + 1));
 do
 ::  for (cExpectedByte: comFIRST_BYTE .. comLAST_BYTE) {
-        xSerialGetChar(_PID, cByteRxed, comRX_BLOCK_TIME, local_xReturn, local_xIsTimeOut, local_var1, local_var2)
+        xSerialGetChar(_PID, cByteRxed, comRX_BLOCK_TIME, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         if
         :: SELE(_PID, local_xReturn == true, local_xReturn = false);
             if
@@ -88,7 +95,7 @@ do
     :: SELE(_PID, xResyncRequired == true);
         do
         :: SELE(_PID, cByteRxed != comLAST_BYTE, local_xReturn = false);
-            xSerialGetChar(_PID, cByteRxed, comRX_BLOCK_TIME, local_xReturn, local_xIsTimeOut, local_var1, local_var2)
+            xSerialGetChar(_PID, cByteRxed, comRX_BLOCK_TIME, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         :: ELSE(_PID, cByteRxed != comLAST_BYTE, local_xReturn = false; break);
         od;
         AWAIT(_PID, cByteRxed = 254; xErrorOccured = xErrorOccured + 1; xResyncRequired = false);
@@ -104,13 +111,11 @@ init
     byte idx;
     byte local_var1 = NULL_byte;
 
-    /* Initial com port */
-    atomic {
-        xSerialPortInitMinimal_fixed();
-    };
-
-    /* Create Tx and Rx tasks */
     d_step {
+        /* Initial com port */
+        xSerialPortInitMinimal_fixed();
+
+        /* Create Tx and Rx tasks */
         prvInitialiseTaskLists(local_var1);
         xTaskCreate_fixed(FIRST_TASK + 0, tskIDLE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY + 1);

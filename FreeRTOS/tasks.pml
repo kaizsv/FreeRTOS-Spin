@@ -406,6 +406,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
                 uxListRemove(xPendingReadyList, PLIST_SIZE, pxTCB, xEvent));
             AWAIT_DS(_id,
                 assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK);
+                listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0);
                 uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState));
             prvAddTaskToReadyList(_id, pxTCB);
 

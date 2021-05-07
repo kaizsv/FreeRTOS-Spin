@@ -39,6 +39,7 @@ inline xSerialPortInitMinimal_fixed()
     /* Ignore Baud Rate and GPIO setting */
     USART1.tdr = NULL_byte;
     USART1.rdr = NULL_byte;
+    USART1.RXNEIE = 1;
     SET_PRIO_EXP(vUARTInterruptHandler_ID, 240);
 }
 
@@ -49,8 +50,7 @@ inline xSerialGetChar(_id, pcRxedChar, xBlockTime, temp_xReturn, temp_xIsTimeOut
 
 inline xSerialPutChar(_id, cOutChar, xBlockTime, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2)
 {
-    //xQueueSend(xCharsForTx, cOutChar, xBlockTime, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    xQueueGenericSend(xCharsForTx, cOutChar, xBlockTime, queueSEND_TO_BACK, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xQueueSend(xCharsForTx, cOutChar, xBlockTime, temp_xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     if
     :: SELE(_id, temp_xReturn == true);
         AWAIT(_id, USART1.TXEIE = 1);
@@ -61,11 +61,13 @@ inline xSerialPutChar(_id, cOutChar, xBlockTime, temp_xReturn, temp_xIsTimeOut, 
 #define USART1_IRQ_TRIGGERED    ((USART1.TXEIE && USART1_USART_IT_TXE_IS_SET) || \
                                 (USART1.RXNEIE && USART1_USART_IT_RXNE_IS_SET))
 
+//bit ASSUMPTION_COMPLETE = 0;
+
 proctype vUARTInterruptHandler()
 {
     byte idx;
     bit local_bit = 0;
-    byte cChar = NULL_byte, local_var = NULL_byte;
+    byte cChar = 254, local_var = NULL_byte;
     assert(_PID == vUARTInterruptHandler_ID);
 do
 ::  irq(_PID, USART1_IRQ_TRIGGERED);
@@ -74,7 +76,8 @@ do
         xQueueReceiveFromISR(_PID, xCharsForTx, cChar, local_bit, local_var);
         if
         :: SELE_AS(_PID, local_bit == 1, local_bit = 0);
-            AWAIT_DS(_PID, USART1.tdr = cChar; cChar = NULL_byte);
+            AWAIT_DS(_PID, assert(cChar != 254 && cChar != NULL_byte); USART1.tdr = cChar; cChar = 254;
+                USART1.rdr = USART1.tdr; USART1.tdr = NULL_byte);
         :: ELSE_AS(_PID, local_bit == 1);
             AWAIT_DS(_PID, USART1.TXEIE = 0);
         fi;
@@ -84,21 +87,23 @@ do
     if
     :: SELE_AS(_PID, USART1_USART_IT_RXNE_IS_SET);
         AWAIT_DS(_PID, cChar = USART1.rdr; USART1.rdr = NULL_byte; assert(cChar != NULL_byte));
+        //AWAIT_DS(_PID, if :: cChar == comLAST_BYTE -> ASSUMPTION_COMPLETE = 1 :: else fi);
         xQueueSendFromISR(_PID, xRxedChars, cChar, local_var);
-    :: ELSE_AS(_PID, USART1_USART_IT_RXNE_IS_SET);
+    :: ELSE_AS(_PID, USART1_USART_IT_RXNE_IS_SET, assert(USART1.rdr == NULL_byte));
     fi;
-    AWAIT_DS(_PID, cChar = NULL_byte; exp_return(local_var))
+    AWAIT_DS(_PID, cChar = 254; exp_return(local_var))
 od
 }
 
 proctype loopback_connector()
 {
-    assert(_PID == FIRST_TASK + promela_TASK_NUMBER);
-do
-::  d_step { USART1.TXEIE && !USART1_USART_IT_TXE_IS_SET ->
-        USART1.rdr = USART1.tdr; USART1.tdr = NULL_byte
-    };
-od;
+    skip
+//    assert(_PID == FIRST_TASK + promela_TASK_NUMBER);
+//do
+//::  d_step { USART1.TXEIE && !USART1_USART_IT_TXE_IS_SET ->
+//        USART1.rdr = USART1.tdr; USART1.tdr = NULL_byte
+//    };
+//od;
 }
 
 #endif

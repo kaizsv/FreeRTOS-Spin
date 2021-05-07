@@ -120,10 +120,12 @@ atomic {
     :: TRIG && BASEPRI_MASK(gen_id) && (EP >= FIRST_TASK) ->
         /* EP is a user task. */
         assert(!HAS_INOPERATIVE_EXP && EP_Top == 0);
+        set_pending(gen_id);
         stack_check(gen_id);
         exp_entry(gen_id)
     :: TRIG && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) < GET_PRIO_EXP(EP)) ->
         assert(!GET_PENDING(gen_id) && (EP != gen_id));
+        set_pending(gen_id);
         stack_check(gen_id);
         if
         :: HAS_INOPERATIVE_EXP ->
@@ -137,6 +139,7 @@ atomic {
         fi
     :: TRIG && BASEPRI_MASK(gen_id) && (EP < FIRST_TASK) && (GET_PRIO_EXP(gen_id) >= GET_PRIO_EXP(EP)) ->
         assert((EP != gen_id) || HAS_INOPERATIVE_EXP);
+        set_pending(gen_id);
 
         /* wait for re-entrying from tail-chaining */
         (EP == gen_id);
@@ -148,6 +151,7 @@ atomic {
         exp_taken(gen_id)
     :: TRIG && !BASEPRI_MASK(gen_id) ->
         assert(!HAS_INOPERATIVE_EXP && (EP != gen_id));
+        set_pending(gen_id);
 
         /* wait for re-entrying from memory barrier */
         (EP == gen_id);

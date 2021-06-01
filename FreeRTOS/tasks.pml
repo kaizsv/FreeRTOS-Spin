@@ -486,7 +486,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
             AWAIT_DS(_id, xAlreadyYielded = true);
             #endif
             taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
-        :: ELSE(_id, xYieldPending != false)
+        :: ELSE_AS(_id, xYieldPending != false)
         fi
     :: ELSE_AS(_id, uxSchedulerSuspended == 0)
     fi;

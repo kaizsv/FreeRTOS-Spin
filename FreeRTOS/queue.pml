@@ -281,7 +281,7 @@ do \
         :: SELE_AS(_id, xTicksToWait == 0); \
             taskEXIT_CRITICAL(_id, temp_var); \
             AWAIT(_id, assert(!xIsTimeOut && xReturn == false); break) \
-        :: ELSE(_id, xTicksToWait == 0) \
+        :: ELSE_AS(_id, xTicksToWait == 0) \
         fi \
     fi; \
     __BH \

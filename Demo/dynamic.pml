@@ -33,9 +33,6 @@
 #define xQueueSendWhenSuspendedHandler      FIRST_TASK + 3
 #define xQueueReceiveWhenSuspendedHandler   FIRST_TASK + 4
 
-QueueDeclarator(1, byte);
-QueueHandle_t(xSuspendedTestQueue, 1, byte);
-
 #define ULCOUNTER_IS_ACCESSED_BY(id, var)   \
     AWAIT(_PID, var = id)
 
@@ -45,6 +42,9 @@ QueueHandle_t(xSuspendedTestQueue, 1, byte);
 #define priNO_BLOCK     0
 #define priSUSPENDED_QUEUE_LENGTH 1
 byte ulCounter;
+
+QueueDeclarator(priSUSPENDED_QUEUE_LENGTH, byte);
+QueueHandle_t(xSuspendedTestQueue, priSUSPENDED_QUEUE_LENGTH, byte);
 
 proctype CONT_INC()
 {

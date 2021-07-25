@@ -23,15 +23,16 @@
 
 #define usNumToProduce 3
 
-QueueDeclarator(10, byte);
-QueueHandle_t(xPolledQueue, 10, byte);
-
 #define INCREASE_VAR_AND_INTOVERFLOW(var)   \
     AWAIT(_PID, var = var + 1; var = var % (usNumToProduce + 1))
 
+#define pollqQUEUE_SIZE 10
 #define pollqPRODUCER_DELAY 50
 #define pollqCONSUMER_DELAY 40
 #define pollqNO_DELAY   0
+
+QueueDeclarator(pollqQUEUE_SIZE, byte);
+QueueHandle_t(xPolledQueue, pollqQUEUE_SIZE, byte);
 
 proctype QConsNB()
 {
@@ -85,7 +86,7 @@ init {
     byte local_var1 = NULL_byte;
 
     d_step {
-        xQueueCreate(xPolledQueue, 0, 10);
+        xQueueCreate(xPolledQueue, 0, pollqQUEUE_SIZE);
 
         prvInitialiseTaskLists(local_var1);
 

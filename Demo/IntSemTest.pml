@@ -15,16 +15,20 @@
     }
 
 #include "../FreeRTOS/include/Queue_Declarator.pml"
+#include "../FreeRTOS/queueFromISR.pml"
+
+#define intsemMASTER_PRIORITY   (tskIDLE_PRIORITY)
+#define intsemSLAVE_PRIORITY    (tskIDLE_PRIORITY + 1)
+#define intsemNO_BLOCK  0
+#define intsemMAX_COUNT 3
 
 SemaphoreDeclarator(1, byte);
-SemaphoreDeclarator(3, byte);
+SemaphoreDeclarator(intsemMAX_COUNT, byte);
 
 SemaphoreHandle_t(xISRMutex, 1, byte);
-SemaphoreHandle_t(xISRCountingSemaphore, 3, byte);
+SemaphoreHandle_t(xISRCountingSemaphore, intsemMAX_COUNT, byte);
 SemaphoreHandle_t(xMasterSlaveMutex, 1, byte);
 bool xOkToGiveMutex = false, xOkToGiveCountingSemaphore = false;
-
-#include "../FreeRTOS/queueFromISR.pml"
 
 local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #define intsemINTERRUPT_MUTEX_GIVE_PERIOD   40
@@ -56,12 +60,6 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #ifdef LTL
     #include "../property/IntSemTest.ltl"
 #endif
-
-#define intsemMASTER_PRIORITY   (tskIDLE_PRIORITY)
-#define intsemSLAVE_PRIORITY    (tskIDLE_PRIORITY + 1)
-
-#define intsemNO_BLOCK  0
-#define intsemMAX_COUNT 3
 
 #define xSlaveHandle    (FIRST_TASK)
 

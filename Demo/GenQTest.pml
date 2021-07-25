@@ -40,9 +40,9 @@
 #define xHighPriorityMutexTask      (FIRST_TASK + 3)
 
 SemaphoreDeclarator(1, byte);
-QueueDeclarator(5, byte);
+QueueDeclarator(genqQUEUE_LENGTH, byte);
 
-QueueHandle_t(xQUEUE, 5, byte);
+QueueHandle_t(xQUEUE, genqQUEUE_LENGTH, byte);
 SemaphoreHandle_t(xMUTEX, 1, byte);
 SemaphoreHandle_t(xLOCALMUTEX, 1, byte);
 
@@ -311,7 +311,7 @@ init
     bool local_xIsTimeOut = false;
 
     d_step {
-        xQueueCreate(xQUEUE, 0, 5);
+        xQueueCreate(xQUEUE, 0, genqQUEUE_LENGTH);
     };
 
     xSemaphoreCreateMutex(xMUTEX, 1, local_xIsTimeOut, local_var1, local_var2, EP);

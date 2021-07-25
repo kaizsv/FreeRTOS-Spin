@@ -43,8 +43,8 @@
 #define MAGIC_VAL2  213 /* identification of 0x01234567 in the source code */
 #define MAGIC_VAL3  231 /* identification of 0xaabbaabb in the source code */
 
-QueueDeclarator(5, byte);
-QueueHandle_t(xQUEUE, 5, byte);
+QueueDeclarator(qpeekQUEUE_LENGTH, byte);
+QueueHandle_t(xQUEUE, qpeekQUEUE_LENGTH, byte);
 
 proctype PeekL()
 {
@@ -202,7 +202,7 @@ init
     byte local_var = NULL_byte;
 
     d_step {
-        xQueueCreate(xQUEUE, 0, 5);
+        xQueueCreate(xQUEUE, 0, qpeekQUEUE_LENGTH);
 
         prvInitialiseTaskLists(local_var);
 

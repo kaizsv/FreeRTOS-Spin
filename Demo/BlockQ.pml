@@ -31,22 +31,25 @@
 #define xBlockTime  100
 #define xDontBlock  0
 
-QueueDeclarator(1, byte);
-QueueDeclarator(2, byte); /* In source code, size is 5 */
+#define uxQueueSize1    1
+#define uxQueueSize2    2 /* Size is 5 in the source */
 
-QueueHandle_t(pxQueueParameters1_xQueue, 1, byte);
+QueueDeclarator(uxQueueSize1, byte);
+QueueDeclarator(uxQueueSize2, byte);
+
+QueueHandle_t(pxQueueParameters1_xQueue, uxQueueSize1, byte);
 #define pxQueueParameters1_xBlockTime       xBlockTime
 
 #define pxQueueParameters2_xQueue           pxQueueParameters1_xQueue
 #define pxQueueParameters2_xBlockTime       xDontBlock
 
-QueueHandle_t(pxQueueParameters3_xQueue, 1, byte);
+QueueHandle_t(pxQueueParameters3_xQueue, uxQueueSize1, byte);
 #define pxQueueParameters3_xBlockTime       xDontBlock
 
 #define pxQueueParameters4_xQueue           pxQueueParameters3_xQueue
 #define pxQueueParameters4_xBlockTime       xBlockTime
 
-QueueHandle_t(pxQueueParameters5_xQueue, 2, byte);
+QueueHandle_t(pxQueueParameters5_xQueue, uxQueueSize2, byte);
 #define pxQueueParameters5_xBlockTime       xBlockTime
 
 #define pxQueueParameters6_xQueue           pxQueueParameters5_xQueue
@@ -196,9 +199,9 @@ init {
     byte local_var1 = NULL_byte;
 
     d_step {
-        xQueueCreate(pxQueueParameters1_xQueue, 0, 1);
-        xQueueCreate(pxQueueParameters3_xQueue, 1, 1);
-        xQueueCreate(pxQueueParameters5_xQueue, 2, 2);
+        xQueueCreate(pxQueueParameters1_xQueue, 0, uxQueueSize1);
+        xQueueCreate(pxQueueParameters3_xQueue, 1, uxQueueSize1);
+        xQueueCreate(pxQueueParameters5_xQueue, 2, uxQueueSize2);
 
         prvInitialiseTaskLists(local_var1);
 

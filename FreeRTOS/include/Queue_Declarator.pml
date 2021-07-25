@@ -72,11 +72,14 @@ inline queueSET_pcReadFrom(pxQueue, value)
     __UnionSemDeclarator(uxQueueLength, uxItemType);    \
     __SemDeclarator(uxQueueLength, uxItemType)
 
+#define __Handler_t(TYPE, NAME, uxQueueLength, uxItemType)  \
+    TYPE ## uxItemType ## uxQueueLength NAME
+
 #define QueueHandle_t(NAME, uxQueueLength, uxItemType)  \
-    __QueueHandle_t_ ## uxItemType ## uxQueueLength NAME
+    __Handler_t(__QueueHandle_t_, NAME, uxQueueLength, uxItemType)
 
 #define SemaphoreHandle_t(NAME, uxQueueLength, uxItemType)  \
-    __SemHandle_t_ ## uxItemType ## uxQueueLength NAME
+    __Handler_t(__SemHandle_t_, NAME, uxQueueLength, uxItemType)
 
 #define queueGET_ListIndex(pxQueue) get_upper_byte(pxQueue.ListIndex_uxQueueType)
 inline queueSET_ListIndex(pxQueue, value)

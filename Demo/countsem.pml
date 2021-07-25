@@ -29,10 +29,10 @@
 #define countNUM_TEST_TASKS 2
 #define countDONT_BLOCK     0
 
-SemaphoreDeclarator(10, byte);
+SemaphoreDeclarator(countMAX_COUNT_VALUE, byte);
 
-SemaphoreHandle_t(xP1_xSemaphore, 10, byte);
-SemaphoreHandle_t(xP2_xSemaphore, 10, byte);
+SemaphoreHandle_t(xP1_xSemaphore, countMAX_COUNT_VALUE, byte);
+SemaphoreHandle_t(xP2_xSemaphore, countMAX_COUNT_VALUE, byte);
 
 inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
 {

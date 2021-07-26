@@ -17,7 +17,7 @@
 #if (configUSE_PREEMPTION == 0)
     #define queueYIELD_IF_USING_PREEMPTION(_id, temp_var)
 #else
-    #define queueYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_DETERMINISTIC(_id, temp_var)
+    #define queueYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_BLOCKED_BY_BASEPRI(_id, temp_var)
 #endif
 
 #include "include/Queue_Declarator.pml"

@@ -14,7 +14,7 @@
     #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
 #else
     // portYIELD_WITHIN_API(_id, temp_var)
-    #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_DETERMINISTIC(_id, temp_var)
+    #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_BLOCKED_BY_BASEPRI(_id, temp_var)
 #endif
 
 #define taskEVENT_LIST_ITEM_VALUE_IN_USE 8 /* 0b1000 */

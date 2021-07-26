@@ -3,7 +3,7 @@
 
 #define portMAX_DELAY       255
 
-inline portYIELD_DETERMINISTIC(_id, temp_var)
+inline portYIELD_BLOCKED_BY_BASEPRI(_id, temp_var)
 {
     AWAIT_DS(_id, set_pending(PendSV_ID); assert(!BASEPRI_MASK(SysTick_ID) && !BASEPRI_MASK(PendSV_ID)))
 }

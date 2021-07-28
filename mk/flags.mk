@@ -31,12 +31,13 @@ ifdef WF
 	RUNTIME_FLAGS += -f
 endif
 
-.PHONY: .safety .bfs .ltl .np
+.PHONY: .safety .bfs .ltl .np .trail.full .trail.ltl
 .safety:
 	$(eval COMPILETIME_FLAGS += -DSAFETY -DNOCLAIM)
 
 .bfs:
 	$(eval COMPILETIME_FLAGS += -DBFS)
+	$(eval undefine RUNTIME_FLAGS)
 
 .ltl:
 	$(eval SPINFLAGS += -DLTL)
@@ -45,3 +46,9 @@ endif
 .np:
 	$(eval COMPILETIME_FLAGS += -DNP)
 	$(eval RUNTIME_FLAGS += -l)
+
+.trail.full:
+	$(eval TRAIL_FLAGS := -s -r -l -g $(TRAIL_FLAGS))
+
+.trail.ltl:
+	$(eval TRAIL_FLAGS := -DLTL $(TRAIL_FLAGS))

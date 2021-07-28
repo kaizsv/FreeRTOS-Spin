@@ -19,28 +19,23 @@ $(PAN).c:
 
 $(PAN): $(PAN).c
 	$(CC) $(CFLAGS) -DMEMLIM=$(MAX_MEMORY) $(COMPILETIME_FLAGS) -o $@ $<
+	./$(PAN) $(RUNTIME_FLAGS)
 
 safety_bfs: clean .safety .bfs $(PAN)
-	./$(PAN)
 
 safety_dfs: clean .safety $(PAN)
-	./$(PAN) $(RUNTIME_FLAGS)
 
 acceptance: clean .ltl $(PAN)
-	./$(PAN) $(RUNTIME_FLAGS)
 
 non-progress: clean .np $(PAN)
-	./$(PAN) $(RUNTIME_FLAGS)
 
 .PHONY: trail trail_full trail_ltl clean distclean
 trail:
 	$(SPIN) $(TRAIL_FLAGS) $(TARGET_PATH)
 
-trail_full:
-	$(SPIN) -s -r -l -g $(TRAIL_FLAGS) $(TARGET_PATH)
+trail_full: .trail.full trail
 
-trail_ltl:
-	$(SPIN) -s -r -l -g -DLTL $(TRAIL_FLAGS) $(TARGET_PATH)
+trail_ltl: .trail.full .trail.ltl trail
 
 clean:
 	rm -rf $(PAN)*

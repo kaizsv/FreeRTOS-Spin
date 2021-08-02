@@ -1,4 +1,5 @@
 /* FreeRTOS/Demo/Common/Minimal/dynamic.c */
+#include "config/dynamic.config"
 
 #define promela_TASK_NUMBER     5
 #define promela_QUEUE_NUMBER    1

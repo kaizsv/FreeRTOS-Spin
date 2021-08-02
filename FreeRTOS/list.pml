@@ -40,8 +40,10 @@ inline listPOINTER_SET(pxListPointer, tcb, item)
     pxListPointer.p_tcb_item = (tcb << 1) | item
 }
 
+#define LIST_SIZE1  1
 #define LIST_SIZE2  2
 #define LIST_SIZE3  3
+#define LIST_SIZE4  4
 #define LIST_SIZE5  5
 
 #if 0
@@ -66,18 +68,20 @@ inline listPOINTER_SET(pxListPointer, tcb, item)
 
 #define xListEnd    254
 
-typedef List5_pxIndex_t {
-    byte pxIndex;
-    List_t ps[LIST_SIZE5];
-};
+#define __TYPEDEF_List_t(__SIZE, WITH_PXINDEX) \
+    typedef List ## __SIZE ## WITH_PXINDEX ## t { \
+        List_t ps[LIST_SIZE ## __SIZE];
 
-typedef List2_t {
-    List_t ps[LIST_SIZE2];
-};
+#define __ENDEF }
 
-typedef List3_t {
-    List_t ps[LIST_SIZE3];
-};
+#define TYPEDEF_List_t(__SIZE) \
+    __TYPEDEF_List_t(__SIZE, _) \
+    __ENDEF
+
+#define TYPEDEF_List_t_WITH_PXINDEX(__SIZE) \
+    __TYPEDEF_List_t(__SIZE, _pxIndex_) \
+        byte pxIndex; \
+    __ENDEF
 
 #define __OWNER_OF(tcb)                 (tcb) - FIRST_TASK
 #define __GET_LIST_ITEM(tcb, item)      TCBs[__OWNER_OF(tcb)].ListItems[item]

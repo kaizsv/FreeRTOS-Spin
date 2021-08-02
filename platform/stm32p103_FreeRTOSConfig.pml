@@ -29,9 +29,11 @@ INCLUDE_VTaskDelete                         0
 
 #define configUSE_PREEMPTION                1
 #define configUSE_TIME_SLICING              1
-#define configIDLE_SHOULD_YIELD             1
+#ifndef configIDLE_SHOULD_YIELD
+    #define configIDLE_SHOULD_YIELD         1
+#endif
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0 // TODO
-#ifndef APP_DEFINED_PRIORITY
+#ifndef configMAX_PRIORITIES
     #define configMAX_PRIORITIES            3
 #endif
 #ifndef configUSE_TICK_HOOK
@@ -46,7 +48,9 @@ INCLUDE_VTaskDelete                         0
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    80  /* 0x50 */
 //#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 0xf
 
-#define INCLUDE_vTaskSuspend                1
+#ifndef INCLUDE_vTaskSuspend
+    #define INCLUDE_vTaskSuspend            1
+#endif
 #define INCLUDE_vTaskDelay                  1
 #define INCLUDE_uxTaskPriorityGet           1
 #define INCLUDE_vTaskPrioritySet            1

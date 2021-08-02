@@ -1,4 +1,5 @@
 /* FreeRTOS/Demo/Common/Minimal/semtest.c */
+#include "config/semtest.config"
 
 #define promela_TASK_NUMBER     4
 #define promela_QUEUE_NUMBER    2

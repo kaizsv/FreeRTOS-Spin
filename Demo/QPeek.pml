@@ -1,7 +1,5 @@
 /* FreeRTOS/Demo/Common/Minimal/QPeek.c */
-
-#define APP_DEFINED_PRIORITY
-#define configMAX_PRIORITIES    4
+#include "config/QPeek.config"
 
 #define promela_TASK_NUMBER     4
 #define promela_QUEUE_NUMBER    1

@@ -1,4 +1,5 @@
 /* FreeRTOS/Demo/Common/Minimal/IntSemTest.c */
+#include "config/IntSemTest.config"
 
 #define promela_TASK_NUMBER     3
 #define promela_QUEUE_NUMBER    3
@@ -35,7 +36,6 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #define intsemINTERRUPT_MUTEX_GIVE_PERIOD_D 80  /* Double */
 #define intsemINTERRUPT_MUTEX_GIVE_PERIOD_Q 160 /* Quardruple (intsemMAX_COUNT + 1) */
 
-#define configUSE_TICK_HOOK 1
 #define vApplicationTickHook() /* vInterruptSemaphorePeriodicTest */ \
     AWAIT_DS(_PID, xTimeNow = xTimeNow + 1); \
     if \

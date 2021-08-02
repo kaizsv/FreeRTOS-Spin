@@ -1,8 +1,6 @@
 /* FreeRTOS/Demo/Common/Minimal/GenQTest.c */
 /* INCLUDE_xTaskAbortDelay is not defined */
-
-#define APP_DEFINED_PRIORITY
-#define configMAX_PRIORITIES    4
+#include "config/GenQTest.config"
 
 #define promela_TASK_NUMBER     4
 #define promela_QUEUE_NUMBER    3

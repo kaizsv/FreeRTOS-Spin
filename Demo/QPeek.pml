@@ -21,7 +21,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-    #include "../property/QPeek.ltl"
+    #include "property/QPeek.ltl"
 #endif
 
 #define qpeekQUEUE_LENGTH   5

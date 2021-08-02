@@ -22,7 +22,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-    #include "../property/GenQTest.ltl"
+    #include "property/GenQTest.ltl"
 #endif
 
 #define genqQUEUE_LENGTH    5

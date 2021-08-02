@@ -18,7 +18,7 @@
 #include "../FreeRTOS/queue.h.pml"
 
 #ifdef LTL
-    #include "../property/PollQ.ltl"
+    #include "property/PollQ.ltl"
 #endif
 
 #define usNumToProduce 3

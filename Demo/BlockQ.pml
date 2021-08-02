@@ -25,7 +25,7 @@
 #include "../FreeRTOS/queue.h.pml"
 
 #ifdef LTL
-    #include "../property/BlockQ.ltl"
+    #include "property/BlockQ.ltl"
 #endif
 
 #define xBlockTime  100

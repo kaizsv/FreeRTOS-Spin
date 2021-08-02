@@ -18,7 +18,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-    #include "../property/countsem.ltl"
+    #include "property/countsem.ltl"
 #endif
 
 #define countMAX_COUNT_VALUE    10

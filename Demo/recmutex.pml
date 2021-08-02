@@ -19,7 +19,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-    #include "../property/recmutex.ltl"
+    #include "property/recmutex.ltl"
 #endif
 
 #ifndef recmuCONTROLLING_TASK_PRIORITY

@@ -17,7 +17,7 @@
 #include "../FreeRTOS/tasks.pml"
 
 #ifdef LTL
-    #include "../property/Demo.ltl"
+    #include "property/Demo.ltl"
 #endif
 
 // TODO: verify List, Queue; using embedded C code

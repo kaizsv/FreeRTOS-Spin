@@ -58,7 +58,7 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-    #include "../property/IntSemTest.ltl"
+    #include "property/IntSemTest.ltl"
 #endif
 
 #define xSlaveHandle    (FIRST_TASK)

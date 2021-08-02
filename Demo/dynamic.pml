@@ -25,7 +25,7 @@
 #include "../FreeRTOS/queue.h.pml"
 
 #ifdef LTL
-    #include "../property/dynamic.ltl"
+    #include "property/dynamic.ltl"
 #endif
 
 #define xContinousIncrementHandle   FIRST_TASK + 0

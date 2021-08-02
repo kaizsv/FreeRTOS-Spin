@@ -21,7 +21,7 @@
 #include "../FreeRTOS/semphr.h.pml"
 
 #ifdef LTL
-    #include "../property/semtest.ltl"
+    #include "property/semtest.ltl"
 #endif
 
 SemaphoreDeclarator(1, byte);

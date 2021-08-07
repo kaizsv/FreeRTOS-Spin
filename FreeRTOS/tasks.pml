@@ -571,6 +571,9 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
         #endif
     :: ELSE_AS(_id, uxSchedulerSuspended == 0, assert(xSwitchRequired == false && pxTCB == NULL_byte));
         AWAIT_DS(_id, xPendedTicks = 1);
+#if (configUSE_TICK_HOOK == 1)
+        vApplicationTickHook();
+#endif
     fi
 }
 

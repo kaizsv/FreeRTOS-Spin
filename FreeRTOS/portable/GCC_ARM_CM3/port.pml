@@ -91,6 +91,9 @@ proctype SysTick_Handler()
     bit local_bit = 0;
     byte idx = 0;
     byte local_var = NULL_byte;
+#if (configUSE_TICK_HOOK == 1)
+    vApplicationTickHook_Declaration();
+#endif
     assert(SysTick_ID == _PID);
 do
 ::  syst_irq(_PID);

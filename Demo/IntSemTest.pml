@@ -21,7 +21,7 @@
 #define intsemMASTER_PRIORITY   (tskIDLE_PRIORITY)
 #define intsemSLAVE_PRIORITY    (tskIDLE_PRIORITY + 1)
 #define intsemNO_BLOCK  0
-#define intsemMAX_COUNT 3
+#define intsemMAX_COUNT 2
 
 SemaphoreDeclarator(1, byte);
 SemaphoreDeclarator(intsemMAX_COUNT, byte);
@@ -31,13 +31,14 @@ SemaphoreHandle_t(xISRCountingSemaphore, intsemMAX_COUNT, byte);
 SemaphoreHandle_t(xMasterSlaveMutex, 1, byte);
 bool xOkToGiveMutex = false, xOkToGiveCountingSemaphore = false;
 
-local byte xTimeNow = 0; /* Only for SysTick_Handler */
 #define intsemINTERRUPT_MUTEX_GIVE_PERIOD   40
 #define intsemINTERRUPT_MUTEX_GIVE_PERIOD_D 80  /* Double */
-#define intsemINTERRUPT_MUTEX_GIVE_PERIOD_Q 160 /* Quardruple (intsemMAX_COUNT + 1) */
+#define intsemINTERRUPT_MUTEX_GIVE_PERIOD_T 120 /* Triple (intsemMAX_COUNT + 1) */
 
-#define vApplicationTickHook() /* vInterruptSemaphorePeriodicTest */ \
-    AWAIT_DS(_PID, xTimeNow = xTimeNow + 1); \
+/* vInterruptSemaphorePeriodicTest */
+#define vApplicationTickHook_Declaration() \
+    byte xTimeNow = 0
+#define vApplicationTickHook() \
     if \
     :: SELE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD, xTimeNow = 0); \
         if \
@@ -51,6 +52,7 @@ local byte xTimeNow = 0; /* Only for SysTick_Handler */
         :: ELSE_AS(_PID, xOkToGiveCountingSemaphore != false); \
         fi; \
     :: ELSE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD); \
+        AWAIT_AS(_PID, xTimeNow = (xOkToGiveMutex || xOkToGiveCountingSemaphore -> xTimeNow + 1 : 0)); \
     fi
 
 #include "../FreeRTOS.pml"
@@ -107,19 +109,20 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
     AWAIT(_id, xOkToGiveMutex = false);
 
     xSemaphoreTake_NB(xISRMutex, intsemNO_BLOCK, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT(_id, assert(xReturn == false));
-
-    AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY));
+    AWAIT(_id,
+        assert(xReturn == false);
+        assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY);
+    );
 
     xSemaphoreGive(xISRMutex, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT(_id, assert(xReturn == true); xReturn = false);
-
-    AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY));
+    AWAIT(_id,
+        assert(xReturn == true); xReturn = false;
+        assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY);
+    );
 
     xSemaphoreGive(xMasterSlaveMutex, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT(_id, assert(xReturn == true); xReturn = false);
-
     AWAIT(_id,
+        assert(xReturn == true); xReturn = false;
         assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY);
         assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).ListItems[xState]) == CID_SUSPENDED_TASK)
     );
@@ -150,19 +153,22 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut,
     AWAIT(_id, xOkToGiveMutex = false);
 
     xSemaphoreTake_NB(xISRMutex, intsemNO_BLOCK, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT(_id, assert(xReturn == false));
-
-    AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY));
+    AWAIT(_id,
+        assert(xReturn == false);
+        assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY);
+    );
 
     xSemaphoreGive(xMasterSlaveMutex, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT(_id, assert(xReturn == true); xReturn = false);
-
-    AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY));
+    AWAIT(_id,
+        assert(xReturn == true); xReturn = false;
+        assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY);
+    );
 
     xSemaphoreGive(xISRMutex, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
-    AWAIT(_id, assert(xReturn == true); xReturn = false);
-
-    AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY));
+    AWAIT(_id,
+        assert(xReturn == true); xReturn = false;
+        assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY);
+    );
 
     xQueueGenericReset(_id, xISRMutex, temp_var1, temp_bit)
 }
@@ -198,7 +204,7 @@ do
 ::  AWAIT(_PID, assert(uxQueueMessagesWaiting(xISRCountingSemaphore) == 0));
 
     AWAIT(_PID, xOkToGiveCountingSemaphore = true);
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD_Q, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD_T, local_bit, local_var1, local_var2);
     AWAIT(_PID, xOkToGiveCountingSemaphore = false);
 
     AWAIT(_PID,

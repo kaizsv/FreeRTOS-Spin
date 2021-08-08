@@ -401,8 +401,17 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
                 assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) == CID_PENDING_READY);
                 uxListRemove(xPendingReadyList, PLIST_SIZE, pxTCB, xEvent));
             AWAIT_DS(_id,
-                assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK);
-                uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState));
+                if
+                :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ->
+                    uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState);
+                    listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0);
+#if (INCLUDE_vTaskSuspend == 1)
+                :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
+                    uxListRemove(xSuspendedTaskList, DLIST_SIZE, pxTCB, xState);
+#endif
+                // else -> the d_step command will be blocked
+                fi
+            );
             prvAddTaskToReadyList(_id, pxTCB);
 
             if

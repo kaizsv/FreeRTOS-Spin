@@ -37,7 +37,7 @@
 #define ULCOUNTER_IS_ACCESSED_BY(id, var)   \
     AWAIT(_PID, var = id)
 
-#define priSLEEP_TIME   50
+#define priSLEEP_TIME   80
 #define priLOOPS        5
 #define priMAX_COUNT    3
 #define priNO_BLOCK     0
@@ -53,9 +53,8 @@ proctype CONT_INC()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false;
 
-    byte uxOurPriority;
+#define uxOurPriority tskIDLE_PRIORITY
     assert(_PID == xContinousIncrementHandle);
-    AWAIT(_PID, uxOurPriority = uxTaskPriorityGet(NULL_byte));
 do
 ::  vTaskPrioritySet(_PID, NULL_byte, uxOurPriority + 1, local_var1, local_bit, local_var2);
     ULCOUNTER_IS_ACCESSED_BY(xContinousIncrementHandle, ulCounter);
@@ -86,12 +85,9 @@ proctype C_CTRL()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false;
 
-    byte sLoops = 0;
     assert(_PID == FIRST_TASK + 2);
 do
-::  /* Reset ulCounter will not help in verification */
-    do
-    :: SELE(_PID, sLoops < priLOOPS, sLoops = sLoops + 1);
+::  /* Remove sLoops to simplify verification */
         vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
             ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
         vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
@@ -105,8 +101,6 @@ do
         vTaskSuspendAll(_PID);
             AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
         xTaskResumeAll(_PID, local_var1, _, local_var2);
-    :: ELSE(_PID, sLoops < priLOOPS, sLoops = 0; break)
-    od;
 
     vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
 
@@ -140,7 +134,7 @@ proctype SUSP_SEND()
     assert(_PID == xQueueSendWhenSuspendedHandler);
 do
 ::  vTaskSuspendAll(_PID);
-    xQueueSend(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     xTaskResumeAll(_PID, local_var1, _, local_var2);
     vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
@@ -151,20 +145,13 @@ proctype SUSP_RECV()
 {
     byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulReceivedValue = 0;
-    bit local_xReturn = false, local_xIsTimeOut = false, xGotValue = false;
+    bit local_xIsTimeOut = false, xGotValue = false;
     assert(_PID == xQueueReceiveWhenSuspendedHandler);
 do
 ::  do
-    :: SELE(_PID, xGotValue == false, assert(local_xReturn == false) /* check */);
-        vTaskSuspendAll(_PID);
-        vTaskSuspendAll(_PID);
+    :: SELE(_PID, xGotValue == false);
+        /* Remove pointless vTaskSuspendAll and xTaskResumeAll */
         xQueueReceive(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
-        xTaskResumeAll(_PID, local_var1, local_xReturn /* check */, local_var2);
-        xTaskResumeAll(_PID, local_var1, _, local_var2);
-
-        #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
-        #endif
     :: ELSE(_PID, xGotValue == false, xGotValue = false; break)
     od;
 running:

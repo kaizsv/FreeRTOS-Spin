@@ -28,7 +28,7 @@
 #define recmuBLOCKING_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 #define recmuPOLLING_TASK_PRIORITY  (tskIDLE_PRIORITY + 0)
 
-#define recmuMAX_COUNT      10
+#define recmuMAX_COUNT      2 /* Origin is 10 */
 
 #define recmuSHORT_DELAY    20
 #define recmuNO_DELAY       0

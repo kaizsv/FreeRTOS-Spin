@@ -152,6 +152,10 @@ do
     :: SELE(_PID, xGotValue == false);
         /* Remove pointless vTaskSuspendAll and xTaskResumeAll */
         xQueueReceive(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
+
+        #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+        #endif
     :: ELSE(_PID, xGotValue == false, xGotValue = false; break)
     od;
 running:

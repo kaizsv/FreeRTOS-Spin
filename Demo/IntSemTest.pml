@@ -230,7 +230,6 @@ running1:
 
     AWAIT(_PID, xOkToGiveCountingSemaphore = true);
     xSemaphoreTake(xISRCountingSemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
-    xSemaphoreTake(xISRCountingSemaphore, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, xOkToGiveCountingSemaphore = false);
 
     vTaskPrioritySet(_PID, NULL_byte, tskIDLE_PRIORITY, local_var1, local_bit, local_var2);

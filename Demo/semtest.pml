@@ -27,11 +27,11 @@
 SemaphoreDeclarator(1, byte);
 
 SemaphoreHandle_t(pxFirstSemaphore_xSemaphore, 1, byte);
-byte pxFirstSemaphore_pulSharedVariable = 0;
+bit pxFirstSemaphore_pulSharedVariable = 0;
 #define pxFirstSemaphore_xBlockTime 0
 
 SemaphoreHandle_t(pxSecondSemaphore_xSemaphore, 1, byte);
-byte pxSecondSemaphore_pulSharedVariable = 0;
+bit pxSecondSemaphore_pulSharedVariable = 0;
 #define pxSecondSemaphore_xBlockTime 10
 
 #define xDelay  100
@@ -49,15 +49,16 @@ do
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
-        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
-        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable - 1);
+        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = 1);
+        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1); pxFirstSemaphore_pulSharedVariable = 0);
 
         xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+running:
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
-running:
-        vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
+        /* xBlockTime is zero. Need not to delay. */
     :: ELSE(_PID, local_xReturn == true);
+        /* xBlockTime is zero. Yield. */
         taskYIELD(_PID, local_var1)
     fi
 od
@@ -76,15 +77,16 @@ do
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
-        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable + 1);
-        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1); pxFirstSemaphore_pulSharedVariable = pxFirstSemaphore_pulSharedVariable - 1);
+        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = 1);
+        AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1); pxFirstSemaphore_pulSharedVariable = 0);
 
         xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+running:
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
-running:
-        vTaskDelay(_PID, 0, local_bit, local_var1, local_var2)
+        /* xBlockTime is zero. Need not to delay. */
     :: ELSE(_PID, local_xReturn == true);
+        /* xBlockTime is zero. Yield. */
         taskYIELD(_PID, local_var1)
     fi
 od
@@ -103,8 +105,8 @@ do
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
-        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
-        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable - 1);
+        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = 1);
+        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1); pxSecondSemaphore_pulSharedVariable = 0);
 
         xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
@@ -129,8 +131,8 @@ do
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
         between the two following AWAIT statements */
-        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable + 1);
-        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1); pxSecondSemaphore_pulSharedVariable = pxSecondSemaphore_pulSharedVariable - 1);
+        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = 1);
+        AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1); pxSecondSemaphore_pulSharedVariable = 0);
 
         xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);

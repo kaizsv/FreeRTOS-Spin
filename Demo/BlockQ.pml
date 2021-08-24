@@ -1,4 +1,5 @@
 /* FreeRTOS/Demo/Common/Minimal/BlockQ.c */
+#include "config/BlockQ.config"
 
 #define promela_TASK_NUMBER     6
 #define promela_QUEUE_NUMBER    3
@@ -55,16 +56,16 @@ QueueHandle_t(pxQueueParameters5_xQueue, uxQueueSize2, byte);
 #define pxQueueParameters6_xQueue           pxQueueParameters5_xQueue
 #define pxQueueParameters6_xBlockTime       xBlockTime
 
-#define INCREASE_VAR_AND_INTOVERFLOW_3(var) \
-    AWAIT(_PID, var = var + 1; var = var % 3)
-
 #define INCREASE_VAR_AND_INTOVERFLOW_2(var) \
-    AWAIT(_PID, var = var + 1; var = var % 2)
+    AWAIT(_PID, var = (var == 0 -> 1 : 0))
+
+#define G1  10
+#define G2  20
 
 proctype QConsB1()
 {
-    byte idx;
-    byte usData, usExpectedValue = 0;
+#define G1usExpectedValue   G1
+    byte idx, usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
     bit local_xIsTimeOut = false;
@@ -73,10 +74,8 @@ do
 ::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
-        AWAIT(_PID, assert(usData == usExpectedValue));
-        /* Catch-up */
 running:
-        INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
+        AWAIT(_PID, assert(usData == G1usExpectedValue); usData = 0);
 
         #if (configUSE_PREEMPTION == 0)
         // pxQueueParameters1_xBlockTime is not zero
@@ -88,16 +87,15 @@ od
 
 proctype QProdB2()
 {
+#define G1usValue   G1
     byte idx;
-    byte usValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 1);
 do
-::  xQueueSend(pxQueueParameters2_xQueue, usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+::  xQueueSend(pxQueueParameters2_xQueue, G1usValue, pxQueueParameters2_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
 running:
-    INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
+    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
@@ -107,8 +105,8 @@ od
 
 proctype QConsB3()
 {
-    byte idx;
-    byte usData, usExpectedValue = 0;
+#define G2usExpectedValue   G2
+    byte idx, usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
     bit local_xIsTimeOut = false;
@@ -117,10 +115,8 @@ do
 ::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
-        AWAIT(_PID, assert(usData == usExpectedValue));
-        /* Catch-up */
 running:
-        INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
+        AWAIT(_PID, assert(usData == G2usExpectedValue); usData = 0);
 
         #if (configUSE_PREEMPTION == 0)
         // pxQueueParameters3_xBlockTime is zero
@@ -133,16 +129,15 @@ od
 
 proctype QProdB4()
 {
+#define G2usValue   G2
     byte idx;
-    byte usValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 3);
 do
-::  xQueueSend(pxQueueParameters4_xQueue, usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
-    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
+::  xQueueSend(pxQueueParameters4_xQueue, G2usValue, pxQueueParameters4_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
 running:
-    INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
+    AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
@@ -153,15 +148,15 @@ od
 proctype QProdB5()
 {
     byte idx;
-    byte usValue = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    bit usValue = 0;
     bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 4);
 do
 ::  xQueueSend(pxQueueParameters5_xQueue, usValue, pxQueueParameters5_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 running:
-    INCREASE_VAR_AND_INTOVERFLOW_3(usValue);
+    INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
@@ -171,9 +166,9 @@ od
 
 proctype QConsB6()
 {
-    byte idx;
-    byte usData, usExpectedValue = 0;
+    byte idx, usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    bit usExpectedValue = 0;
     bit local_xReturn = false;
     bit local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 5);
@@ -181,10 +176,10 @@ do
 ::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
-        AWAIT(_PID, assert(usData == usExpectedValue));
+        AWAIT(_PID, assert(usData == usExpectedValue); usData = 0);
         /* Catch-up */
 running:
-        INCREASE_VAR_AND_INTOVERFLOW_3(usExpectedValue);
+        INCREASE_VAR_AND_INTOVERFLOW_2(usExpectedValue);
 
         #if (configUSE_PREEMPTION == 0)
         // pxQueueParameters6_xBlockTime is not zero

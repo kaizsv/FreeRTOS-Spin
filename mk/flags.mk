@@ -31,6 +31,10 @@ ifdef WF
 	RUNTIME_FLAGS += -f
 endif
 
+ifdef CORRECTION
+	SPINFLAGS += -DCORRECTION
+endif
+
 .PHONY: .safety .bfs .ltl .np .trail.full .trail.ltl
 .safety:
 	$(eval COMPILETIME_FLAGS += -DSAFETY -DNOCLAIM)

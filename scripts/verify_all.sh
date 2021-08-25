@@ -3,28 +3,36 @@
 set -e
 set -o pipefail
 
-if [ -z "$1" ];
+if [ $# -gt 0 ];
 then
-    OPTION=safety_dfs
+    while [ $# -gt 0 ];
+    do
+        case "$1" in
+            -dfs)
+                OPTION=safety_dfs
+                ;;
+            -bfs)
+                OPTION=safety_bfs
+                ;;
+            -np|-non-progress)
+                OPTION=non-progress
+                ;;
+            -ltl)
+                OPTION=acceptance
+                ;;
+            -correction)
+                OPTION="${OPTION} CORRECTION=1"
+                ;;
+            *)
+                echo "Usage: -dfs, -bfs, -np, or -ltl"
+                echo "append -correction if an application has a correction"
+                exit 2
+                ;;
+        esac
+        shift
+    done
 else
-    case "$1" in
-        -dfs)
-            OPTION=safety_dfs
-            ;;
-        -bfs)
-            OPTION=safety_bfs
-            ;;
-        -np|-non-progress)
-            OPTION=non-progress
-            ;;
-        -ltl)
-            OPTION=acceptance
-            ;;
-        *)
-            echo "Usage: -dfs, -bfs, -np, or -ltl"
-            exit 2
-            ;;
-    esac
+    OPTION=safety_dfs
 fi
 
 if [ -d ./outputs ];

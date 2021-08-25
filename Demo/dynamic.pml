@@ -87,26 +87,24 @@ proctype C_CTRL()
 
     assert(_PID == FIRST_TASK + 2);
 do
-::  /* First section : */
+::  /* Remove sLoops to simplify verification */
+        vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
+            ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
+        vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
 
-    ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
-    /* Remove sLoops to simplify verification */
-    vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
+        #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+        #endif
 
-    #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
-    #endif
+        vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
 
-    vTaskDelay(_PID, 40, local_bit, local_var1, local_var2);
+        vTaskSuspendAll(_PID);
+            AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
+        xTaskResumeAll(_PID, local_var1, _, local_var2);
 
     vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
-    AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
 
-    /* Second section : */
-    /* xContinousIncrementHandle is already suspended. */
-
-    AWAIT(_PID, ulCounter = 0;
-        assert(listLIST_ITEM_CONTAINER(TCB(xLimitedIncrementHandle).ListItems[xState]) == CID_SUSPENDED_TASK));
+    AWAIT(_PID, ulCounter = 0);
 
     vTaskResume(_PID, xLimitedIncrementHandle, local_bit, local_var1);
 
@@ -116,6 +114,8 @@ do
 
 running:
     AWAIT(_PID, assert(ulCounter == xLimitedIncrementHandle));
+
+    vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);

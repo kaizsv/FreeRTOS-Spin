@@ -98,6 +98,12 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
 
     vTaskResume(_id, xSlaveHandle, temp_bit, temp_var1);
 
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
+
     AWAIT(_id,
         assert(eTaskGetState_eBlocked(xSlaveHandle));
         assert(uxTaskPriorityGet(NULL_byte) == intsemSLAVE_PRIORITY)
@@ -121,6 +127,11 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
     );
 
     xSemaphoreGive(xMasterSlaveMutex, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
     AWAIT(_id,
         assert(xReturn == true); xReturn = false;
         assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY);
@@ -141,6 +152,12 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut,
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     vTaskResume(_id, xSlaveHandle, temp_bit, temp_var1);
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
 
     AWAIT(_id,
         assert(eTaskGetState_eBlocked(xSlaveHandle));

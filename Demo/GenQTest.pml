@@ -151,6 +151,12 @@ do
 
 running:
     AWAIT(_PID, ulLoopCounter = INC_VAR_AND_WRAP_AROUND(ulLoopCounter));
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
 od
 }
 

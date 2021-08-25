@@ -106,7 +106,13 @@ proctype CNT1()
     AWAIT(_PID, assert(local_xReturn == false));
 do
 ::  prvIncrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
-    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2)
+    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
 od
 }
 
@@ -121,7 +127,13 @@ proctype CNT2()
     AWAIT(_PID, assert(local_xReturn == false));
 do
 ::  prvIncrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
-    prvDecrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2)
+    prvDecrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
 od
 }
 

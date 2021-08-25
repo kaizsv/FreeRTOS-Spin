@@ -57,6 +57,11 @@ running:
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
         /* xBlockTime is zero. Need not to delay. */
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 0) || (configUSE_TIME_SLICING == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
         taskYIELD(_PID, local_var1)
@@ -85,6 +90,11 @@ running:
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
         /* xBlockTime is zero. Need not to delay. */
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 0) || (configUSE_TIME_SLICING == 0)
+        taskYIELD(_PID, local_var1);
+    #endif
+#endif
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
         taskYIELD(_PID, local_var1)

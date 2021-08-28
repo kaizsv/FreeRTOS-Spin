@@ -16,6 +16,17 @@
         run prvSemaphoreTest4(); \
     }
 
+#ifdef CORRECTION
+/* After applying the correction, the verification is still disproved.
+ * The error is polling the binary semaphore.
+ */
+#include "../platform/stm32p103_FreeRTOSConfig.pml"
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        #undef configIDLE_SHOULD_YIELD
+        #define configIDLE_SHOULD_YIELD 0
+    #endif
+#endif
+
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
@@ -65,7 +76,13 @@ running:
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
         taskYIELD(_PID, local_var1)
-    fi
+    fi;
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        vTaskDelay(_PID, 5, local_bit, local_var1, local_var2);
+    #endif
+#endif
 od
 }
 
@@ -98,7 +115,13 @@ running:
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
         taskYIELD(_PID, local_var1)
-    fi
+    fi;
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        vTaskDelay(_PID, 5, local_bit, local_var1, local_var2);
+    #endif
+#endif
 od
 }
 

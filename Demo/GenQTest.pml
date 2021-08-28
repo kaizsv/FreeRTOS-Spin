@@ -17,6 +17,14 @@
         run MuHigh();   \
     }
 
+#ifdef CORRECTION
+#include "../platform/stm32p103_FreeRTOSConfig.pml"
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        #undef configIDLE_SHOULD_YIELD
+        #define configIDLE_SHOULD_YIELD 0
+    #endif
+#endif
+
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/semphr.h.pml"
@@ -210,6 +218,11 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_TEST_PRIORITY));
 
     vTaskPrioritySet(_id, NULL_byte, genqMUTEX_LOW_PRIORITY, temp_var1, temp_bool, temp_var2);
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        vTaskDelay(_PID, 5, temp_bool, temp_var1, temp_var2);
+    #endif
+#endif
 }
 
 inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)

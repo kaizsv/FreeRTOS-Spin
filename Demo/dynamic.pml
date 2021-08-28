@@ -20,6 +20,14 @@
 #define QUEUE_SEND_EXIT_CRITICAL
 #define QUEUE_RECEIVE_EXIT_CRITICAL
 
+#ifdef CORRECTION
+#include "../platform/stm32p103_FreeRTOSConfig.pml"
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        #undef configIDLE_SHOULD_YIELD
+        #define configIDLE_SHOULD_YIELD 0
+    #endif
+#endif
+
 #include "../FreeRTOS.pml"
 #include "../FreeRTOS/tasks.pml"
 #include "../FreeRTOS/queue.h.pml"
@@ -63,6 +71,12 @@ do
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
     #endif
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        vTaskDelay(_PID, 5, local_bit, local_var1, local_var2);
+    #endif
+#endif
 od
 }
 

@@ -302,8 +302,19 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
     AWAIT_DS(_id, assert(pxTCB == NULL_byte); pxTCB = prvGetTCBFromHandle(xTaskToSuspend));
 
     AWAIT_DS(_id,
-        assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_READY_LISTS + TCB(pxTCB).uxPriority);
-        uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxTCB).uxPriority], RLIST_SIZE, pxTCB, xState));
+        if
+        :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_READY_LISTS + TCB(pxTCB).uxPriority ->
+            uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxTCB).uxPriority], RLIST_SIZE, pxTCB, xState);
+        :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ->
+            uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState);
+            listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0);
+            if
+            :: listLIST_IS_EMPTY(pxDelayedTaskList) -> reset_xTickCount();
+            :: else
+            fi
+        // else -> the d_step command is blocked
+        fi
+    );
     if
     :: SELE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[TCB(pxTCB).uxPriority]));
         taskRESET_READY_PRIORITY(_id, TCB(pxTCB).uxPriority)

@@ -15,6 +15,17 @@
         run IntCnt();   \
     }
 
+#ifdef CORRECTION
+/* After applying the correction, the verification is still disproved.
+ * The error is releasing the mutex from an interrupt handler.
+ */
+#include "../platform/stm32p103_FreeRTOSConfig.pml"
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        #undef configIDLE_SHOULD_YIELD
+        #define configIDLE_SHOULD_YIELD 0
+    #endif
+#endif
+
 #include "../FreeRTOS/include/Queue_Declarator.pml"
 #include "../FreeRTOS/queueFromISR.pml"
 

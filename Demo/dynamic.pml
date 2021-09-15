@@ -107,7 +107,7 @@ do
     /* Remove unnecessary vTaskSuspend and vTaskResume */
     ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
 
-    vTaskDelay(_PID, 40, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
 
     /* Remove unnecessary vTaskSuspendAll and xTaskResumeAll */
     AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));

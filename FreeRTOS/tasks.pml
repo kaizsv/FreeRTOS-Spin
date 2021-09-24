@@ -25,6 +25,9 @@ typedef TCB_t {
     ListItem_t ListItems[2];
     byte uxPriority;
     // Move uxBasePriority and uxMutexesHeld to another sturcture.
+#if ( portCRITICAL_NESTING_IN_TCB == 1 )
+    byte uxCriticalNesting;
+#endif
 };
 
 #define TCB(index) TCBs[__OWNER_OF(index)]
@@ -168,6 +171,12 @@ inline xTaskCreate_fixed(pcName, Priority)
     vListInitialiseItem(TCB(pcName).ListItems[xState]);
     vListInitialiseItem(TCB(pcName).ListItems[xEvent]);
     listSET_LIST_ITEM_VALUE(TCB(pcName).ListItems[xEvent], configMAX_PRIORITIES - (Priority));
+
+#if (portCRITICAL_NESTING_IN_TCB == 1 )
+    TCB(pcName).uxCriticalNesting = 0;
+#endif
+
+    pxPortInitialiseStack(pcName);
 
     /* prvAddNewTaskToReadyList */
     if
@@ -872,6 +881,37 @@ inline vTaskPriorityDisinheritAfterTimeout(_id, pxMutexHolder, uxHighestPriority
 }
 
 #endif /* configUSE_MUTEXES */
+
+#if ( portCRITICAL_NESTING_IN_TCB == 1 )
+
+inline vTaskEnterCritical(_id)
+{
+    portDISABLE_INTERRUPTS(_id);
+    if
+    :: SELE_AS(_id, xIsSchedulerRunning);
+        AWAIT_DS(_id, TCB(pxCurrentTCB).uxCriticalNesting =
+            TCB(pxCurrentTCB).uxCriticalNesting + 1);
+        // portASSERT_IF_IN_ISR()
+    :: ELSE_AS(_id, xIsSchedulerRunning);
+    fi;
+}
+
+inline vTaskExitCritical(_id)
+{
+    if
+    :: SELE_AS(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
+        AWAIT_DS(_id, TCB(pxCurrentTCB).uxCriticalNesting =
+            TCB(pxCurrentTCB).uxCriticalNesting - 1);
+        if
+        :: SELE_AS(_id, TCB(pxCurrentTCB).uxCriticalNesting == 0);
+            portENABLE_INTERRUPTS(_id);
+        :: ELSE_AS(_id, TCB(pxCurrentTCB).uxCriticalNesting == 0);
+        fi
+    :: ELSE_AS(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
+    fi
+}
+
+#endif
 
 // TODO check again
 inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, temp_var, temp_var2)

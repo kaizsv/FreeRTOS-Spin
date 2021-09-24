@@ -14,6 +14,8 @@
         run SysTick_Handler();  \
     }
 
+#define pxPortInitialiseStack(...)
+
 #include "../../../arch/v7m.pml"
 #include "portmacro.pml"
 #include "../../tasks.pml"

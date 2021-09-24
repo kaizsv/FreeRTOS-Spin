@@ -5,9 +5,10 @@ set -o pipefail
 
 usage () {
 cat <<EOF
-Usage: ./scripts/verify_all [-dfs|-bfs|-np|-ltl] [-armv7m] [-correction]
+Usage: ./scripts/verify_all [-dfs|-bfs|-np|-ltl] [-armv7m|-rv32] [-correction]
+
 [-dfs|-bfs|-np|-ltl]: Specify a search algorithm for Spin model checker.
-[-armv7m]: Specify an architecture.
+[-armv7m|-rv32]: Specify an architecture.
 [-correction]: Append this argument to verify corrective applications.
 EOF
 }
@@ -34,6 +35,9 @@ do
             ;;
         -armv7m)
             ARCH="ARCH=ARMV7M"
+            ;;
+        -rv32)
+            ARCH="ARCH=RV32"
             ;;
         *|-h|--help)
             usage;

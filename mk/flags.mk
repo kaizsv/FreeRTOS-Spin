@@ -1,8 +1,8 @@
 CFLAGS = -w -O2
-SPINFLAGS = -a
+SPINFLAGS = -a -D$(ARCH)
 COMPILETIME_FLAGS = -DXUSAFE -DCOLLAPSE -DNOFAIR
 RUNTIME_FLAGS = -m$(MAX_DEPTH)
-TRAIL_FLAGS = -p -v -k $(notdir $(TARGET)).trail
+TRAIL_FLAGS = -p -v -k $(notdir $(TARGET)).trail -D$(ARCH)
 
 # minimized DFA encoding
 ifdef MA

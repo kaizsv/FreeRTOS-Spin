@@ -1,8 +1,7 @@
 /* include the platform and the porting files */
 
-#include "platform/stm32p103_FreeRTOSConfig.pml"
-#include "FreeRTOS/portable/GCC_ARM_CM3/port.pml"
-#include "FreeRTOS/portable/GCC_ARM_CM3/portmacro.pml"
+#include "PROMELA.pml"
+#include "portable.h.pml"
 
 #ifndef _INC_FREERTOS_H_
 #define _INC_FREERTOS_H_

@@ -1,8 +1,6 @@
 #ifndef _V7M_GHOST_VAR_
 #define _V7M_GHOST_VAR_
 
-#include "../PROMELA.pml"
-
 /* The low-order 4 bits are ignored. */
 #define NON_IMPLEMENTED_LOW_BITS(val) (val >> 4)
 

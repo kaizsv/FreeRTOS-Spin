@@ -1,5 +1,6 @@
 include mk/config.mk
 TARGET ?= $(DEFAULT_TARGET)
+ARCH ?= $(DEFAULT_ARCH)
 
 TARGET_DIR = Demo
 TARGET_PATH = $(addprefix $(TARGET_DIR)/, $(notdir $(TARGET)))

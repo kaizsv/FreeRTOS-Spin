@@ -15,7 +15,7 @@
     }
 
 #include "../../../arch/v7m.pml"
-#include "../../../FreeRTOS.pml"
+#include "portmacro.pml"
 #include "../../tasks.pml"
 
 /** Default configurations: modification has no effects in the model **

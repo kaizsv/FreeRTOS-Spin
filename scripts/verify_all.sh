@@ -3,37 +3,45 @@
 set -e
 set -o pipefail
 
-if [ $# -gt 0 ];
-then
-    while [ $# -gt 0 ];
-    do
-        case "$1" in
-            -dfs)
-                OPTION=safety_dfs
-                ;;
-            -bfs)
-                OPTION=safety_bfs
-                ;;
-            -np|-non-progress)
-                OPTION=non-progress
-                ;;
-            -ltl)
-                OPTION=acceptance
-                ;;
-            -correction)
-                OPTION="${OPTION} CORRECTION=1"
-                ;;
-            *)
-                echo "Usage: -dfs, -bfs, -np, or -ltl"
-                echo "append -correction if an application has a correction"
-                exit 2
-                ;;
-        esac
-        shift
-    done
-else
-    OPTION=safety_dfs
-fi
+usage () {
+cat <<EOF
+Usage: ./scripts/verify_all [-dfs|-bfs|-np|-ltl] [-armv7m] [-correction]
+[-dfs|-bfs|-np|-ltl]: Specify a search algorithm for Spin model checker.
+[-armv7m]: Specify an architecture.
+[-correction]: Append this argument to verify corrective applications.
+EOF
+}
+
+OPTION=safety_dfs
+ARCH=
+while [ $# -gt 0 ];
+do
+    case "$1" in
+        -dfs)
+            OPTION=safety_dfs
+            ;;
+        -bfs)
+            OPTION=safety_bfs
+            ;;
+        -np|-non-progress)
+            OPTION=non-progress
+            ;;
+        -ltl)
+            OPTION=acceptance
+            ;;
+        -correction)
+            OPTION="${OPTION} CORRECTION=1"
+            ;;
+        -armv7m)
+            ARCH="ARCH=ARMV7M"
+            ;;
+        *|-h|--help)
+            usage;
+            exit 2
+            ;;
+    esac
+    shift
+done
 
 if [ -d ./outputs ];
 then
@@ -46,7 +54,7 @@ DEMOS=Demo/*.pml
 for demo in $DEMOS
 do
     OUT_FILE=./outputs/$(basename $demo .pml).result
-    make $OPTION TARGET=$demo | tee $OUT_FILE
+    make $OPTION TARGET=$demo $ARCH | tee $OUT_FILE
 
     # Polish the output file
     if [ -x "$(command -v awk)" ];

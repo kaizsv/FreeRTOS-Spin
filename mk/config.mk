@@ -1,4 +1,5 @@
-DEFAULT_TARGET = BlockQ.pml
+DEFAULT_TARGET = Demo.pml
+DEFAULT_ARCH = ARMV7M
 
 # memory limit in MB
 MAX_MEMORY = 20480

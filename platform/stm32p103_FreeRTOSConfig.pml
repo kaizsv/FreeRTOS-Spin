@@ -32,7 +32,7 @@ INCLUDE_VTaskDelete                         0
 #ifndef configIDLE_SHOULD_YIELD
     #define configIDLE_SHOULD_YIELD         1
 #endif
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0 // TODO
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #ifndef configMAX_PRIORITIES
     #define configMAX_PRIORITIES            3
 #endif

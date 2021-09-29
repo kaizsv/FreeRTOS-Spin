@@ -33,7 +33,7 @@ INCLUDE_VTaskDelete                         0
 #define configUSE_PREEMPTION                1
 #define configUSE_TIME_SLICING              1
 #define configIDLE_SHOULD_YIELD             0
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0 // TODO
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
 #ifndef configMAX_PRIORITIES
     #define configMAX_PRIORITIES            3
 #endif

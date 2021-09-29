@@ -62,6 +62,15 @@ inline taskRECORD_READY_PRIORITY(_id, Priority)
     fi
 }
 
+inline taskRECORD_READY_PRIORITY_fixed(Priority)
+{
+    if
+    :: Priority > uxTopReadyPriority ->
+        uxTopReadyPriority = Priority
+    :: else
+    fi
+}
+
 inline taskSELECT_HIGHEST_PRIORITY_TASK(_id, local_idx)
 {
     AWAIT_DS(_id, assert(local_idx == NULL_byte);
@@ -77,9 +86,34 @@ inline taskSELECT_HIGHEST_PRIORITY_TASK(_id, local_idx)
 }
 
     #define taskRESET_READY_PRIORITY(_id, uxPriority)
-    #define portRESET_READY_PRIORITY(_id, uxPriority, uxTopReadyPriority)
+    #define portRESET_READY_PRIORITY(uxPriority, uxTopReadyPriority)
 #else
-// TODO: configUSE_PORT_OPTIMISED_TASK_SELECTION
+
+#define taskRECORD_READY_PRIORITY(_id, Priority) \
+    AWAIT_DS(_id, portRECORD_READY_PRIORITY(Priority, uxTopReadyPriority))
+
+#define taskRECORD_READY_PRIORITY_fixed(Priority) \
+    portRECORD_READY_PRIORITY(Priority, uxTopReadyPriority)
+
+inline taskSELECT_HIGHEST_PRIORITY_TASK(_id, local_idx)
+{
+    AWAIT_DS(_id,
+        portGET_HIGHEST_PRIORITY(local_idx, uxTopReadyPriority);
+        assert(listLIST_IS_EMPTY(pxReadyTasksLists[local_idx]) == false)
+    );
+    listGET_OWNER_OF_NEXT_ENTRY(_id, pxCurrentTCB, pxReadyTasksLists[local_idx], RLIST_SIZE);
+    AWAIT_DS(_id, local_idx = NULL_byte);
+}
+
+inline taskRESET_READY_PRIORITY(_id, Priority)
+{
+    if
+    :: SELE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[Priority]));
+        AWAIT_DS(_id, portRESET_READY_PRIORITY(Priority, uxTopReadyPriority));
+    :: ELSE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[Priority]));
+    fi
+}
+
 #endif
 
 #if 0
@@ -125,7 +159,7 @@ inline prvAddTaskToReadyList(_id, pxTCB)
 
 inline prvAddTaskToReadyList_fixed(pxTCB)
 {
-    uxTopReadyPriority = (TCB(pxTCB).uxPriority > uxTopReadyPriority -> TCB(pxTCB).uxPriority : uxTopReadyPriority);
+    taskRECORD_READY_PRIORITY_fixed(TCB(pxTCB).uxPriority);
     vListInsertEnd_pxIndex(pxReadyTasksLists[TCB(pxTCB).uxPriority], RLIST_SIZE, CID_READY_LISTS + TCB(pxTCB).uxPriority, pxTCB, xState, hidden_idx)
 }
 
@@ -282,7 +316,7 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
             AWAIT_DS(_id, uxListRemove_pxIndex(pxReadyTasksLists[uxPriorityUsedOnEntry_pset], RLIST_SIZE, pxTCB, xState, hidden_idx));
             if
             :: SELE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry_pset]));
-                portRESET_READY_PRIORITY(_id, uxPriorityUsedOnEntry_pset, uxTopReadyPriority)
+                AWAIT_DS(_id, portRESET_READY_PRIORITY(uxPriorityUsedOnEntry_pset, uxTopReadyPriority));
             :: ELSE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry_pset]))
             fi;
             prvAddTaskToReadyList(_id, pxTCB)
@@ -865,7 +899,7 @@ inline vTaskPriorityDisinheritAfterTimeout(_id, pxMutexHolder, uxHighestPriority
                     AWAIT_DS(_id, uxListRemove_pxIndex(pxReadyTasksLists[uxPriorityUsedOnEntry], RLIST_SIZE, pxMutexHolder, xState, hidden_idx));
                     if
                     :: SELE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]), uxPriorityUsedOnEntry = NULL_byte);
-                        portRESET_READY_PRIORITY(_id, TCB(pxMutexHolder).uxPriority, uxTopReadyPriority)
+                        AWAIT_DS(_id, portRESET_READY_PRIORITY(TCB(pxMutexHolder).uxPriority, uxTopReadyPriority));
                     :: ELSE_AS(_id, listLIST_IS_EMPTY(pxReadyTasksLists[uxPriorityUsedOnEntry]), uxPriorityUsedOnEntry = NULL_byte)
                     fi;
 
@@ -921,7 +955,7 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
         uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority], RLIST_SIZE, pxCurrentTCB, xState, temp_var));
     if
     :: SELE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]));
-        portRESET_READY_PRIORITY(_id, TCB(pxCurrentTCB).uxPriority, uxTopReadyPriority)
+        AWAIT(_id, portRESET_READY_PRIORITY(TCB(pxCurrentTCB).uxPriority, uxTopReadyPriority))
     :: ELSE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
     fi;
 

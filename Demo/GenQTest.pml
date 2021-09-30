@@ -59,7 +59,6 @@ byte ulGuardedVariable = 0;
 
 proctype GenQ()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xReturn = false, local_xIsTimeOut = false;
 
@@ -274,7 +273,6 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 
 proctype MuLow()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == (FIRST_TASK + 1));
@@ -296,7 +294,6 @@ od
 
 proctype MuMed()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     assert(_PID == xMediumPriorityMutexTask);
 do
@@ -307,7 +304,6 @@ od
 
 proctype MuHigh()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xHighPriorityMutexTask);
@@ -323,7 +319,6 @@ od
 
 init
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xIsTimeOut = false;
 

@@ -87,12 +87,16 @@ inline pop(ret)
 
 inline stack_check(id)
 {
+#if (promela_EXP_NUMBER != 2)
+    #error Extend this macro if promela_NVIC_NUMBER is not equal to 2.
+#endif
     if
     :: EP_Top > 0 ->
-        for (idx: 0 .. (EP_Top - 1)) {
-            assert(EP_Stack[idx] != id)
-        }
-        idx = 0
+        assert(
+            EP_Stack[0] != id &&
+            EP_Stack[1] != id &&
+            EP_Stack[2] != id
+        );
     :: else ->
         assert(EP_Stack[0] == NULL_byte)
     fi

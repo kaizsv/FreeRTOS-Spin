@@ -54,7 +54,6 @@ QueueHandle_t(xQUEUE, qpeekQUEUE_LENGTH, byte);
 
 proctype PeekL()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulValue = 0;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK);
@@ -114,7 +113,6 @@ od
 
 proctype PeekM()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulValue = 0;
     bool local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xMediumPriorityTask);
@@ -134,7 +132,6 @@ od
 
 proctype PeekH1()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulValue = 0;
     bool local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xHighPriorityTask);
@@ -161,7 +158,6 @@ od
 
 proctype PeekH2()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulValue = 0;
     bool local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xHighestPriorityTask);
@@ -204,7 +200,6 @@ od
 
 init
 {
-    byte idx;
     byte local_var = NULL_byte;
 
     d_step {

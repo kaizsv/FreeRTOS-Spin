@@ -3,6 +3,9 @@
 
 #define NULL_byte       255 /* 0xff */
 
+/* for indexing in d_step command */
+hidden byte hidden_idx = NULL_byte;
+
 /** Executing process
 *
 *      init PendSV SysTick <<exp handlers>>  FIRST_TASK  SEC_TASK  <<user tasks>>

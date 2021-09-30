@@ -56,7 +56,7 @@ bool xControllingIsSuspended = false, xBlockingIsSuspended = false;
 
 proctype Rec1()
 {
-    byte idx, ux = 0;
+    byte ux = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xControllingTaskHandle);
@@ -99,7 +99,6 @@ od
 
 proctype Rec2()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xBlockingTaskHandle);
@@ -122,7 +121,6 @@ od
 
 proctype Rec3()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 2);
@@ -166,7 +164,6 @@ od
 
 init
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xIsTimeOut = false;
 

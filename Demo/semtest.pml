@@ -49,7 +49,6 @@ bit pxSecondSemaphore_pulSharedVariable = 0;
 
 proctype prvSemaphoreTest1()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
     bit local_xIsTimeOut = false;
@@ -88,7 +87,6 @@ od
 
 proctype prvSemaphoreTest2()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
     bit local_xIsTimeOut = false;
@@ -127,7 +125,6 @@ od
 
 proctype prvSemaphoreTest3()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
     bit local_xIsTimeOut = false;
@@ -153,7 +150,6 @@ od
 
 proctype prvSemaphoreTest4()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
     bit local_xIsTimeOut = false;
@@ -178,7 +174,6 @@ od
 }
 
 init {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_xIsTimeOut = false;
 

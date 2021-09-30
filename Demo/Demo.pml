@@ -28,7 +28,6 @@
 
 proctype MY_TASK()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
@@ -40,7 +39,6 @@ od
 
 proctype SEC_TASK()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
@@ -59,7 +57,6 @@ od
 }
 
 init {
-    byte idx;
     byte local_var = NULL_byte;
 
     d_step {

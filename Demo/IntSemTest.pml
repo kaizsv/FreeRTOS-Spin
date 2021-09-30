@@ -78,7 +78,6 @@ bool xOkToGiveMutex = false, xOkToGiveCountingSemaphore = false;
 
 proctype IntMuS()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xSlaveHandle);
@@ -203,7 +202,6 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut,
 
 proctype IntMuM()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
     assert(_PID == (FIRST_TASK + 1));
@@ -222,7 +220,6 @@ od
 
 proctype IntCnt()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
 
@@ -271,7 +268,6 @@ od
 
 init
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bool local_xIsTimeOut = false;
 

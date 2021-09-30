@@ -73,13 +73,12 @@ inline vPortExitCritical(_id, temp_var)
 
 proctype PendSV_Handler()
 {
-    byte idx = 0;
     byte local_var = NULL_byte;
     assert(PendSV_ID == _PID);
 do
 ::  soft_gen_irq(_PID);
     AWAIT_DS(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
-    vTaskSwitchContext(_PID);
+    vTaskSwitchContext(_PID, local_var);
     AWAIT_DS(_PID, MSR_BASEPRI(0));
     AWAIT_DS(_PID, switch_context(pxCurrentTCB));
     AWAIT_DS(_PID, exp_return(local_var))
@@ -89,7 +88,6 @@ od
 proctype SysTick_Handler()
 {
     bit local_bit = 0;
-    byte idx = 0;
     byte local_var = NULL_byte;
 #if (configUSE_TICK_HOOK == 1)
     vApplicationTickHook_Declaration();

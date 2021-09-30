@@ -36,7 +36,6 @@ QueueHandle_t(xPolledQueue, pollqQUEUE_SIZE, byte);
 
 proctype QConsNB()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
     bit local_xIsTimeOut = false;
@@ -62,7 +61,6 @@ od
 
 proctype QProdNB()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
 
@@ -82,7 +80,6 @@ od
 }
 
 init {
-    byte idx;
     byte local_var1 = NULL_byte;
 
     d_step {

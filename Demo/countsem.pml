@@ -89,7 +89,6 @@ runningInc:
 
 proctype CNT1()
 {
-    byte idx = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK);
@@ -126,7 +125,6 @@ od
 
 proctype CNT2()
 {
-    byte idx = 0;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
     bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
     assert(_PID == (FIRST_TASK + 1));
@@ -147,7 +145,6 @@ od
 
 init
 {
-    byte idx;
     byte local_var1 = NULL_byte;
 
     d_step {

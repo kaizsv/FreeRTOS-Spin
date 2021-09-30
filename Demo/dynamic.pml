@@ -57,7 +57,6 @@ QueueHandle_t(xSuspendedTestQueue, priSUSPENDED_QUEUE_LENGTH, byte);
 
 proctype CONT_INC()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false;
 
@@ -82,7 +81,6 @@ od
 
 proctype LIM_INC()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
 
     assert(_PID == xLimitedIncrementHandle);
@@ -95,7 +93,6 @@ od
 
 proctype C_CTRL()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false;
 
@@ -140,7 +137,6 @@ od
 
 proctype SUSP_SEND()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_bit = false, local_xReturn = false;
     assert(_PID == xQueueSendWhenSuspendedHandler);
@@ -155,7 +151,6 @@ od
 
 proctype SUSP_RECV()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulReceivedValue = 0;
     bit local_xIsTimeOut = false, xGotValue = false;
     assert(_PID == xQueueReceiveWhenSuspendedHandler);
@@ -176,7 +171,6 @@ od
 }
 
 init {
-    byte idx;
     byte local_var = NULL_byte;
 
     d_step {

@@ -74,7 +74,7 @@ QueueHandle_t(pxQueueParameters5_xQueue, uxQueueSize2, byte);
 proctype QConsB1()
 {
 #define G1usExpectedValue   G1
-    byte idx, usData;
+    byte usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
     bit local_xIsTimeOut = false;
@@ -97,7 +97,6 @@ od
 proctype QProdB2()
 {
 #define G1usValue   G1
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 1);
@@ -121,7 +120,7 @@ od
 proctype QConsB3()
 {
 #define G2usExpectedValue   G2
-    byte idx, usData;
+    byte usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
     bit local_xIsTimeOut = false;
@@ -145,7 +144,6 @@ od
 proctype QProdB4()
 {
 #define G2usValue   G2
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 3);
@@ -168,7 +166,6 @@ od
 
 proctype QProdB5()
 {
-    byte idx;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit usValue = 0;
     bit local_xReturn = false, local_xIsTimeOut = false;
@@ -187,7 +184,7 @@ od
 
 proctype QConsB6()
 {
-    byte idx, usData;
+    byte usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit usExpectedValue = 0;
     bit local_xReturn = false;
@@ -211,7 +208,6 @@ od
 }
 
 init {
-    byte idx;
     byte local_var1 = NULL_byte;
 
     d_step {

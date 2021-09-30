@@ -5,17 +5,19 @@
 
 inline get_high_prio_pending(ret)
 {
-    /* ensure there is at least one pending exception. */
-    assert(ret == NULL_byte && promela_EXP_NUMBER < NULL_byte);
-    for (idx: 0 .. (promela_EXP_NUMBER - 1)) {
-        if
-        :: GET_PENDING(idx) && (ret == NULL_byte || GET_PRIO_EXP(idx) < GET_PRIO_EXP(ret)) ->
-            ret = idx
-        :: else
-        fi
-    }
-    idx = 0;
-    assert(ret != NULL_byte)
+#if (promela_EXP_NUMBER != 2)
+    #error Extend this macro if promela_NVIC_NUMBER is not equal to 2.
+#endif
+#if (GET_PRIO_EXP(PendSV_ID) != GET_PRIO_EXP(SysTick_ID))
+    #error Extend this macro if exceptions have different priority setting.
+#endif
+    /* at least one exception is pending */
+    assert(HAS_PENDING_EXPS && ret == NULL_byte);
+
+    ret = (GET_PENDING(PendSV_ID) -> PendSV_ID : SysTick_ID);
+
+    /* NOTE: Since PendSV has smaller exception number than SysTick,
+     * PendSV is first selected when both of them are pending. */
 }
 
 /* According to section 4.10 in Application Note 321, the dsb instruction

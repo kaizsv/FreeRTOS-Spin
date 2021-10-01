@@ -12,7 +12,7 @@ proctype freertos_risc_v_trap_handler()
 do
 ::  trap_entry();
 
-    AWAIT_DS(_PID, mstatus_store[__OWNER_OF(pxCurrentTCB)].sp = mstatus);
+    AWAIT_DS(_PID, mstatus_store[__OWNER_OF(pxCurrentTCB)] = mstatus);
 
     /* test_if_asynchronous */
     if
@@ -32,7 +32,7 @@ do
     /* processed_source */
     AWAIT_DS(_PID,
         mepc = pxCurrentTCB;
-        mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)].sp;
+        mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)];
     );
 
     AWAIT_DS(_PID, mret());
@@ -43,7 +43,7 @@ inline xPortStartFirstTask()
 {
     assert(mtvec == TRAP_ID);
 
-    mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)].sp;
+    mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)];
     SET_MSTATUS_MIE();
     RUN_ALL_EXPS();
 
@@ -52,7 +52,7 @@ inline xPortStartFirstTask()
 
 inline pxPortInitialiseStack(pcName)
 {
-    mstatus_store[__OWNER_OF(pcName)].sp =
+    mstatus_store[__OWNER_OF(pcName)] =
         (mstatus & ~MSTATUS_MIE_Msk) | MSTATUS_MPIE_Msk | MSTATUS_MPP_Msk;
 }
 

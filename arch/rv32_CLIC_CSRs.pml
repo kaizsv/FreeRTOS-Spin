@@ -17,10 +17,7 @@
 #define MSTATUS_MPIE_Pos    1
 #define MSTATUS_MPIE_Msk    2
 
-#define MSTATUS_MPP_Pos     2
-#define MSTATUS_MPP_Msk     4
-
-unsigned mstatus : 4 = 0;
+byte mstatus = 0;
 
 #define GET_MSTATUS_MIE()   __GET_CSR_BIT(mstatus, MSTATUS_MIE_Msk, \
                                 MSTATUS_MIE_Pos)
@@ -32,16 +29,30 @@ unsigned mstatus : 4 = 0;
 #define SET_MSTATUS_MPIE()  CSRS(mstatus, MSTATUS_MPIE_Msk)
 #define CLR_MSTATUS_MPIE()  CSRC(mstatus, MSTATUS_MPIE_Msk)
 
+// Reactivate mstatus.MPP if necessary.
+#if 0
+
+#define MSTATUS_MPP_Pos     2
+#define MSTATUS_MPP_Msk     4
+
 #define GET_MSTATUS_MPP()   __GET_CSR_BIT(mstatus, MSTATUS_MPP_Msk, \
                                 MSTATUS_MPP_Pos)
 #define SET_MSTATUS_MPP_U_MODE()    CSRC(mstatus, MSTATUS_MPP_Msk)
 #define SET_MSTATUS_MPP_M_MODE()    CSRS(mstatus, MSTATUS_MPP_Msk)
 
+#else
+
+#define MSTATUS_MPP_Pos     0
+#define MSTATUS_MPP_Msk     0
+
+#define GET_MSTATUS_MPP()
+#define SET_MSTATUS_MPP_U_MODE()
+#define SET_MSTATUS_MPP_M_MODE()
+
+#endif
+
 /***** mstatus_store *****/
-typedef mstatus_t {
-    unsigned sp : 4 = 0;
-}
-mstatus_t mstatus_store[promela_TASK_NUMBER+1]; // Include the idle task
+byte mstatus_store[promela_TASK_NUMBER+1]; // Include the idle task
 
 /***** mtvec *****/
 
@@ -72,7 +83,7 @@ byte mcause = 0;
 #define MIP_MTIP_Pos    0
 #define MIP_MTIP_Msk    1
 
-unsigned mie_mip : 4 = 0;
+byte mie_mip = 0;
 
 #define GET_MIE_MTIE()  __GET_CSR_BIT(mie_mip, MIE_MTIE_Msk, MIE_MTIE_Pos)
 #define SET_MIE_MTIE()  CSRS(mie_mip, MIE_MTIE_Msk)

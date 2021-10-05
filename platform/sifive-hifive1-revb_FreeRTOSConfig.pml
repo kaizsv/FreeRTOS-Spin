@@ -28,35 +28,60 @@ INCLUDE_VTaskDelete                         0
 #define configINITIAL_TICK_COUNT            0
 
 // TODO: CLINT_CTRL_ADDR
-// TODO: configUSE_PORT_OPTIMISED_TASK_SELECTION
 
-#define configUSE_PREEMPTION                1
-#define configUSE_TIME_SLICING              1
-#define configIDLE_SHOULD_YIELD             0
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+/* If configUSE_PREEMPTION and configUSE_TIME_SLICING are already definded,
+ * the verification is specified to one of the three scheduling policies.
+ *
+ * Please see the directory `FreeRTOS-Spin/scripts/FreeRTOSConfig_plans`.
+ */
+
+#ifndef configUSE_PREEMPTION
+    #define configUSE_PREEMPTION            1
+#endif
+
+#ifndef configUSE_TIME_SLICING
+    #define configUSE_TIME_SLICING          1
+#endif
+
+/* If the following configurations are already defined,
+ * the verification target in the directory `FreeRTOS-Spin/Demo` has a
+ * custom configuration.
+ *
+ * Please see the verification target in `FreeRTOS-Spin/Demo` and its
+ * custom configuration in `FreeRTOS-Spin/Demo/config`.
+ */
+
+#ifndef configIDLE_SHOULD_YIELD
+    #define configIDLE_SHOULD_YIELD         0
+#endif
+
 #ifndef configMAX_PRIORITIES
     #define configMAX_PRIORITIES            3
 #endif
+
 #ifndef configUSE_TICK_HOOK
     #define configUSE_TICK_HOOK             0
 #endif
+
+#ifndef INCLUDE_vTaskSuspend
+    #define INCLUDE_vTaskSuspend            1
+#endif
+
+/* The following configuration is the default of
+ * FreeRTOS/Demo/RISC-V_RV32_SiFive_HiFive1-RevB_FreedomStudio/FreeRTOSConfig.h
+ */
+
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         1
 #define configUSE_QUEUE_SETS                0 // TODO
 #define configUSE_COUNTING_SEMAPHORES       1
 
-#ifndef INCLUDE_vTaskSuspend
-    #define INCLUDE_vTaskSuspend            1
-#endif
 #define INCLUDE_vTaskDelay                  1
 #define INCLUDE_uxTaskPriorityGet           1
 #define INCLUDE_vTaskPrioritySet            1
 
 /* Configurations Limitations */
-
-#if (promela_EXP_NUMBER > 7)
-#error Increase the size of exp_inactive_yet in the file of v7m ghost variables.
-#endif
 
 #if (configMAX_PRIORITIES > 10)
 #error Increase the size of the Container in the ListItem_t.

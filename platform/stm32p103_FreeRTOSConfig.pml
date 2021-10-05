@@ -27,18 +27,49 @@ INCLUDE_VTaskDelete                         0
 #define configTickType_t                    byte
 #define configINITIAL_TICK_COUNT            0
 
-#define configUSE_PREEMPTION                1
-#define configUSE_TIME_SLICING              1
+/* If configUSE_PREEMPTION and configUSE_TIME_SLICING are already definded,
+ * the verification is specified to one of the three scheduling policies.
+ *
+ * Please see the directory `FreeRTOS-Spin/scripts/FreeRTOSConfig_plans`.
+ */
+
+#ifndef configUSE_PREEMPTION
+    #define configUSE_PREEMPTION            1
+#endif
+
+#ifndef configUSE_TIME_SLICING
+    #define configUSE_TIME_SLICING          1
+#endif
+
+/* If the following configurations are already defined,
+ * the verification target in the directory `FreeRTOS-Spin/Demo` has a
+ * custom configuration.
+ *
+ * Please see the verification target in `FreeRTOS-Spin/Demo` and its
+ * custom configuration in `FreeRTOS-Spin/Demo/config`.
+ */
+
 #ifndef configIDLE_SHOULD_YIELD
     #define configIDLE_SHOULD_YIELD         1
 #endif
-#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
+
 #ifndef configMAX_PRIORITIES
     #define configMAX_PRIORITIES            3
 #endif
+
 #ifndef configUSE_TICK_HOOK
     #define configUSE_TICK_HOOK             0
 #endif
+
+#ifndef INCLUDE_vTaskSuspend
+    #define INCLUDE_vTaskSuspend            1
+#endif
+
+/* The following configuration is the default of
+ * FreeRTOS/Demo/CORTEX_M4F_STM32F407ZG-SK/FreeRTOSConfig.h
+ */
+
+#define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_MUTEXES                   1
 #define configUSE_RECURSIVE_MUTEXES         1
 #define configUSE_QUEUE_SETS                0 // TODO
@@ -48,9 +79,6 @@ INCLUDE_VTaskDelete                         0
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    80  /* 0x50 */
 //#define configLIBRARY_KERNEL_INTERRUPT_PRIORITY 0xf
 
-#ifndef INCLUDE_vTaskSuspend
-    #define INCLUDE_vTaskSuspend            1
-#endif
 #define INCLUDE_vTaskDelay                  1
 #define INCLUDE_uxTaskPriorityGet           1
 #define INCLUDE_vTaskPrioritySet            1

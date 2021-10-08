@@ -33,6 +33,7 @@ endif
 
 ifdef CORRECTION
 	SPINFLAGS += -DCORRECTION
+	TRAIL_FLAGS += -DCORRECTION
 endif
 
 .PHONY: .safety .bfs .ltl .np .trail.full .trail.ltl

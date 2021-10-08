@@ -97,4 +97,13 @@ INCLUDE_VTaskDelete                         0
 #error Increase the size of the Value in the ListItem_t.
 #endif
 
+/* Check configurations for correction */
+
+#ifdef CLEAR_configIDLE_SHOULD_YIELD_IF_USE_PREEMPTION_AND_TIME_SLICING
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        #undef configIDLE_SHOULD_YIELD
+        #define configIDLE_SHOULD_YIELD 0
+    #endif
+#endif
+
 #endif

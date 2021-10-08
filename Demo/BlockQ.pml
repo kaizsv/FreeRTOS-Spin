@@ -21,13 +21,9 @@
 #define QUEUE_SEND_EXIT_CRITICAL
 #define QUEUE_RECEIVE_EXIT_CRITICAL
 
-#ifdef CORRECTION
 /* This correction requires memory more than 512GB. */
-#include "../platform/stm32p103_FreeRTOSConfig.pml"
-    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        #undef configIDLE_SHOULD_YIELD
-        #define configIDLE_SHOULD_YIELD 0
-    #endif
+#ifdef CORRECTION
+    #define CLEAR_configIDLE_SHOULD_YIELD_IF_USE_PREEMPTION_AND_TIME_SLICING
 #endif
 
 #include "../FreeRTOS.pml"

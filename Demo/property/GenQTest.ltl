@@ -1,1 +1,3 @@
-ltl { []<>(_last == 2) -> ([]<>GenQ@running && []<>MuLow@running) }
+#include "portable.ltl"
+#define RUNNING ([]<>GenQ@running && []<>MuLow@running)
+ltl { ENABLED_TIMER_INTERRUPT -> RUNNING }

@@ -1,1 +1,4 @@
-ltl { []<>(_last == 2) -> ([]<>CNT1@runningDec && []<>CNT1@runningInc && []<>CNT2@runningDec && []<>CNT2@runningInc) }
+#include "portable.ltl"
+#define RUNNING ([]<>CNT1@runningDec && []<>CNT1@runningInc && \
+    []<>CNT2@runningDec && []<>CNT2@runningInc)
+ltl { ENABLED_TIMER_INTERRUPT -> RUNNING }

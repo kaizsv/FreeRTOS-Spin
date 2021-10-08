@@ -1,0 +1,13 @@
+#if defined(ARMV7M)
+
+#define ENABLED_TIMER_INTERRUPT []<>(_last == 2)
+
+#elif defined(RV32)
+
+#define ENABLED_TIMER_INTERRUPT []<>(mcause == M_TIMER_INTERRUPT)
+
+#else
+
+#error No specified architecture.
+
+#endif

@@ -1,1 +1,3 @@
-ltl { []<>(_last == 2) -> ([]<>C_CTRL@running && []<>SUSP_RECV@running) }
+#include "portable.ltl"
+#define RUNNING ([]<>C_CTRL@running && []<>SUSP_RECV@running)
+ltl { ENABLED_TIMER_INTERRUPT -> RUNNING }

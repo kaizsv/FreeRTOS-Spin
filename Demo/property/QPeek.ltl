@@ -1,1 +1,3 @@
-ltl { []<>(_last == 2) -> []<>PeekM@running }
+#include "portable.ltl"
+#define RUNNING []<>PeekM@running
+ltl { ENABLED_TIMER_INTERRUPT -> RUNNING }

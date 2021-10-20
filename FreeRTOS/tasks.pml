@@ -470,7 +470,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
                     listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0);
 #if (INCLUDE_vTaskSuspend == 1)
                 :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
-                    uxListRemove(xSuspendedTaskList, DLIST_SIZE, pxTCB, xState, hidden_idx);
+                    uxListRemove(xSuspendedTaskList, SLIST_SIZE, pxTCB, xState, hidden_idx);
 #endif
                 // else -> the d_step command will be blocked
                 fi

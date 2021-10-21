@@ -97,13 +97,19 @@ do
 ::  /* First section : */
 
     /* Remove sLoops to simplify verification */
-    /* Remove unnecessary vTaskSuspend and vTaskResume */
-    ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
+        vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
+            ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
+        vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
 
-    vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
+        #if (configUSE_PREEMPTION == 0)
+            taskYIELD(_PID, local_var1);
+        #endif
 
-    /* Remove unnecessary vTaskSuspendAll and xTaskResumeAll */
-    AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
+        vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1, local_var2);
+
+        vTaskSuspendAll(_PID);
+            AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
+        xTaskResumeAll(_PID, local_var1, _, local_var2);
 
     /* Second section: */
 
@@ -153,8 +159,11 @@ proctype SUSP_RECV()
 do
 ::  do
     :: SELE(_PID, xGotValue == false);
-        /* Remove pointless vTaskSuspendAll and xTaskResumeAll */
+        vTaskSuspendAll(_PID);
+        /* Remove pointless vTaskSuspendAll */
         xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
+        /* Remove pointless xTaskResumeAll */
+        xTaskResumeAll(_PID, local_var1, _, local_var2);
 
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);

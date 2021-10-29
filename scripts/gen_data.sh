@@ -21,34 +21,43 @@ dirs_in_output=$(find ./outputs/* -maxdepth 0 -type d)
 apps_in_demos=$(find ./Demo/*.pml -maxdepth 0 -type f)
 
 _time () {
-    local pan_error=$(grep errors $1 | rev | cut -d' ' -f 1)
-    if [ $pan_error == '0' ];
+    if [ -f $1 ];
     then
-        local pan_search_depth=$(grep 'max search depth too small' $1)
-        if [ -z "$pan_search_depth" ];
+        local pan_error=$(grep errors $1 | rev | cut -d' ' -f 1)
+        if [ $pan_error == '0' ];
         then
-            local pan_time=$(grep 'elapsed time' $1 | cut -d' ' -f 4)
-            echo -n ",$pan_time" >>$CSV_FILE
+            local pan_search_depth=$(grep 'max search depth too small' $1)
+            if [ -z "$pan_search_depth" ];
+            then
+                local pan_time=$(grep 'elapsed time' $1 | cut -d' ' -f 4)
+                echo -n ",$pan_time" >>$CSV_FILE
+            else
+                echo -n ",$pan_search_depth" >>$CSV_FILE
+            fi
+        elif [ $pan_error == '1' ];
+        then
+            echo -n ",error" >>$CSV_FILE
         else
-            echo -n ",$pan_search_depth" >>$CSV_FILE
+            echo -n ",XXX" >>$CSV_FILE
         fi
-    elif [ $pan_error == '1' ];
-    then
-        echo -n ",error" >>$CSV_FILE
     else
-        echo Extend this script to handle skipped errors
-        exit 2
+        echo -n ",XXX" >>$CSV_FILE
     fi
 }
 
 _memory () {
-    local pan_memory_bound=$(grep 'reached -DMEMLIM bound' $1)
-    if [ -z "$pan_memory_bound" ];
+    if [ -f $1 ];
     then
-        local pan_memory=$(grep 'total actual' $1 | cut -d$'\t' -f 1)
-        echo -n ",\"=ROUND($pan_memory/1024,1)\"" >>$CSV_FILE
+        local pan_memory_bound=$(grep 'reached -DMEMLIM bound' $1)
+        if [ -z "$pan_memory_bound" ];
+        then
+            local pan_memory=$(grep 'total actual' $1 | cut -d$'\t' -f 1)
+            echo -n ",\"=ROUND($pan_memory/1024,1)\"" >>$CSV_FILE
+        else
+            echo -n ",Out of memory" >>$CSV_FILE
+        fi
     else
-        echo -n ",Out of memory" >>$CSV_FILE
+        echo -n ",XXX" >>$CSV_FILE
     fi
 }
 

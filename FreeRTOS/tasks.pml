@@ -93,9 +93,7 @@ bool xYieldPending = false;
 byte uxSchedulerSuspended = 0;
 
 byte xTickCount = 0;
-
-#define xNextTaskUnblockTicks   \
-    listGET_LIST_ITEM_VALUE(TCB(listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList)).ListItems[xState])
+byte xNextTaskUnblockTicks = portMAX_DELAY;
 
 #define reset_xTickCount() xTickCount = 0
 
@@ -111,8 +109,8 @@ byte xTickCount = 0;
         fi \
     } \
     idx = NULL_byte; \
-    assert(xNextTaskUnblockTicks > 0); \
-    xTickCount = 0
+    xNextTaskUnblockTicks = listGET_ITEM_VALUE_OF_HEAD_ENTRY(pxDelayedTaskList); \
+    reset_xTickCount()
 
 #define uxCurrentNumberOfTasks promela_TASK_NUMBER + 1 /* user tasks and the idle */
 
@@ -308,10 +306,6 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
         :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ->
             uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState, hidden_idx);
             listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0);
-            if
-            :: listLIST_IS_EMPTY(pxDelayedTaskList) -> reset_xTickCount();
-            :: else
-            fi
         // else -> the d_step command is blocked
         fi
     );
@@ -399,6 +393,7 @@ inline vTaskStartScheduler(_id, temp_var)
     };
 
     portDISABLE_INTERRUPTS(_id, temp_var);
+    xNextTaskUnblockTicks = portMAX_DELAY;
     reset_xTickCount();
 
     xPortStartScheduler()
@@ -467,14 +462,16 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
                     fi
                 );
                 if
-                :: SELE_AS(_id, !listLIST_IS_EMPTY(pxDelayedTaskList) && xTickCount >= xNextTaskUnblockTicks);
+                :: SELE_AS(_id, xTickCount >= xNextTaskUnblockTicks);
                     do
                     :: SELE_AS(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
                         AWAIT_DS(_id, pxTCB = listGET_OWNER_OF_HEAD_ENTRY(pxDelayedTaskList));
                         if
                         :: SELE_AS(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]));
-                            AWAIT_DS(_id, update_xTickCount(hidden_idx); pxTCB = NULL_byte);
-                            AWAIT_AS(_id, break)
+                            AWAIT_AS(_id,
+                                xNextTaskUnblockTicks = listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]);
+                                pxTCB = NULL_byte; break
+                            );
                         :: ELSE_AS(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
                         fi;
                         AWAIT_DS(_id,
@@ -496,9 +493,13 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
                         fi
                         #endif
                     :: ELSE_AS(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
-                        AWAIT_AS(_id, reset_xTickCount(); pxTCB = NULL_byte; break)
+                        AWAIT_AS(_id,
+                            reset_xTickCount();
+                            xNextTaskUnblockTicks = portMAX_DELAY;
+                            pxTCB = NULL_byte; break
+                        )
                     od;
-                :: ELSE_AS(_id, !listLIST_IS_EMPTY(pxDelayedTaskList) && xTickCount >= xNextTaskUnblockTicks);
+                :: ELSE_AS(_id, xTickCount >= xNextTaskUnblockTicks);
                 fi;
                 #if ((configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
                 if
@@ -545,7 +546,7 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
             fi
         );
         if
-        :: SELE_AS(_id, !listLIST_IS_EMPTY(pxDelayedTaskList) && xTickCount >= xNextTaskUnblockTicks);
+        :: SELE_AS(_id, xTickCount >= xNextTaskUnblockTicks);
             do
             :: SELE_AS(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
                 /* The delayed list is not empty. */
@@ -555,8 +556,10 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
                 :: SELE_AS(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]));
                     /* It is not time to unblock this item yet. Record the item
                      * value in xNextTaskUnblockTicks and clear it. */
-                    AWAIT_DS(_id, update_xTickCount(hidden_idx); pxTCB = NULL_byte);
-                    AWAIT_AS(_id, break)
+                    AWAIT_AS(_id,
+                        xNextTaskUnblockTicks = listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]);
+                        pxTCB = NULL_byte; break
+                    );
                 :: ELSE_AS(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
                 fi;
 
@@ -584,9 +587,13 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
                 #endif
             :: ELSE_AS(_id, listLIST_IS_EMPTY(pxDelayedTaskList) == false);
                 /* The delayed list is empty */
-                AWAIT_AS(_id, reset_xTickCount(); pxTCB = NULL_byte; break)
+                AWAIT_AS(_id,
+                    reset_xTickCount();
+                    xNextTaskUnblockTicks = portMAX_DELAY;
+                    pxTCB = NULL_byte; break
+                )
             od
-        :: ELSE_AS(_id, !listLIST_IS_EMPTY(pxDelayedTaskList) && xTickCount >= xNextTaskUnblockTicks)
+        :: ELSE_AS(_id, xTickCount >= xNextTaskUnblockTicks)
         fi;
 
         #if ((configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
@@ -653,12 +660,6 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
             if
             :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK ->
                 uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxUnblockedTCB, xState, hidden_idx);
-                /* Because xNextTaskUnblockTicks is a pointer,
-                 * it is unnecessary to update xTickCount. */
-                if
-                :: listLIST_IS_EMPTY(pxDelayedTaskList) -> reset_xTickCount()
-                :: else
-                fi
 #if (INCLUDE_vTaskSuspend == 1)
             :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
                 uxListRemove(xSuspendedTaskList, SLIST_SIZE, pxUnblockedTCB, xState, hidden_idx);
@@ -666,7 +667,10 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
             // else -> the d_step command will be blocked
             fi
         );
-        prvAddTaskToReadyList(_id, pxUnblockedTCB)
+        prvAddTaskToReadyList(_id, pxUnblockedTCB);
+        /* Because xTickCount will not monotonically increase, we have to
+         * reset xNextTaskUnblockTicks here. */
+        prvResetNextTaskUnblockTicks(_id);
     :: ELSE_AS(_id, uxSchedulerSuspended == 0);
         AWAIT_DS(_id, vListInsertEnd(xPendingReadyList, PLIST_SIZE, CID_PENDING_READY, pxUnblockedTCB, xEvent, hidden_idx))
     fi;
@@ -718,9 +722,9 @@ inline prvResetNextTaskUnblockTicks(_id)
 {
     if
     :: SELE_AS(_id, listLIST_IS_EMPTY(pxDelayedTaskList));
-        AWAIT_DS(_id, reset_xTickCount())
+        AWAIT_DS(_id, reset_xTickCount(); xNextTaskUnblockTicks = portMAX_DELAY)
     :: ELSE_AS(_id, listLIST_IS_EMPTY(pxDelayedTaskList));
-        AWAIT_DS(_id, update_xTickCount(hidden_idx))
+        AWAIT_DS(_id, xNextTaskUnblockTicks = listGET_ITEM_VALUE_OF_HEAD_ENTRY(pxDelayedTaskList))
     fi
 }
 
@@ -887,7 +891,7 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
         AWAIT(_id, vListInsertEnd(xSuspendedTaskList, SLIST_SIZE, CID_SUSPENDED_TASK, pxCurrentTCB, xState, temp_var))
     :: ELSE(_id, xTicksToWait == portMAX_DELAY && xCanBlockIndefinitely != false);
         AWAIT(_id,
-            assert(xTicksToWait < 256 && listGET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState]) == 0);
+            assert(xTicksToWait < 255 && listGET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState]) == 0);
             listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).ListItems[xState], xTicksToWait));
         AWAIT(_id,
             if
@@ -897,6 +901,11 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
             fi;
             assert(xTickCount == 0);
             vListInsert(pxDelayedTaskList, DLIST_SIZE, CID_DELAYED_TASK, pxCurrentTCB, xState, temp_var, temp_var2));
+        if
+        :: SELE(_id, xTicksToWait < xNextTaskUnblockTicks);
+            AWAIT(_id, xNextTaskUnblockTicks = xTicksToWait)
+        :: ELSE(_id, xTicksToWait < xNextTaskUnblockTicks);
+        fi;
     fi;
 #else
     AWAIT(_id,
@@ -910,6 +919,11 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely, 
         fi;
         assert(xTickCount == 0);
         vListInsert(pxDelayedTaskList, DLIST_SIZE, CID_DELAYED_TASK, pxCurrentTCB, xState, temp_var, temp_var2));
+    if
+    :: SELE(_id, xTicksToWait < xNextTaskUnblockTicks);
+        AWAIT(_id, xNextTaskUnblockTicks = xTicksToWait)
+    :: ELSE(_id, xTicksToWait < xNextTaskUnblockTicks);
+    fi;
 #endif
 }
 

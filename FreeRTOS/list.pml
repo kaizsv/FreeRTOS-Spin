@@ -151,95 +151,95 @@ inline swapListPointers(aListPointer, bListPointer)
     aListPointer.p_tcb_item = aListPointer.p_tcb_item ^ bListPointer.p_tcb_item;
 }
 
-inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, idx)
+inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE));
 
-    for (idx: 0 .. (SIZE - 1)) {
+    for (hidden_idx: 0 .. (SIZE - 1)) {
         if
-        :: listPOINTER_IS_NULL(pxList.ps[idx]) ->
+        :: listPOINTER_IS_NULL(pxList.ps[hidden_idx]) ->
             listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-            listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
+            listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB, xStateORxEvent);
             break
         :: else
         fi
     }
-    idx = NULL_byte
+    hidden_idx = NULL_byte
 }
 
-inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, idx)
+inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE));
 
     /* Find the next null item */
-    for (idx: 0 .. (SIZE - 1)) {
+    for (hidden_idx: 0 .. (SIZE - 1)) {
         if
-        :: listPOINTER_IS_NULL(pxList.ps[idx]) -> break
+        :: listPOINTER_IS_NULL(pxList.ps[hidden_idx]) -> break
         :: else
         fi
     }
 
     if
     :: pxList.pxIndex ^ xListEnd ->
-        assert(pxList.pxIndex < idx);
+        assert(pxList.pxIndex < hidden_idx);
         do
-        :: pxList.pxIndex < idx ->
-            swapListPointers(pxList.ps[idx - 1], pxList.ps[idx]);
-            idx = idx - 1
+        :: pxList.pxIndex < hidden_idx ->
+            swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx]);
+            hidden_idx = hidden_idx - 1
         :: else ->
-            assert(pxList.pxIndex == idx);
+            assert(pxList.pxIndex == hidden_idx);
             pxList.pxIndex = pxList.pxIndex + 1;
             break
         od
     :: else
     fi;
 
-    assert(listPOINTER_IS_NULL(pxList.ps[idx]));
+    assert(listPOINTER_IS_NULL(pxList.ps[hidden_idx]));
     listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-    listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
-    idx = NULL_byte
+    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB, xStateORxEvent);
+    hidden_idx = NULL_byte
 }
 
-inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, idx, temp_var)
+inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
 {
-    assert(listLIST_IS_NOT_FULL(pxList, SIZE) && idx == NULL_byte && temp_var == NULL_byte);
+    assert(listLIST_IS_NOT_FULL(pxList, SIZE) && hidden_idx == NULL_byte && hidden_var == NULL_byte);
 
-    for (idx: 0 .. (SIZE - 1)) {
+    for (hidden_idx: 0 .. (SIZE - 1)) {
         /* Find the next null item */
         if
-        :: listPOINTER_IS_NULL(pxList.ps[idx]) -> break;
+        :: listPOINTER_IS_NULL(pxList.ps[hidden_idx]) -> break;
         :: else
         fi;
         /* Find the first place to insert the new item */
         if
-        :: (temp_var == NULL_byte) &&
-           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
-            temp_var = idx
+        :: (hidden_var == NULL_byte) &&
+           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, hidden_idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
+            hidden_var = hidden_idx
         :: else
         fi
     }
 
     if
-    :: temp_var ^ NULL_byte ->
-        /* replace the item at the temp_var by the last null item */
-        assert(temp_var < idx);
+    :: hidden_var ^ NULL_byte ->
+        /* replace the item at the hidden_var by the last null item */
+        assert(hidden_var < hidden_idx);
         do
-        :: temp_var < idx ->
-            swapListPointers(pxList.ps[idx - 1], pxList.ps[idx]);
-            idx = idx - 1
+        :: hidden_var < hidden_idx ->
+            swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx]);
+            hidden_idx = hidden_idx - 1
         :: else ->
-            assert(temp_var == idx);
-            temp_var = NULL_byte;
+            assert(hidden_var == hidden_idx);
+            hidden_var = NULL_byte;
             break
         od
     :: else
     fi;
 
     /* place pxNewListItem at the index position of pxList */
-    assert(listPOINTER_IS_NULL(pxList.ps[idx]));
+    assert(listPOINTER_IS_NULL(pxList.ps[hidden_idx]));
     listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-    listPOINTER_SET(pxList.ps[idx], pxNewListItemTCB, xStateORxEvent);
-    idx = NULL_byte
+    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB, xStateORxEvent);
+    hidden_idx = NULL_byte
 }
 
 #if 0
@@ -248,68 +248,68 @@ inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, idx, te
     macro since pxList is known.
 #endif
 
-inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, idx)
+inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
 {
     /* find the index of pxItemToRemove in pxList */
-    for (idx: 0 .. (SIZE - 1)) {
+    for (hidden_idx: 0 .. (SIZE - 1)) {
         if
-        :: (pxList.ps[idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
-            assert((pxList.ps[idx].p_tcb_item & 1) == xStateORxEvent);
-            vListInitialisePointer(pxList.ps[idx]);
+        :: (pxList.ps[hidden_idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
+            assert((pxList.ps[hidden_idx].p_tcb_item & 1) == xStateORxEvent);
+            vListInitialisePointer(pxList.ps[hidden_idx]);
             break
-        :: else -> assert(idx < (SIZE - 1)) /* check reliability */
+        :: else -> assert(hidden_idx < (SIZE - 1)) /* check reliability */
         fi
     }
 
     if
-    :: idx < (SIZE - 1) ->
+    :: hidden_idx < (SIZE - 1) ->
         /* move items behind the index position of pxList forward */
-        for (idx: (idx + 1) .. (SIZE - 1)) {
+        for (hidden_idx: (hidden_idx + 1) .. (SIZE - 1)) {
             if
-            :: !listPOINTER_IS_NULL(pxList.ps[idx]) ->
-                swapListPointers(pxList.ps[idx - 1], pxList.ps[idx])
+            :: !listPOINTER_IS_NULL(pxList.ps[hidden_idx]) ->
+                swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx])
             :: else -> break
             fi
         }
     :: else
     fi;
-    idx = NULL_byte;
+    hidden_idx = NULL_byte;
     vListInitialiseItem(pxItemToRemove)
 }
 
-inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent, idx)
+inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
 {
     /* find the index of pxItemToRemove in pxList */
-    for (idx: 0 .. (SIZE - 1)) {
+    for (hidden_idx: 0 .. (SIZE - 1)) {
         if
-        :: (pxList.ps[idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
-            assert((pxList.ps[idx].p_tcb_item & 1) == xStateORxEvent);
-            vListInitialisePointer(pxList.ps[idx]);
+        :: (pxList.ps[hidden_idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
+            assert((pxList.ps[hidden_idx].p_tcb_item & 1) == xStateORxEvent);
+            vListInitialisePointer(pxList.ps[hidden_idx]);
             break
-        :: else -> assert(idx < (SIZE - 1)) /* check reliability */
+        :: else -> assert(hidden_idx < (SIZE - 1)) /* check reliability */
         fi
     }
 
     /* Make sure the index is left pointing to a valid item */
     if
-    :: (pxList.pxIndex >= idx) && (pxList.pxIndex ^ xListEnd) ->
+    :: (pxList.pxIndex >= hidden_idx) && (pxList.pxIndex ^ xListEnd) ->
         pxList.pxIndex = ((pxList.pxIndex ^ 0) -> pxList.pxIndex - 1 : xListEnd)
     :: else
     fi;
 
     if
-    :: idx < (SIZE - 1) ->
+    :: hidden_idx < (SIZE - 1) ->
         /* move items behind the index position of pxList forward */
-        for (idx: (idx + 1) .. (SIZE - 1)) {
+        for (hidden_idx: (hidden_idx + 1) .. (SIZE - 1)) {
             if
-            :: !listPOINTER_IS_NULL(pxList.ps[idx]) ->
-                swapListPointers(pxList.ps[idx - 1], pxList.ps[idx])
+            :: !listPOINTER_IS_NULL(pxList.ps[hidden_idx]) ->
+                swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx])
             :: else -> break
             fi
         }
     :: else
     fi;
-    idx = NULL_byte;
+    hidden_idx = NULL_byte;
     vListInitialiseItem(pxItemToRemove)
 }
 

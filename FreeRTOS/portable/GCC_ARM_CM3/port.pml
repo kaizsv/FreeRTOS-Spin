@@ -54,21 +54,21 @@ inline xPortStartScheduler()
     /* Should never get vTaskSwitchContext */
 }
 
-inline vPortEnterCritical(_id, temp_var)
+inline vPortEnterCritical(_id)
 {
-    portDISABLE_INTERRUPTS(_id, temp_var);
+    portDISABLE_INTERRUPTS(_id);
     AWAIT_DS(_id, uxCriticalNesting = uxCriticalNesting + 1);
     /* ensure VECTACTIVE is zero. In other words, the running task can only be
      * user tasks. */
     AWAIT_DS(_id, assert((uxCriticalNesting != 1) || (EP >= FIRST_TASK)));
 }
 
-inline vPortExitCritical(_id, temp_var)
+inline vPortExitCritical(_id)
 {
     AWAIT_DS(_id, assert(uxCriticalNesting); uxCriticalNesting = uxCriticalNesting - 1);
     if
     :: SELE_AS(_id, uxCriticalNesting == 0);
-        portENABLE_INTERRUPTS(_id, temp_var)
+        portENABLE_INTERRUPTS(_id)
     :: ELSE_AS(_id, uxCriticalNesting == 0)
     fi
 }
@@ -83,7 +83,7 @@ do
     vTaskSwitchContext(_PID, local_var);
     AWAIT_DS(_PID, MSR_BASEPRI(0));
     AWAIT_DS(_PID, switch_context(pxCurrentTCB));
-    AWAIT_DS(_PID, exp_return(local_var))
+    AWAIT_DS(_PID, exp_return(hidden_var))
 od
 }
 
@@ -97,15 +97,15 @@ proctype SysTick_Handler()
     assert(SysTick_ID == _PID);
 do
 ::  syst_irq(_PID);
-    portDISABLE_INTERRUPTS(_PID, local_var);
+    portDISABLE_INTERRUPTS(_PID);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
     :: SELE_AS(_PID, local_bit != false, local_bit = false);
         AWAIT_DS(_PID, set_pending(PendSV_ID))
     :: ELSE_AS(_PID, local_bit != false)
     fi;
-    portENABLE_INTERRUPTS(_PID, local_var);
-    AWAIT_DS(_PID, exp_return(local_var))
+    portENABLE_INTERRUPTS(_PID);
+    AWAIT_DS(_PID, exp_return(hidden_var))
 od
 }
 

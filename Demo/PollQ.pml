@@ -55,7 +55,7 @@ running:
         fi
     :: ELSE(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
     od;
-    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1);
 od
 }
 
@@ -75,24 +75,22 @@ running:
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: ELSE(_PID, usLoop < usNumToProduce, usLoop = 0; break)
     od;
-    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1);
 od
 }
 
 init {
-    byte local_var1 = NULL_byte;
-
     d_step {
         xQueueCreate(xPolledQueue, 0, pollqQUEUE_SIZE);
 
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK + 0, 1);
         xTaskCreate_fixed(FIRST_TASK + 1, 1)
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

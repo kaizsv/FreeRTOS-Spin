@@ -3,20 +3,15 @@
 
 #define portMAX_DELAY       255
 
-inline portYIELD_BLOCKED_BY_BASEPRI(_id, temp_var)
+inline portYIELD(_id)
 {
-    AWAIT_DS(_id, set_pending(PendSV_ID); assert(!BASEPRI_MASK(SysTick_ID) && !BASEPRI_MASK(PendSV_ID)))
+    AWAIT(_id, set_pending(PendSV_ID); v7m_memory_barrier(_id, hidden_var))
 }
 
-inline portYIELD(_id, temp_var)
-{
-    AWAIT(_id, set_pending(PendSV_ID); v7m_memory_barrier(_id, temp_var))
-}
-
-#define portDISABLE_INTERRUPTS(_id, temp_var)   vPortRaiseBASEPRI(_id, temp_var)
-#define portENABLE_INTERRUPTS(_id, temp_var)    vPortSetBASEPRI(_id, 0, temp_var)
-#define portENTER_CRITICAL(_id, temp_var)       vPortEnterCritical(_id, temp_var)
-#define portEXIT_CRITICAL(_id, temp_var)        vPortExitCritical(_id, temp_var)
+#define portDISABLE_INTERRUPTS(_id) vPortRaiseBASEPRI(_id)
+#define portENABLE_INTERRUPTS(_id)  vPortSetBASEPRI(_id, 0)
+#define portENTER_CRITICAL(_id)     vPortEnterCritical(_id)
+#define portEXIT_CRITICAL(_id)      vPortExitCritical(_id)
 
 #define portTASK_FUNCTION(vFunction) proctype vFunction()
 
@@ -50,15 +45,15 @@ inline portYIELD(_id, temp_var)
 
 #endif
 
-inline vPortRaiseBASEPRI(_id, temp_var)
+inline vPortRaiseBASEPRI(_id)
 {
-    // v7m_memory_barrier(_id, temp_var)
+    // v7m_memory_barrier(_id, hidden_var)
     AWAIT(_id, MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY); assert(!BASEPRI_MASK(SysTick_ID) && !BASEPRI_MASK(PendSV_ID)))
 }
 
-inline vPortSetBASEPRI(_id, ulNewMaskValue, temp_var)
+inline vPortSetBASEPRI(_id, ulNewMaskValue)
 {
-    AWAIT(_id, MSR_BASEPRI(ulNewMaskValue); v7m_memory_barrier(_id, temp_var))
+    AWAIT(_id, MSR_BASEPRI(ulNewMaskValue); v7m_memory_barrier(_id, hidden_var))
 }
 
 #endif

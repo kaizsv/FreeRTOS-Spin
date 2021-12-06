@@ -28,23 +28,23 @@
 
 proctype MY_TASK()
 {
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    byte local_var1 = NULL_byte;
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
 ::  AWAIT(_PID, printf("Task1 %d\n", _PID));
-    vTaskDelay(_PID, 50, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, 50, local_bit, local_var1);
 od
 }
 
 proctype SEC_TASK()
 {
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    byte local_var1 = NULL_byte;
     bit local_bit = false, local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
 ::  AWAIT(_PID, printf("Task2 %d\n", _PID));
-    vTaskDelay(_PID, 50, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, 50, local_bit, local_var1);
 od
 }
 
@@ -57,16 +57,14 @@ od
 }
 
 init {
-    byte local_var = NULL_byte;
-
     d_step {
-        prvInitialiseTaskLists(local_var);
+        prvInitialiseTaskLists();
         xTaskCreate_fixed(FIRST_TASK + 0, 1);
         xTaskCreate_fixed(FIRST_TASK + 1, 1);
         xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY)
     };
-    vTaskStartScheduler(EP, local_var);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

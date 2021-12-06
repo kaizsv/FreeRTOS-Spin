@@ -59,7 +59,7 @@ do
     AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 0);
@@ -69,7 +69,7 @@ do
     AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 
     xQueueReceive_NB(xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
@@ -78,14 +78,14 @@ do
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1);
 
-    vTaskResume(_PID, xMediumPriorityTask, local_bit, local_var1);
-    vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
-    vTaskResume(_PID, xHighestPriorityTask, local_bit, local_var1);
+    vTaskResume(_PID, xMediumPriorityTask, local_bit);
+    vTaskResume(_PID, xHighPriorityTask, local_bit);
+    vTaskResume(_PID, xHighestPriorityTask, local_bit);
 
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 
     AWAIT(_PID, ulValue = MAGIC_VAL3);
@@ -93,17 +93,17 @@ do
     AWAIT(_PID, ulValue = 0; assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 
     /* The queue should be empty */
     xQueuePeek_NB(_PID, xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
     AWAIT(_PID, assert(local_xReturn == false));
 
-    vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
-    vTaskResume(_PID, xHighestPriorityTask, local_bit, local_var1);
+    vTaskResume(_PID, xHighPriorityTask, local_bit);
+    vTaskResume(_PID, xHighestPriorityTask, local_bit);
 
-    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1);
 od
 }
 
@@ -122,7 +122,7 @@ do
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
 running:
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
 od
 }
 
@@ -140,7 +140,7 @@ do
 
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
 
     xQueueReceive(xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID,
@@ -148,7 +148,7 @@ do
         assert(ulValue == MAGIC_VAL3); ulValue = 0
     );
 
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
 od
 }
 
@@ -182,7 +182,7 @@ do
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
     /* Only peeked the data */
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
 
     xQueuePeek_PR(_PID, xQUEUE, ulValue, portMAX_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
     AWAIT(_PID,
@@ -190,18 +190,16 @@ do
         assert(ulValue == MAGIC_VAL3); ulValue = 0
     );
 
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
 od
 }
 
 init
 {
-    byte local_var = NULL_byte;
-
     d_step {
         xQueueCreate(xQUEUE, 0, qpeekQUEUE_LENGTH);
 
-        prvInitialiseTaskLists(local_var);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK, qpeekLOW_PRIORITY);
         xTaskCreate_fixed(xMediumPriorityTask, qpeekMED_PRIORITY);
@@ -209,8 +207,8 @@ init
         xTaskCreate_fixed(xHighestPriorityTask, qpeekHIGHEST_PRIORITY)
     };
 
-    vTaskStartScheduler(EP, local_var);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

@@ -25,22 +25,23 @@ inline get_high_prio_pending(ret)
  * instructions. */
 inline v7m_memory_barrier(_wait_unil, high_pending_exp)
 {
-    if
-    :: HAS_PENDING_EXPS ->
-        assert(!HAS_INOPERATIVE_EXP);
-        get_high_prio_pending(high_pending_exp);
+    d_step {
+        assert(_wait_unil == EP && high_pending_exp == NULL_byte);
         if
-        :: BASEPRI_MASK(high_pending_exp) && (EP >= FIRST_TASK || GET_PRIO_EXP(high_pending_exp) < GET_PRIO_EXP(EP)) ->
-            inoperative_exp_entry(high_pending_exp);
-            high_pending_exp = NULL_byte; /* reset local variable */
-
-            (EP == _wait_unil)
-        :: else ->
-            assert(high_pending_exp != EP);
-            high_pending_exp = NULL_byte /* reset local variable */
+        :: HAS_PENDING_EXPS ->
+            assert(!HAS_INOPERATIVE_EXP);
+            get_high_prio_pending(high_pending_exp);
+            if
+            :: BASEPRI_MASK(high_pending_exp) && (EP >= FIRST_TASK || GET_PRIO_EXP(high_pending_exp) < GET_PRIO_EXP(EP)) ->
+                inoperative_exp_entry(high_pending_exp);
+            :: else ->
+                assert(high_pending_exp != EP);
+            fi;
+            high_pending_exp = NULL_byte; /* reset variable */
+        :: else
         fi
-    :: else
-    fi
+    };
+    (EP == _wait_unil)
 }
 
 inline inoperative_exp_taken(id)
@@ -137,10 +138,10 @@ atomic {
     fi
 }   }
 
-// TODO: redesign tail chaining if the last process in the stack is an interrupt.
 inline tail_chaining(high_pending_exp)
 {
     get_high_prio_pending(high_pending_exp);
+    // redesign tail chaining if the last process in the stack is an interrupt.
     assert(BASEPRI_MASK(high_pending_exp) && !HAS_INOPERATIVE_EXP && LAST_EP_STACK >= FIRST_TASK);
     inoperative_exp_taken(high_pending_exp);
     high_pending_exp = NULL_byte /* reset local variable */

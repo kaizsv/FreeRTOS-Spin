@@ -78,7 +78,7 @@ proctype IntMuS()
     bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == xSlaveHandle);
 do
-::  vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+::  vTaskSuspend(_PID, NULL_byte, local_var1);
 
     xSemaphoreTake(xMasterSlaveMutex, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
@@ -102,11 +102,11 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
     xSemaphoreTake_NB(xMasterSlaveMutex, intsemNO_BLOCK, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
-    vTaskResume(_id, xSlaveHandle, temp_bit, temp_var1);
+    vTaskResume(_id, xSlaveHandle, temp_bit);
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_id);
     #endif
 #endif
 
@@ -135,7 +135,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
     xSemaphoreGive(xMasterSlaveMutex, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_id);
     #endif
 #endif
     AWAIT(_id,
@@ -157,11 +157,11 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut,
     xSemaphoreTake_NB(xMasterSlaveMutex, intsemNO_BLOCK, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
-    vTaskResume(_id, xSlaveHandle, temp_bit, temp_var1);
+    vTaskResume(_id, xSlaveHandle, temp_bit);
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_id);
     #endif
 #endif
 
@@ -205,12 +205,12 @@ do
 ::  prvTakeAndGiveInTheSameOrder(_PID, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
 running1:
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1);
 
     prvTakeAndGiveInTheOppositeOrder(_PID, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
 running2:
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1);
 od
 }
 
@@ -225,7 +225,7 @@ do
 ::  AWAIT(_PID, assert(uxQueueMessagesWaiting(xISRCountingSemaphore) == 0));
 
     AWAIT(_PID, xOkToGiveCountingSemaphore = true);
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD_T, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD_T, local_bit, local_var1);
     AWAIT(_PID, xOkToGiveCountingSemaphore = false);
 
     AWAIT(_PID,
@@ -278,15 +278,15 @@ init
     skip;
 
     d_step {
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(xSlaveHandle, intsemSLAVE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 1, intsemMASTER_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY);
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

@@ -73,10 +73,9 @@ proctype QConsB1()
     byte usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
-    bit local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK);
 do
-::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xQueueReceive(pxQueueParameters1_xQueue, usData, pxQueueParameters1_xBlockTime, local_xReturn, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
 running:
@@ -119,10 +118,9 @@ proctype QConsB3()
     byte usData;
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
-    bit local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 2);
 do
-::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xQueueReceive(pxQueueParameters3_xQueue, usData, pxQueueParameters3_xBlockTime, local_xReturn, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
 running:
@@ -184,10 +182,9 @@ proctype QConsB6()
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit usExpectedValue = 0;
     bit local_xReturn = false;
-    bit local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK + 5);
 do
-::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xQueueReceive(pxQueueParameters6_xQueue, usData, pxQueueParameters6_xBlockTime, local_xReturn, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         AWAIT(_PID, assert(usData == usExpectedValue); usData = 0);

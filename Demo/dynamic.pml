@@ -154,14 +154,14 @@ od
 proctype SUSP_RECV()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulReceivedValue = 0;
-    bit local_xIsTimeOut = false, xGotValue = false;
+    bit xGotValue = false;
     assert(_PID == xQueueReceiveWhenSuspendedHandler);
 do
 ::  do
     :: SELE(_PID, xGotValue == false);
         vTaskSuspendAll(_PID);
         /* Remove pointless vTaskSuspendAll */
-        xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_var1, local_var2, _PID);
         /* Remove pointless xTaskResumeAll */
         xTaskResumeAll(_PID, local_var1, NULL_byte);
 

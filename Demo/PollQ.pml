@@ -38,14 +38,13 @@ proctype QConsNB()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false;
-    bit local_xIsTimeOut = false;
 
     byte usData, usExpectedValue = 0;
     assert(_PID == FIRST_TASK + 0);
 do
 ::  do
     :: SELE(_PID, uxQueueMessagesWaiting(xPolledQueue));
-        xQueueReceive_NB(xPolledQueue, usData, pollqNO_DELAY, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive_NB(xPolledQueue, usData, pollqNO_DELAY, local_xReturn, local_var1, local_var2, _PID);
         if
         :: SELE(_PID, local_xReturn == true, local_xReturn = false);
             AWAIT(_PID, assert(usData == usExpectedValue));

@@ -69,7 +69,7 @@ do
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_bit, local_var1);
+        vTaskDelay(_PID, 5, local_var1);
     #endif
 #endif
 od
@@ -105,11 +105,11 @@ do
             taskYIELD(_PID);
         #endif
 
-        vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1);
+        vTaskDelay(_PID, priSLEEP_TIME, local_var1);
 
         vTaskSuspendAll(_PID);
             AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
-        xTaskResumeAll(_PID, local_var1, _);
+        xTaskResumeAll(_PID, local_var1, NULL_byte);
 
     /* Second section: */
 
@@ -146,8 +146,8 @@ do
 ::  vTaskSuspendAll(_PID);
     xQueueSendToBack_NB(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
-    xTaskResumeAll(_PID, local_var1, _);
-    vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1);
+    xTaskResumeAll(_PID, local_var1, NULL_byte);
+    vTaskDelay(_PID, priSLEEP_TIME, local_var1);
 od
 }
 
@@ -163,7 +163,7 @@ do
         /* Remove pointless vTaskSuspendAll */
         xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
         /* Remove pointless xTaskResumeAll */
-        xTaskResumeAll(_PID, local_var1, _);
+        xTaskResumeAll(_PID, local_var1, NULL_byte);
 
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID);

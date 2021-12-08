@@ -29,22 +29,22 @@
 proctype MY_TASK()
 {
     byte local_var1 = NULL_byte;
-    bit local_bit = false, local_xIsNDTimeOut = false;
+    bit local_xIsNDTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
 ::  AWAIT(_PID, printf("Task1 %d\n", _PID));
-    vTaskDelay(_PID, 50, local_bit, local_var1);
+    vTaskDelay(_PID, 50, local_var1);
 od
 }
 
 proctype SEC_TASK()
 {
     byte local_var1 = NULL_byte;
-    bit local_bit = false, local_xIsNDTimeOut = false;
+    bit local_xIsNDTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
 ::  AWAIT(_PID, printf("Task2 %d\n", _PID));
-    vTaskDelay(_PID, 50, local_bit, local_var1);
+    vTaskDelay(_PID, 50, local_var1);
 od
 }
 

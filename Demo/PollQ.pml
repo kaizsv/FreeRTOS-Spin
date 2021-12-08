@@ -37,7 +37,7 @@ QueueHandle_t(xPolledQueue, pollqQUEUE_SIZE, byte);
 proctype QConsNB()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_bit = false;
+    bit local_xReturn = false;
     bit local_xIsTimeOut = false;
 
     byte usData, usExpectedValue = 0;
@@ -55,7 +55,7 @@ running:
         fi
     :: ELSE(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
     od;
-    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1);
+    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_var1);
 od
 }
 
@@ -75,7 +75,7 @@ running:
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: ELSE(_PID, usLoop < usNumToProduce, usLoop = 0; break)
     od;
-    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1);
+    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_var1);
 od
 }
 

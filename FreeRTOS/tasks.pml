@@ -231,20 +231,20 @@ inline xTaskCreate_fixed(pcName, Priority)
 
 #if (INCLUDE_vTaskDelay == 1)
 
-inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var)
+inline vTaskDelay(_id, xTicksToDelay, temp_var)
 {
     if
     :: SELE(_id, xTicksToDelay > 0, assert(uxSchedulerSuspended == 0));
         vTaskSuspendAll(_id);
         prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false);
-        xTaskResumeAll(_id, temp_var, xAlreadyYielded)
-    :: ELSE(_id, xTicksToDelay > 0, assert(xAlreadyYielded == false))
+        xTaskResumeAll(_id, temp_var, true)
+    :: ELSE(_id, xTicksToDelay > 0,)
     fi;
 
     if
-    :: SELE(_id, xAlreadyYielded == false);
+    :: SELE(_id, temp_var == NULL_byte); // not yielded
         portYIELD_WITHIN_API(_id)
-    :: ELSE(_id, xAlreadyYielded == false, xAlreadyYielded = false)
+    :: ELSE(_id, temp_var == NULL_byte, temp_var = NULL_byte) // yielded
     fi
 }
 
@@ -445,11 +445,10 @@ inline vTaskSuspendAll(_id)
     AWAIT(_id, uxSchedulerSuspended = uxSchedulerSuspended + 1);
 }
 
-// TODO: change xAlreadyYielded to byte size
-inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
+inline xTaskResumeAll(_id, pxTCB, returnxAlreadyYielded)
 {
-    AWAIT(_id, xAlreadyYielded = false;
-        assert(pxTCB == NULL_byte && uxSchedulerSuspended));
+    AWAIT(_id, assert(uxSchedulerSuspended && pxTCB == NULL_byte &&
+        (returnxAlreadyYielded == true || returnxAlreadyYielded == NULL_byte)));
 
     taskENTER_CRITICAL(_id);
     AWAIT_DS(_id, uxSchedulerSuspended = uxSchedulerSuspended - 1);
@@ -562,10 +561,11 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
         if
         :: SELE_AS(_id, xYieldPending != false);
             #if (configUSE_PREEMPTION != 0)
-            AWAIT_DS(_id, xAlreadyYielded = true);
+            #define alias_xAlreadyYielded pxTCB
+            AWAIT_DS(_id, alias_xAlreadyYielded = returnxAlreadyYielded);
             #endif
             taskYIELD_IF_USING_PREEMPTION(_id)
-        :: ELSE_AS(_id, xYieldPending != false)
+        :: ELSE_AS(_id, xYieldPending != false, assert(pxTCB == NULL_byte))
         fi
     :: ELSE_AS(_id, uxSchedulerSuspended == 0)
     fi;

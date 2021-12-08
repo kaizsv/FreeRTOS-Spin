@@ -167,13 +167,13 @@ od
 
 init {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xReturn = false, local_xIsTimeOut = false;
+    bit local_xIsTimeOut = false;
 
     xSemaphoreCreateBinary(pxFirstSemaphore_xSemaphore, 0);
-    xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, EP);
+    xSemaphoreGive(pxFirstSemaphore_xSemaphore, _, local_xIsTimeOut, local_var1, local_var2, EP);
 
     xSemaphoreCreateBinary(pxSecondSemaphore_xSemaphore, 1);
-    xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, EP);
+    xSemaphoreGive(pxSecondSemaphore_xSemaphore, _, local_xIsTimeOut, local_var1, local_var2, EP);
     skip; /* prevent Spin Error: jump into d_step sequence */
 
     d_step {

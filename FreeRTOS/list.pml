@@ -84,9 +84,10 @@ inline listPOINTER_SET(pxListPointer, tcb)
 
 #define __OWNER_OF(tcb)                 (tcb) - FIRST_TASK
 #define __GET_LIST_ITEM(tcb, xListItem) TCBs[__OWNER_OF(tcb)].xListItem
+#define _GET_LIST_ITEM(tcb, xListItem)  TCBs_others[__OWNER_OF(tcb)].xListItem
 
 #define pxOrdinalStateListItem(pxList, ord) __GET_LIST_ITEM(pxList.ps[ord].p_tcb, xStateListItem)
-#define pxOrdinalEventListItem(pxList, ord) __GET_LIST_ITEM(pxList.ps[ord].p_tcb, xEventListItem)
+#define pxOrdinalEventListItem(pxList, ord) _GET_LIST_ITEM(pxList.ps[ord].p_tcb, xEventListItem)
 
 #define listGET_STATE_ITEM_VALUE_OF_HEAD_ENTRY(pxList) \
     listGET_LIST_ITEM_VALUE(pxOrdinalStateListItem(pxList, 0))

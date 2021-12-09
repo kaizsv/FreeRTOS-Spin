@@ -90,7 +90,7 @@ od
 
 #define eTaskGetState_eBlocked(pxTCB) \
     (listLIST_ITEM_CONTAINER(TCB(pxTCB).xStateListItem) == CID_DELAYED_TASK) || \
-    (listLIST_ITEM_CONTAINER(TCB(pxTCB).xStateListItem) == CID_SUSPENDED_TASK && listLIST_ITEM_CONTAINER(TCB(pxTCB).xEventListItem) != NULL_byte)
+    (listLIST_ITEM_CONTAINER(TCB(pxTCB).xStateListItem) == CID_SUSPENDED_TASK && listLIST_ITEM_CONTAINER(TCB_xEventListItem(pxTCB)) != NULL_byte)
 
 inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_var1, temp_var2)
 {

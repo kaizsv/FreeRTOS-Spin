@@ -18,13 +18,11 @@
 
 #define taskEVENT_LIST_ITEM_VALUE_IN_USE 8 /* 0b1000 */
 
-// Move xEventListItem, uxBasePriority, and uxMutexesHeld to another sturcture.
+// Move xEventListItem, uxBasePriority, uxMutexesHeld, uxCriticalNesting
+// to TCBs_others.
 typedef TCB_t {
     ListItem_t xStateListItem;
     byte uxPriority;
-#if ( portCRITICAL_NESTING_IN_TCB == 1 )
-    byte uxCriticalNesting;
-#endif
 };
 
 #define TCB(index) TCBs[__OWNER_OF(index)]
@@ -36,11 +34,18 @@ typedef TCB_OTHERS_t {
     byte uxBasePriority;
     byte uxMutexesHeld;
 #endif
+#if (portCRITICAL_NESTING_IN_TCB == 1)
+    byte uxCriticalNesting;
+#endif
 };
 
 #if (configUSE_MUTEXES == 1)
     #define TCB_uxBasePriority(index)   TCBs_others[__OWNER_OF(index)].uxBasePriority
     #define TCB_uxMutexesHeld(index)    TCBs_others[__OWNER_OF(index)].uxMutexesHeld
+#endif
+
+#if (portCRITICAL_NESTING_IN_TCB == 1)
+    #define TCB_uxCriticalNesting(index)    TCBs_others[__OWNER_OF(index)].uxCriticalNesting
 #endif
 
 #define TCB_xEventListItem(index)   TCBs_others[__OWNER_OF(index)].xEventListItem
@@ -199,15 +204,14 @@ inline xTaskCreate_fixed(pcName, Priority)
         TCB_uxBasePriority(pcName) = Priority;
         TCB_uxMutexesHeld(pcName) = 0;
 #endif
+#if (portCRITICAL_NESTING_IN_TCB == 1 )
+        TCB_uxCriticalNesting(pcName) = 0;
+#endif
         vListInitialiseItem(TCB_xEventListItem(pcName));
         listSET_LIST_ITEM_VALUE(TCB_xEventListItem(pcName), configMAX_PRIORITIES - (Priority));
     :: else
     fi;
     vListInitialiseItem(TCB(pcName).xStateListItem);
-
-#if (portCRITICAL_NESTING_IN_TCB == 1 )
-    TCB(pcName).uxCriticalNesting = 0;
-#endif
 
     pxPortInitialiseStack(pcName);
 
@@ -739,6 +743,8 @@ inline vTaskMissedYield(_id)
     AWAIT_DS(_id, xYieldPending = true)
 }
 
+// TODO: Move uxCriticalNesting to TCB_t data structure if
+//       the idle hook needs to enable/disable interrupts.
 inline vTaskIDLE_TASK_BODY(_id)
 {
     assert(_id == IDLE_TASK_ID);
@@ -925,8 +931,8 @@ inline vTaskEnterCritical(_id)
     portDISABLE_INTERRUPTS(_id);
     if
     :: SELE_AS(_id, xIsSchedulerRunning);
-        AWAIT_DS(_id, TCB(pxCurrentTCB).uxCriticalNesting =
-            TCB(pxCurrentTCB).uxCriticalNesting + 1);
+        AWAIT_DS(_id, TCB_uxCriticalNesting(pxCurrentTCB) =
+            TCB_uxCriticalNesting(pxCurrentTCB) + 1);
         // portASSERT_IF_IN_ISR()
     :: ELSE_AS(_id, xIsSchedulerRunning);
     fi;
@@ -935,15 +941,15 @@ inline vTaskEnterCritical(_id)
 inline vTaskExitCritical(_id)
 {
     if
-    :: SELE_AS(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
-        AWAIT_DS(_id, TCB(pxCurrentTCB).uxCriticalNesting =
-            TCB(pxCurrentTCB).uxCriticalNesting - 1);
+    :: SELE_AS(_id, xIsSchedulerRunning && TCB_uxCriticalNesting(pxCurrentTCB) > 0);
+        AWAIT_DS(_id, TCB_uxCriticalNesting(pxCurrentTCB) =
+            TCB_uxCriticalNesting(pxCurrentTCB) - 1);
         if
-        :: SELE_AS(_id, TCB(pxCurrentTCB).uxCriticalNesting == 0);
+        :: SELE_AS(_id, TCB_uxCriticalNesting(pxCurrentTCB) == 0);
             portENABLE_INTERRUPTS(_id);
-        :: ELSE_AS(_id, TCB(pxCurrentTCB).uxCriticalNesting == 0);
+        :: ELSE_AS(_id, TCB_uxCriticalNesting(pxCurrentTCB) == 0);
         fi
-    :: ELSE_AS(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
+    :: ELSE_AS(_id, xIsSchedulerRunning && TCB_uxCriticalNesting(pxCurrentTCB) > 0);
     fi
 }
 

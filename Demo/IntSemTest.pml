@@ -89,13 +89,13 @@ od
 }
 
 #define eTaskGetState_eBlocked(pxTCB) \
-    (listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK) || \
-    (listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_SUSPENDED_TASK && listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) != NULL_byte)
+    (listLIST_ITEM_CONTAINER(TCB(pxTCB).xStateListItem) == CID_DELAYED_TASK) || \
+    (listLIST_ITEM_CONTAINER(TCB(pxTCB).xStateListItem) == CID_SUSPENDED_TASK && listLIST_ITEM_CONTAINER(TCB(pxTCB).xEventListItem) != NULL_byte)
 
 inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_var1, temp_var2)
 {
     AWAIT(_id,
-        assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).ListItems[xState]) == CID_SUSPENDED_TASK);
+        assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).xStateListItem) == CID_SUSPENDED_TASK);
         assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY)
     );
 
@@ -141,7 +141,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_var1, temp_var2
     AWAIT(_id,
         assert(xReturn == true); xReturn = false;
         assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY);
-        assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).ListItems[xState]) == CID_SUSPENDED_TASK)
+        assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).xStateListItem) == CID_SUSPENDED_TASK)
     );
 
     xQueueGenericReset(_id, xISRMutex, temp_var1)
@@ -150,7 +150,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_var1, temp_var2
 inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_var1, temp_var2)
 {
     AWAIT(_id,
-        assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).ListItems[xState]) == CID_SUSPENDED_TASK);
+        assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).xStateListItem) == CID_SUSPENDED_TASK);
         assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY)
     );
 

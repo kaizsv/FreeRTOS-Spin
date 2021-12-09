@@ -528,7 +528,7 @@ inline prvGetDisinheritPriorityAfterTimeout(_id, pxQueue, uxHighestPriorityOfWai
     if
     :: SELE_AS(_id, listLENGTH_IS_EXCEEDING_0(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]));
         AWAIT_DS(_id, assert(uxHighestPriorityOfWaitingTasks == NULL_byte);
-            uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_ITEM_VALUE_OF_HEAD_ENTRY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
+            uxHighestPriorityOfWaitingTasks = configMAX_PRIORITIES - listGET_EVENT_ITEM_VALUE_OF_HEAD_ENTRY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]))
     :: ELSE_AS(_id, listLENGTH_IS_EXCEEDING_0(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]));
         AWAIT_DS(_id, assert(uxHighestPriorityOfWaitingTasks == NULL_byte);
             uxHighestPriorityOfWaitingTasks = tskIDLE_PRIORITY)

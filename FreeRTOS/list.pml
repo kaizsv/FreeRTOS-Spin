@@ -23,21 +23,20 @@ inline listSET_LIST_ITEM_CONTAINER(pxListItem, uxContainer)
 }
 
 typedef List_t {
-    byte p_tcb_item;
+    byte p_tcb;
 };
 
-#define listPOINTER_IS_NULL(pxListPointer) (pxListPointer.p_tcb_item == NULL_byte)
+#define listPOINTER_IS_NULL(pxListPointer) (pxListPointer.p_tcb == NULL_byte)
 
 inline listPOINTER_RESET(pxListPointer)
 {
-    pxListPointer.p_tcb_item = NULL_byte
+    pxListPointer.p_tcb = NULL_byte
 }
 
-inline listPOINTER_SET(pxListPointer, tcb, item)
+inline listPOINTER_SET(pxListPointer, tcb)
 {
-    /* prevent p_tcb_item becoming NULL_byte or xListEnd */
-    assert(tcb < 127 && item < 2);
-    pxListPointer.p_tcb_item = (tcb << 1) | item
+    assert(tcb < 254); // prevent p_tcb becoming NULL_byte or xListEnd
+    pxListPointer.p_tcb = tcb
 }
 
 #define LIST_SIZE1  1
@@ -84,16 +83,15 @@ inline listPOINTER_SET(pxListPointer, tcb, item)
     __ENDEF
 
 #define __OWNER_OF(tcb)                 (tcb) - FIRST_TASK
-#define __GET_LIST_ITEM(tcb, item)      TCBs[__OWNER_OF(tcb)].ListItems[item]
-#define GET_LIST_ITEM_FROM_POINTER(p)   __GET_LIST_ITEM(p >> 1, p & 1)
+#define __GET_LIST_ITEM(tcb, xListItem) TCBs[__OWNER_OF(tcb)].xListItem
 
-#define pxNewListItem                   __GET_LIST_ITEM(pxNewListItemTCB, xStateORxEvent)
-#define pxItemToRemove                  __GET_LIST_ITEM(pxItemToRemoveTCB, xStateORxEvent)
-#define pxOrdinalListItem(pxList, ord)  GET_LIST_ITEM_FROM_POINTER(pxList.ps[ord].p_tcb_item)
-#define pxFirstListItem(pxList)         pxOrdinalListItem(pxList, 0)
+#define pxOrdinalStateListItem(pxList, ord) __GET_LIST_ITEM(pxList.ps[ord].p_tcb, xStateListItem)
+#define pxOrdinalEventListItem(pxList, ord) __GET_LIST_ITEM(pxList.ps[ord].p_tcb, xEventListItem)
 
-#define listGET_ITEM_VALUE_OF_HEAD_ENTRY(pxList) \
-    listGET_LIST_ITEM_VALUE(pxFirstListItem(pxList))
+#define listGET_STATE_ITEM_VALUE_OF_HEAD_ENTRY(pxList) \
+    listGET_LIST_ITEM_VALUE(pxOrdinalStateListItem(pxList, 0))
+#define listGET_EVENT_ITEM_VALUE_OF_HEAD_ENTRY(pxList) \
+    listGET_LIST_ITEM_VALUE(pxOrdinalEventListItem(pxList, 0))
 
 #define listLIST_IS_EMPTY(pxList)           listPOINTER_IS_NULL(pxList.ps[0])
 #define listLIST_IS_NOT_FULL(pxList, SIZE)  listPOINTER_IS_NULL(pxList.ps[SIZE - 1])
@@ -112,11 +110,11 @@ inline listGET_OWNER_OF_NEXT_ENTRY(_id, pxTCB, pxList, SIZE)
     AWAIT_DS(_id, pxList.pxIndex = (pxList.pxIndex == xListEnd -> 0 : pxList.pxIndex));
     AWAIT_DS(_id,
         assert(pxTCB == NULL_byte || pxTCB == pxCurrentTCB);
-        pxTCB = pxList.ps[pxList.pxIndex].p_tcb_item >> 1
+        pxTCB = pxList.ps[pxList.pxIndex].p_tcb
     )
 }
 
-#define listGET_OWNER_OF_HEAD_ENTRY(pxList) (pxList.ps[0].p_tcb_item >> 1)
+#define listGET_OWNER_OF_HEAD_ENTRY(pxList) pxList.ps[0].p_tcb
 
 #define listIS_CONTAINED_WITHIN(xCID, pxListItem) (listLIST_ITEM_CONTAINER(pxListItem) == (xCID))
 
@@ -146,12 +144,12 @@ inline vListInitialise_pxIndex(pxList, SIZE)
 
 inline swapListPointers(aListPointer, bListPointer)
 {
-    aListPointer.p_tcb_item = aListPointer.p_tcb_item ^ bListPointer.p_tcb_item;
-    bListPointer.p_tcb_item = bListPointer.p_tcb_item ^ aListPointer.p_tcb_item;
-    aListPointer.p_tcb_item = aListPointer.p_tcb_item ^ bListPointer.p_tcb_item;
+    aListPointer.p_tcb = aListPointer.p_tcb ^ bListPointer.p_tcb;
+    bListPointer.p_tcb = bListPointer.p_tcb ^ aListPointer.p_tcb;
+    aListPointer.p_tcb = aListPointer.p_tcb ^ bListPointer.p_tcb;
 }
 
-inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
+inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, pxNewListItem)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE));
 
@@ -159,7 +157,7 @@ inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
         if
         :: listPOINTER_IS_NULL(pxList.ps[hidden_idx]) ->
             listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-            listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB, xStateORxEvent);
+            listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB);
             break
         :: else
         fi
@@ -167,7 +165,7 @@ inline vListInsertEnd(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
     hidden_idx = NULL_byte
 }
 
-inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
+inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, pxNewListItem)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE));
 
@@ -196,14 +194,13 @@ inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEve
 
     assert(listPOINTER_IS_NULL(pxList.ps[hidden_idx]));
     listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB, xStateORxEvent);
+    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB);
     hidden_idx = NULL_byte
 }
 
-inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
+inline vListInsert_sortStateListItem(pxList, SIZE, xCID, pxNewListItemTCB, pxNewListItem)
 {
     assert(listLIST_IS_NOT_FULL(pxList, SIZE) && hidden_idx == NULL_byte && hidden_var == NULL_byte);
-
     for (hidden_idx: 0 .. (SIZE - 1)) {
         /* Find the next null item */
         if
@@ -213,12 +210,11 @@ inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
         /* Find the first place to insert the new item */
         if
         :: (hidden_var == NULL_byte) &&
-           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, hidden_idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
+           (listGET_LIST_ITEM_VALUE(pxOrdinalStateListItem(pxList, hidden_idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
             hidden_var = hidden_idx
         :: else
         fi
     }
-
     if
     :: hidden_var ^ NULL_byte ->
         /* replace the item at the hidden_var by the last null item */
@@ -234,11 +230,49 @@ inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
         od
     :: else
     fi;
-
     /* place pxNewListItem at the index position of pxList */
     assert(listPOINTER_IS_NULL(pxList.ps[hidden_idx]));
     listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
-    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB, xStateORxEvent);
+    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB);
+    hidden_idx = NULL_byte
+}
+
+inline vListInsert_sortEventListItem(pxList, SIZE, xCID, pxNewListItemTCB, pxNewListItem)
+{
+    assert(listLIST_IS_NOT_FULL(pxList, SIZE) && hidden_idx == NULL_byte && hidden_var == NULL_byte);
+    for (hidden_idx: 0 .. (SIZE - 1)) {
+        /* Find the next null item */
+        if
+        :: listPOINTER_IS_NULL(pxList.ps[hidden_idx]) -> break;
+        :: else
+        fi;
+        /* Find the first place to insert the new item */
+        if
+        :: (hidden_var == NULL_byte) &&
+           (listGET_LIST_ITEM_VALUE(pxOrdinalEventListItem(pxList, hidden_idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
+            hidden_var = hidden_idx
+        :: else
+        fi
+    }
+    if
+    :: hidden_var ^ NULL_byte ->
+        /* replace the item at the hidden_var by the last null item */
+        assert(hidden_var < hidden_idx);
+        do
+        :: hidden_var < hidden_idx ->
+            swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx]);
+            hidden_idx = hidden_idx - 1
+        :: else ->
+            assert(hidden_var == hidden_idx);
+            hidden_var = NULL_byte;
+            break
+        od
+    :: else
+    fi;
+    /* place pxNewListItem at the index position of pxList */
+    assert(listPOINTER_IS_NULL(pxList.ps[hidden_idx]));
+    listSET_LIST_ITEM_CONTAINER(pxNewListItem, xCID);
+    listPOINTER_SET(pxList.ps[hidden_idx], pxNewListItemTCB);
     hidden_idx = NULL_byte
 }
 
@@ -248,13 +282,12 @@ inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent)
     macro since pxList is known.
 #endif
 
-inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
+inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, pxItemToRemove)
 {
     /* find the index of pxItemToRemove in pxList */
     for (hidden_idx: 0 .. (SIZE - 1)) {
         if
-        :: (pxList.ps[hidden_idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
-            assert((pxList.ps[hidden_idx].p_tcb_item & 1) == xStateORxEvent);
+        :: pxList.ps[hidden_idx].p_tcb == pxItemToRemoveTCB ->
             vListInitialisePointer(pxList.ps[hidden_idx]);
             break
         :: else -> assert(hidden_idx < (SIZE - 1)) /* check reliability */
@@ -267,6 +300,7 @@ inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
         for (hidden_idx: (hidden_idx + 1) .. (SIZE - 1)) {
             if
             :: !listPOINTER_IS_NULL(pxList.ps[hidden_idx]) ->
+                assert(pxList.ps[hidden_idx].p_tcb != pxItemToRemoveTCB);
                 swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx])
             :: else -> break
             fi
@@ -277,13 +311,12 @@ inline uxListRemove(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
     vListInitialiseItem(pxItemToRemove)
 }
 
-inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
+inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, pxItemToRemove)
 {
     /* find the index of pxItemToRemove in pxList */
     for (hidden_idx: 0 .. (SIZE - 1)) {
         if
-        :: (pxList.ps[hidden_idx].p_tcb_item >> 1) == pxItemToRemoveTCB ->
-            assert((pxList.ps[hidden_idx].p_tcb_item & 1) == xStateORxEvent);
+        :: pxList.ps[hidden_idx].p_tcb == pxItemToRemoveTCB ->
             vListInitialisePointer(pxList.ps[hidden_idx]);
             break
         :: else -> assert(hidden_idx < (SIZE - 1)) /* check reliability */
@@ -303,6 +336,7 @@ inline uxListRemove_pxIndex(pxList, SIZE, pxItemToRemoveTCB, xStateORxEvent)
         for (hidden_idx: (hidden_idx + 1) .. (SIZE - 1)) {
             if
             :: !listPOINTER_IS_NULL(pxList.ps[hidden_idx]) ->
+                assert(pxList.ps[hidden_idx].p_tcb != pxItemToRemoveTCB);
                 swapListPointers(pxList.ps[hidden_idx - 1], pxList.ps[hidden_idx])
             :: else -> break
             fi

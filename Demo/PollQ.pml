@@ -1,6 +1,6 @@
 /* FreeRTOS/Demo/Common/Minimal/PollQ.c */
 
-#define promela_TASK_NUMBER     2
+#define promela_TASK_NUMBER     3
 #define promela_QUEUE_NUMBER    1
 
 #define FIRST_TASK              promela_EXP_NUMBER
@@ -11,6 +11,7 @@
         stmts;              \
         run QConsNB();      \
         run QProdNB();      \
+        run prvCheckTask(); \
     }
 
 #include "../FreeRTOS.pml"
@@ -78,6 +79,71 @@ running:
 od
 }
 
+proctype prvCheckTask()
+{
+    byte local_var = NULL_byte;
+    assert(_PID == FIRST_TASK + 2);
+do
+::  { // vTaskDelay
+        AWAIT(_PID,
+            assert(uxSchedulerSuspended == 0);
+            uxSchedulerSuspended = uxSchedulerSuspended + 1; // vTaskSuspendAll(_PID);
+        );
+        { // prvAddCurrentTaskToDelayedList(_PID, local_var, false);
+            AWAIT(_PID, d_step {
+                assert(listLIST_ITEM_CONTAINER(TCB(pxCurrentTCB).xStateListItem) == CID_READY_LISTS + TCB(pxCurrentTCB).uxPriority);
+                uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority], RLIST_SIZE, pxCurrentTCB, TCB(pxCurrentTCB).xStateListItem)
+            });
+            if
+            :: SELE(_PID, listLIST_IS_EMPTY(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]));
+                AWAIT(_PID, portRESET_READY_PRIORITY(TCB(pxCurrentTCB).uxPriority, uxTopReadyPriority))
+            :: ELSE(_PID, listLIST_IS_EMPTY(pxReadyTasksLists[TCB(pxCurrentTCB).uxPriority]))
+            fi;
+            AWAIT(_PID, d_step {
+                if
+                :: listLIST_IS_EMPTY(pxDelayedTaskList) ->
+                    local_var = 10
+                :: else ->
+                    assert(hidden_var == NULL_byte);
+                    for (hidden_idx: 0 .. (DLIST_SIZE - 1)) {
+                        if
+                        :: !listPOINTER_IS_NULL(pxDelayedTaskList.ps[hidden_idx]) ->
+                            hidden_var = listGET_LIST_ITEM_VALUE(pxOrdinalStateListItem(pxDelayedTaskList, hidden_idx));
+                        :: else -> break
+                        fi
+                    }
+                    assert(hidden_var != NULL_byte && hidden_var > xTickCount);
+                    local_var = hidden_var - xTickCount + 1;
+                    hidden_idx = NULL_byte; hidden_var = NULL_byte;
+                fi;
+                assert(local_var < 256 && listGET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).xStateListItem) == 0);
+                listSET_LIST_ITEM_VALUE(TCB(pxCurrentTCB).xStateListItem, local_var)
+            });
+            AWAIT(_PID, d_step {
+                if
+                :: !listLIST_IS_EMPTY(pxDelayedTaskList) ->
+                    update_xTickCount();
+                :: else
+                fi;
+                assert(xTickCount == 0);
+                vListInsert_sortStateListItem(pxDelayedTaskList, DLIST_SIZE, CID_DELAYED_TASK, pxCurrentTCB, TCB(pxCurrentTCB).xStateListItem)
+            });
+            if
+            :: SELE(_PID, local_var < xNextTaskUnblockTicks);
+                AWAIT(_PID, xNextTaskUnblockTicks = local_var; local_var = NULL_byte)
+            :: ELSE(_PID, local_var < xNextTaskUnblockTicks, local_var = NULL_byte);
+            fi;
+        }; // End of prvAddCurrentTaskToDelayedList(_PID, local_var, false);
+        xTaskResumeAll(_PID, local_var, true);
+        if
+        :: SELE(_PID, local_var == NULL_byte); // not yielded
+            portYIELD_WITHIN_API(_PID)
+        :: ELSE(_PID, local_var == NULL_byte, local_var = NULL_byte) // yielded
+        fi
+    }
+od
+}
+
 init {
     d_step {
         xQueueCreate(xPolledQueue, 0, pollqQUEUE_SIZE);
@@ -85,7 +151,8 @@ init {
         prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK + 0, 1);
-        xTaskCreate_fixed(FIRST_TASK + 1, 1)
+        xTaskCreate_fixed(FIRST_TASK + 1, 1);
+        xTaskCreate_fixed(FIRST_TASK + 2, configMAX_PRIORITIES - 1);
     };
 
     vTaskStartScheduler(EP);

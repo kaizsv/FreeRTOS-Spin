@@ -137,8 +137,7 @@ byte xNextTaskUnblockTicks = portMAX_DELAY;
 #define update_xTickCount(idx) \
     for (idx: 0 .. (DLIST_SIZE - 1)) { \
         if \
-        :: !listPOINTER_IS_NULL(pxDelayedTaskList.ps[idx]) && \
-           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx)) < 255) -> \
+        :: !listPOINTER_IS_NULL(pxDelayedTaskList.ps[idx]) -> \
             assert(listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx)) > xTickCount); \
             listSET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx), \
                 listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxDelayedTaskList, idx)) - xTickCount) \

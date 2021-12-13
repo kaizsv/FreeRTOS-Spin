@@ -16,7 +16,8 @@
             if \
             :: SELE_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]) == false); \
                 /* TODO: pxHigherPriorityTaskWoken */ \
-                xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], _); \
+                xTaskRemoveFromEventList(_id, temp_var, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]); \
+                AWAIT_DS(_id, temp_var = NULL_byte); \
             :: ELSE_AS(_id, listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]) == false); \
             fi; \
         :: ELSE_AS(_id, queueGET_cTxLock(pxQueue) == 15); \

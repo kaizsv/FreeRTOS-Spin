@@ -689,10 +689,10 @@ inline vTaskPlaceOnEventList(_id, pxEventList, EventListContainer, xTicksToWait,
     prvAddCurrentTaskToDelayedList(_id, xTicksToWait, true, temp_var, temp_var2)
 }
 
-inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
+inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList)
 {
-    AWAIT_DS(_id, xReturn = false; assert(pxUnblockedTCB == NULL_byte);
-        pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList); assert(pxUnblockedTCB != NULL_byte));
+    AWAIT_DS(_id, assert(pxUnblockedTCB == NULL_byte && !listLIST_IS_EMPTY(pxEventList));
+        pxUnblockedTCB = listGET_OWNER_OF_HEAD_ENTRY(pxEventList));
     AWAIT_DS(_id, uxListRemove(pxEventList, QLIST_SIZE, pxUnblockedTCB, xEvent, hidden_idx));
 
     if
@@ -719,10 +719,10 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList, xReturn)
     fi;
 
     if
-    :: SELE_AS(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority, pxUnblockedTCB = NULL_byte);
-        AWAIT_DS(_id, xReturn = true; xYieldPending = true)
-    :: ELSE_AS(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority, pxUnblockedTCB = NULL_byte);
-        AWAIT_DS(_id, xReturn = false)
+    :: SELE_AS(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority);
+        AWAIT_DS(_id, pxUnblockedTCB = true; xYieldPending = true)
+    :: ELSE_AS(_id, TCB(pxUnblockedTCB).uxPriority > TCB(pxCurrentTCB).uxPriority);
+        AWAIT_DS(_id, pxUnblockedTCB = false)
     fi
 }
 
@@ -837,12 +837,12 @@ inline xTaskPriorityDisinherit(_id, pxMutexHolder, xReturn)
                 AWAIT_DS(_id, listSET_LIST_ITEM_VALUE(TCB(pxMutexHolder).ListItems[xEvent], configMAX_PRIORITIES - TCB(pxMutexHolder).uxPriority));
                 prvAddTaskToReadyList(_id, pxMutexHolder);
 
-                AWAIT_DS(_id, assert(xReturn == false); xReturn = true)
+                AWAIT_DS(_id, xReturn = true)
             :: ELSE_AS(_id, TCB_uxMutexesHeld(pxMutexHolder) == 0)
             fi
         :: ELSE_AS(_id, TCB(pxMutexHolder).uxPriority != TCB_uxBasePriority(pxMutexHolder))
         fi
-    :: ELSE_AS(_id, FIRST_TASK <= pxMutexHolder && pxMutexHolder < NULL_byte, assert(xReturn == false))
+    :: ELSE_AS(_id, FIRST_TASK <= pxMutexHolder && pxMutexHolder < NULL_byte)
     fi
 }
 

@@ -144,7 +144,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
         assert(listLIST_ITEM_CONTAINER(TCB(xSlaveHandle).ListItems[xState]) == CID_SUSPENDED_TASK)
     );
 
-    xQueueGenericReset(_id, xISRMutex, temp_var1, temp_bit)
+    xQueueGenericReset(_id, xISRMutex, temp_var1)
 }
 
 inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2)
@@ -193,7 +193,7 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut,
         assert(uxTaskPriorityGet(NULL_byte) == intsemMASTER_PRIORITY);
     );
 
-    xQueueGenericReset(_id, xISRMutex, temp_var1, temp_bit)
+    xQueueGenericReset(_id, xISRMutex, temp_var1)
 }
 
 proctype IntMuM()

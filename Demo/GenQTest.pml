@@ -172,7 +172,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_LOW_PRIORITY));
 
-    vTaskResume(_id, xHighPriorityMutexTask, temp_bool, temp_var1);
+    vTaskResume(_id, xHighPriorityMutexTask, temp_var1);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_id, local_var1);
@@ -183,7 +183,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
     vTaskPrioritySet(_id, NULL_byte, genqMUTEX_TEST_PRIORITY, temp_var1, temp_bool, temp_var2);
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
 
-    vTaskResume(_id, xMediumPriorityMutexTask, temp_bool, temp_var1);
+    vTaskResume(_id, xMediumPriorityMutexTask, temp_var1);
 
     AWAIT(_id, assert(ulGuardedVariable == 0));
 
@@ -229,7 +229,7 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_LOW_PRIORITY));
 
-    vTaskResume(_id, xHighPriorityMutexTask, temp_bool, temp_var1);
+    vTaskResume(_id, xHighPriorityMutexTask, temp_var1);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_id, local_var1);
@@ -237,7 +237,7 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
 
-    vTaskResume(_id, xMediumPriorityMutexTask, temp_bool, temp_var1);
+    vTaskResume(_id, xMediumPriorityMutexTask, temp_var1);
 
     AWAIT(_id, assert(ulGuardedVariable == 0));
 

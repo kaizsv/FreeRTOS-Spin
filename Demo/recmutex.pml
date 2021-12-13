@@ -127,12 +127,12 @@ do
         AWAIT(_PID, assert(xBlockingIsSuspended && xControllingIsSuspended));
 
 running:
-        vTaskResume(_PID, xBlockingTaskHandle, local_bit, local_var1);
+        vTaskResume(_PID, xBlockingTaskHandle, local_var1);
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
         #endif
 
-        vTaskResume(_PID, xControllingTaskHandle, local_bit, local_var1);
+        vTaskResume(_PID, xControllingTaskHandle, local_var1);
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
         #endif

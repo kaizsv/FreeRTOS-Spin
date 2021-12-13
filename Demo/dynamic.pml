@@ -99,7 +99,7 @@ do
     /* Remove sLoops to simplify verification */
         vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
             ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
-        vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
+        vTaskResume(_PID, xContinousIncrementHandle, local_var1);
 
         #if (configUSE_PREEMPTION == 0)
             taskYIELD(_PID, local_var1);
@@ -117,7 +117,7 @@ do
 
     AWAIT(_PID, ulCounter = 0);
 
-    vTaskResume(_PID, xLimitedIncrementHandle, local_bit, local_var1);
+    vTaskResume(_PID, xLimitedIncrementHandle, local_var1);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
@@ -126,7 +126,7 @@ do
 running:
     AWAIT(_PID, assert(ulCounter == xLimitedIncrementHandle));
 
-    vTaskResume(_PID, xContinousIncrementHandle, local_bit, local_var1);
+    vTaskResume(_PID, xContinousIncrementHandle, local_var1);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);

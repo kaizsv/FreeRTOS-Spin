@@ -80,9 +80,9 @@ do
 
     vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
 
-    vTaskResume(_PID, xMediumPriorityTask, local_bit, local_var1);
-    vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
-    vTaskResume(_PID, xHighestPriorityTask, local_bit, local_var1);
+    vTaskResume(_PID, xMediumPriorityTask, local_var1);
+    vTaskResume(_PID, xHighPriorityTask, local_var1);
+    vTaskResume(_PID, xHighestPriorityTask, local_var1);
 
     #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
@@ -100,8 +100,8 @@ do
     xQueuePeek_NB(_PID, xQUEUE, ulValue, qpeekNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
     AWAIT(_PID, assert(local_xReturn == false));
 
-    vTaskResume(_PID, xHighPriorityTask, local_bit, local_var1);
-    vTaskResume(_PID, xHighestPriorityTask, local_bit, local_var1);
+    vTaskResume(_PID, xHighPriorityTask, local_var1);
+    vTaskResume(_PID, xHighestPriorityTask, local_var1);
 
     vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
 od

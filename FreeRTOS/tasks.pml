@@ -393,24 +393,24 @@ inline prvTaskIsTaskSuspended(_id, xTask, xReturn)
         :: SELE_AS(_id, listIS_CONTAINED_WITHIN(CID_PENDING_READY, TCB(xTask).ListItems[xEvent]) == false);
             if
             :: SELE_AS(_id, listIS_CONTAINED_WITHIN(NULL_byte, TCB(xTask).ListItems[xEvent]) != false);
-                AWAIT_DS(_id, assert(xReturn == false); xReturn = true)
+                AWAIT_DS(_id, xReturn = true)
             :: ELSE_AS(_id, listIS_CONTAINED_WITHIN(NULL_byte, TCB(xTask).ListItems[xEvent]) != false)
             fi
         :: ELSE_AS(_id, listIS_CONTAINED_WITHIN(CID_PENDING_READY, TCB(xTask).ListItems[xEvent]) == false)
         fi
-    :: ELSE_AS(_id, listIS_CONTAINED_WITHIN(CID_SUSPENDED_TASK, TCB(xTask).ListItems[xState]) != false, assert(xReturn == false))
+    :: ELSE_AS(_id, listIS_CONTAINED_WITHIN(CID_SUSPENDED_TASK, TCB(xTask).ListItems[xState]) != false)
     fi
 }
 
-inline vTaskResume(_id, xTaskToResume, temp_xReturn, temp_var)
+inline vTaskResume(_id, xTaskToResume, temp_var)
 {
     if
     :: SELE(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte);
         taskENTER_CRITICAL(_id, temp_var);
 
-        prvTaskIsTaskSuspended(_id, xTaskToResume, temp_xReturn);
+        prvTaskIsTaskSuspended(_id, xTaskToResume, temp_var);
         if
-        :: SELE_AS(_id, temp_xReturn != false, temp_xReturn = false);
+        :: SELE_AS(_id, temp_var == true, temp_var = NULL_byte);
             AWAIT_DS(_id, uxListRemove(xSuspendedTaskList, SLIST_SIZE, xTaskToResume, xState, hidden_idx));
             prvAddTaskToReadyList(_id, xTaskToResume);
 
@@ -419,7 +419,7 @@ inline vTaskResume(_id, xTaskToResume, temp_xReturn, temp_var)
                 taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
             :: ELSE_AS(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
-        :: ELSE_AS(_id, temp_xReturn != false)
+        :: ELSE_AS(_id, temp_var == true, assert(temp_var == NULL_byte))
         fi;
 
         taskEXIT_CRITICAL(_id, temp_var)

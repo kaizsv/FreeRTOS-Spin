@@ -102,7 +102,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_xIsTimeOut, tem
     xSemaphoreTake_NB(xMasterSlaveMutex, intsemNO_BLOCK, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
-    vTaskResume(_id, xSlaveHandle, temp_bit, temp_var1);
+    vTaskResume(_id, xSlaveHandle, temp_var1);
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
@@ -157,7 +157,7 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_xIsTimeOut,
     xSemaphoreTake_NB(xMasterSlaveMutex, intsemNO_BLOCK, xReturn, temp_bit, temp_xIsTimeOut, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
-    vTaskResume(_id, xSlaveHandle, temp_bit, temp_var1);
+    vTaskResume(_id, xSlaveHandle, temp_var1);
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)

@@ -107,7 +107,7 @@ running:
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 30, local_xIsTimeOut, local_var1, local_var2);
+        vTaskDelay(_PID, 30, local_xIsTimeOut, local_var1);
     #endif
 #endif
 od
@@ -154,7 +154,7 @@ running:
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 30, local_xIsTimeOut, local_var1, local_var2);
+        vTaskDelay(_PID, 30, local_xIsTimeOut, local_var1);
     #endif
 #endif
 od

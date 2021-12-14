@@ -78,7 +78,7 @@ do
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1);
 
     vTaskResume(_PID, xMediumPriorityTask, local_var1);
     vTaskResume(_PID, xHighPriorityTask, local_var1);
@@ -103,7 +103,7 @@ do
     vTaskResume(_PID, xHighPriorityTask, local_var1);
     vTaskResume(_PID, xHighestPriorityTask, local_var1);
 
-    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1);
 od
 }
 

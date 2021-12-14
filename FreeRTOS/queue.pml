@@ -225,7 +225,7 @@ od
         :: SELE(_id, prvIsQueueFull(pxQueue), xIsTimeOut = true); \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
+            xTaskResumeAll(_id, temp_var, xReturn); \
             if \
             :: SELE(_id, xReturn == false); \
                 portYIELD_WITHIN_API(_id, temp_var) \
@@ -234,12 +234,12 @@ od
         :: ELSE(_id, prvIsQueueFull(pxQueue)); \
             /* Try again. */ \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, _, temp_var2) \
+            xTaskResumeAll(_id, temp_var, _) \
         fi \
     :: ELSE(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait), xIsTimeOut = false); \
         /* The timeout has expired. */ \
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-        xTaskResumeAll(_id, temp_var, _, temp_var2); \
+        xTaskResumeAll(_id, temp_var, _); \
         AWAIT(_id, assert(xReturn == false); break) \
     fi;
 
@@ -299,7 +299,7 @@ od
         :: SELE(_id, prvIsQueueEmpty(pxQueue), xIsTimeOut = true); \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
+            xTaskResumeAll(_id, temp_var, xReturn); \
             if \
             :: SELE(_id, xReturn == false); \
                 portYIELD_WITHIN_API(_id, temp_var) \
@@ -307,12 +307,12 @@ od
             fi \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, _, temp_var2) \
+            xTaskResumeAll(_id, temp_var, _) \
         fi \
     :: ELSE(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait)); \
         /* Timed out. */ \
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-        xTaskResumeAll(_id, temp_var, _, temp_var2); \
+        xTaskResumeAll(_id, temp_var, _); \
         if \
         :: SELE(_id, prvIsQueueEmpty(pxQueue)); \
             AWAIT(_id, xIsTimeOut = false; assert(xReturn == false); break) \
@@ -376,7 +376,7 @@ od
         :: SELE(_id, prvIsQueueEmpty(pxQueue) != false, xIsTimeOut = true); \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
+            xTaskResumeAll(_id, temp_var, xReturn); \
             if \
             :: SELE(_id, xReturn == false); \
                 portYIELD_WITHIN_API(_id, temp_var) \
@@ -384,7 +384,7 @@ od
             fi \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, _, temp_var2) \
+            xTaskResumeAll(_id, temp_var, _) \
         fi \
     :: ELSE(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait)); \
         __AGAIN_AFTER_TIMED_OUT \
@@ -392,7 +392,7 @@ od
 
 #define __xQueuePeek_AGAIN_AFTER_TIMED_OUT \
    prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-   xTaskResumeAll(_id, temp_var, _, temp_var2); \
+   xTaskResumeAll(_id, temp_var, _); \
    if \
    :: SELE(_id, prvIsQueueEmpty(pxQueue), xIsTimeOut = false; assert(!xReturn); break) \
    :: ELSE(_id, prvIsQueueEmpty(pxQueue)) \
@@ -477,7 +477,7 @@ od
             fi; \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
+            xTaskResumeAll(_id, temp_var, xReturn); \
             if \
             :: SELE(_id, xReturn == false); \
                 portYIELD_WITHIN_API(_id, temp_var) \
@@ -485,12 +485,12 @@ od
             fi \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, _, temp_var2) \
+            xTaskResumeAll(_id, temp_var, _) \
         fi \
     :: ELSE(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait)); \
         /* Timed out. */ \
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-        xTaskResumeAll(_id, temp_var, _, temp_var2); \
+        xTaskResumeAll(_id, temp_var, _); \
         if \
         :: SELE(_id, prvIsQueueEmpty(pxQueue)); \
             if \

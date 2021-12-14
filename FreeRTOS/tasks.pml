@@ -232,13 +232,13 @@ inline xTaskCreate_fixed(pcName, Priority)
 
 #if (INCLUDE_vTaskDelay == 1)
 
-inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var, temp_var2)
+inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var)
 {
     if
     :: SELE(_id, xTicksToDelay > 0, assert(uxSchedulerSuspended == 0));
         vTaskSuspendAll(_id);
         prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false, temp_var);
-        xTaskResumeAll(_id, temp_var, xAlreadyYielded, temp_var2)
+        xTaskResumeAll(_id, temp_var, xAlreadyYielded)
     :: ELSE(_id, xTicksToDelay > 0, assert(xAlreadyYielded == false))
     fi;
 
@@ -446,12 +446,13 @@ inline vTaskSuspendAll(_id)
     AWAIT(_id, uxSchedulerSuspended = uxSchedulerSuspended + 1);
 }
 
-inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
+inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
 {
+#define reuse_pxTCB pxTCB
     AWAIT(_id, xAlreadyYielded = false;
         assert(pxTCB == NULL_byte && uxSchedulerSuspended));
 
-    taskENTER_CRITICAL(_id, temp_var);
+    taskENTER_CRITICAL(_id, reuse_pxTCB);
     AWAIT_DS(_id, uxSchedulerSuspended = uxSchedulerSuspended - 1);
     if
     :: SELE_AS(_id, uxSchedulerSuspended == 0);
@@ -564,13 +565,13 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded, temp_var)
             #if (configUSE_PREEMPTION != 0)
             AWAIT_DS(_id, xAlreadyYielded = true);
             #endif
-            taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
+            taskYIELD_IF_USING_PREEMPTION(_id, reuse_pxTCB)
         :: ELSE_AS(_id, xYieldPending != false)
         fi
     :: ELSE_AS(_id, uxSchedulerSuspended == 0)
     fi;
 
-    taskEXIT_CRITICAL(_id, temp_var)
+    taskEXIT_CRITICAL(_id, reuse_pxTCB)
 }
 
 // TODO: merge xTaskIncrementTick in xTaskResumeAll

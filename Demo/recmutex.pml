@@ -65,13 +65,13 @@ do
     :: SELE(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
         xSemaphoreTakeRecursive(_PID, xMutex, recmu15ms_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
-        vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1, local_var2);
+        vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1);
     :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0; break)
     od;
 
     do
     :: SELE(_PID, ux < recmuMAX_COUNT, ux = ux + 1);
-        vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1, local_var2);
+        vTaskDelay(_PID, recmuSHORT_DELAY, local_bit, local_var1);
         xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 

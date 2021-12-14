@@ -55,7 +55,7 @@ running:
         fi
     :: ELSE(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
     od;
-    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, pollqCONSUMER_DELAY, local_bit, local_var1);
 od
 }
 
@@ -75,7 +75,7 @@ running:
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
     :: ELSE(_PID, usLoop < usNumToProduce, usLoop = 0; break)
     od;
-    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1, local_var2);
+    vTaskDelay(_PID, pollqPRODUCER_DELAY, local_bit, local_var1);
 od
 }
 

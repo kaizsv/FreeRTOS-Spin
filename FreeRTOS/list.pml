@@ -200,38 +200,41 @@ inline vListInsertEnd_pxIndex(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEve
     idx = NULL_byte
 }
 
-inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, idx, temp_var)
+inline vListInsert(pxList, SIZE, xCID, pxNewListItemTCB, xStateORxEvent, idx)
 {
-    assert(listLIST_IS_NOT_FULL(pxList, SIZE) && idx == NULL_byte && temp_var == NULL_byte);
+    assert(listLIST_IS_NOT_FULL(pxList, SIZE) && idx == NULL_byte);
 
+    /* Find the first place to insert the new item */
     for (idx: 0 .. (SIZE - 1)) {
-        /* Find the next null item */
         if
         :: listPOINTER_IS_NULL(pxList.ps[idx]) -> break;
-        :: else
-        fi;
-        /* Find the first place to insert the new item */
-        if
-        :: (temp_var == NULL_byte) &&
-           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
-            temp_var = idx
-        :: else
+        :: else ->
+            if
+            :: listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, idx)) > listGET_LIST_ITEM_VALUE(pxNewListItem) ->
+                break
+            :: else
+            fi
         fi
     }
 
     if
-    :: temp_var ^ NULL_byte ->
-        /* replace the item at the temp_var by the last null item */
-        assert(temp_var < idx);
+    :: !listPOINTER_IS_NULL(pxList.ps[idx]) ->
+        idx = idx + 1;
+        /* Find the next null item */
+        for (idx: idx .. (SIZE - 1)) {
+            if
+            :: listPOINTER_IS_NULL(pxList.ps[idx]) -> break;
+            :: else
+            fi
+        }
+        /* replace the item at idx by the next null item */
         do
-        :: temp_var < idx ->
-            swapListPointers(pxList.ps[idx - 1], pxList.ps[idx]);
-            idx = idx - 1
-        :: else ->
-            assert(temp_var == idx);
-            temp_var = NULL_byte;
-            break
-        od
+        :: (idx > 0) &&
+           (listGET_LIST_ITEM_VALUE(pxOrdinalListItem(pxList, idx-1)) > listGET_LIST_ITEM_VALUE(pxNewListItem)) ->
+            swapListPointers(pxList.ps[idx-1], pxList.ps[idx]);
+            idx = idx - 1;
+        :: else -> break;
+        od;
     :: else
     fi;
 

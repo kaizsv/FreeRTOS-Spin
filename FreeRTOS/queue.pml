@@ -223,7 +223,7 @@ od
     :: SELE(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait)); \
         if \
         :: SELE(_id, prvIsQueueFull(pxQueue), xIsTimeOut = true); \
-            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var, temp_var2); \
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
             if \
@@ -297,7 +297,7 @@ od
         /* The timeout has not expired. */ \
         if \
         :: SELE(_id, prvIsQueueEmpty(pxQueue), xIsTimeOut = true); \
-            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var, temp_var2); \
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
             if \
@@ -374,7 +374,7 @@ od
     :: SELE(_id, xTaskCheckForTimeOut(xIsTimeOut, xTicksToWait)); \
         if \
         :: SELE(_id, prvIsQueueEmpty(pxQueue) != false, xIsTimeOut = true); \
-            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var, temp_var2); \
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
             if \
@@ -475,7 +475,7 @@ od
                 taskEXIT_CRITICAL(_id, temp_var) \
             :: ELSE(_id, queueQUEUE_IS_MUTEX(pxQueue)) \
             fi; \
-            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var, temp_var2); \
+            vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
             xTaskResumeAll(_id, temp_var, xReturn, temp_var2); \
             if \

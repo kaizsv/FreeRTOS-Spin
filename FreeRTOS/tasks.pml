@@ -239,13 +239,13 @@ inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var)
         vTaskSuspendAll(_id);
         prvAddCurrentTaskToDelayedList(_id, xTicksToDelay, false, temp_var);
         xTaskResumeAll(_id, temp_var, xAlreadyYielded)
-    :: ELSE(_id, xTicksToDelay > 0, assert(xAlreadyYielded == false))
+    :: ELSE(_id, xTicksToDelay > 0, assert(xAlreadyYielded == NULL_byte))
     fi;
 
     if
-    :: SELE(_id, xAlreadyYielded == false);
+    :: SELE(_id, xAlreadyYielded == false, xAlreadyYielded = NULL_byte);
         portYIELD_WITHIN_API(_id, temp_var)
-    :: ELSE(_id, xAlreadyYielded == false, xAlreadyYielded = false)
+    :: ELSE(_id, xAlreadyYielded == false, xAlreadyYielded = NULL_byte)
     fi
 }
 

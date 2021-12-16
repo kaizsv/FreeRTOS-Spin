@@ -51,7 +51,7 @@ QueueHandle_t(xQUEUE, qpeekQUEUE_LENGTH, byte);
 proctype PeekL()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulValue = 0;
-    bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
+    bool local_xReturn = false, local_xIsTimeOut = false;
     assert(_PID == FIRST_TASK);
 do
 ::  AWAIT(_PID, ulValue = MAGIC_VAL1);
@@ -78,7 +78,7 @@ do
         assert(ulValue == MAGIC_VAL2); ulValue = 0
     );
 
-    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1);
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_var1, local_var2);
 
     vTaskResume(_PID, xMediumPriorityTask, local_var1);
     vTaskResume(_PID, xHighPriorityTask, local_var1);
@@ -103,7 +103,7 @@ do
     vTaskResume(_PID, xHighPriorityTask, local_var1);
     vTaskResume(_PID, xHighestPriorityTask, local_var1);
 
-    vTaskDelay(_PID, qpeekSHORT_DELAY, local_bit, local_var1);
+    vTaskDelay(_PID, qpeekSHORT_DELAY, local_var1, local_var2);
 od
 }
 

@@ -225,11 +225,11 @@ od
         :: SELE(_id, prvIsQueueFull(pxQueue), xIsTimeOut = true); \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend], queueGET_ListIndex(pxQueue) + xTasksWaitingToSend, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn); \
+            xTaskResumeAll(_id, temp_var, temp_var2); \
             if \
-            :: SELE(_id, xReturn == false); \
+            :: SELE(_id, temp_var2 == false, temp_var2 = NULL_byte); \
                 portYIELD_WITHIN_API(_id, temp_var) \
-            :: ELSE(_id, xReturn == false, xReturn = false) \
+            :: ELSE(_id, temp_var2 == false, temp_var2 = NULL_byte) \
             fi \
         :: ELSE(_id, prvIsQueueFull(pxQueue)); \
             /* Try again. */ \
@@ -299,11 +299,11 @@ od
         :: SELE(_id, prvIsQueueEmpty(pxQueue), xIsTimeOut = true); \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn); \
+            xTaskResumeAll(_id, temp_var, temp_var2); \
             if \
-            :: SELE(_id, xReturn == false); \
+            :: SELE(_id, temp_var2 == false, temp_var2 = NULL_byte); \
                 portYIELD_WITHIN_API(_id, temp_var) \
-            :: ELSE(_id, xReturn == false, xReturn = false) \
+            :: ELSE(_id, temp_var2 == false, temp_var2 = NULL_byte) \
             fi \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
@@ -376,11 +376,11 @@ od
         :: SELE(_id, prvIsQueueEmpty(pxQueue) != false, xIsTimeOut = true); \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn); \
+            xTaskResumeAll(_id, temp_var, temp_var2); \
             if \
-            :: SELE(_id, xReturn == false); \
+            :: SELE(_id, temp_var2 == false, temp_var2 = NULL_byte); \
                 portYIELD_WITHIN_API(_id, temp_var) \
-            :: ELSE(_id, xReturn == false, xReturn = false) \
+            :: ELSE(_id, temp_var2 == false, temp_var2 = NULL_byte) \
             fi \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
@@ -477,11 +477,11 @@ od
             fi; \
             vTaskPlaceOnEventList(_id, QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive], queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive, xTicksToWait, temp_var); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
-            xTaskResumeAll(_id, temp_var, xReturn); \
+            xTaskResumeAll(_id, temp_var, temp_var2); \
             if \
-            :: SELE(_id, xReturn == false); \
+            :: SELE(_id, temp_var2 == false, temp_var2 = NULL_byte); \
                 portYIELD_WITHIN_API(_id, temp_var) \
-            :: ELSE(_id, xReturn == false, xReturn = false) \
+            :: ELSE(_id, temp_var2 == false, temp_var2 = NULL_byte) \
             fi \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue) != false); \
             prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \

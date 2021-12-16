@@ -90,7 +90,6 @@ od
 proctype C_CTRL()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_bit = false;
 
     assert(_PID == FIRST_TASK + 2);
 do
@@ -105,7 +104,7 @@ do
             taskYIELD(_PID, local_var1);
         #endif
 
-        vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1);
+        vTaskDelay(_PID, priSLEEP_TIME, local_var1, local_var2);
 
         vTaskSuspendAll(_PID);
             AWAIT(_PID, assert(ulCounter == xContinousIncrementHandle));
@@ -147,7 +146,7 @@ do
     xQueueSendToBack_NB(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     xTaskResumeAll(_PID, local_var1, _);
-    vTaskDelay(_PID, priSLEEP_TIME, local_bit, local_var1);
+    vTaskDelay(_PID, priSLEEP_TIME, local_var1, local_var2);
 od
 }
 

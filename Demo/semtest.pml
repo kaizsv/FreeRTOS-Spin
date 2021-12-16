@@ -138,7 +138,7 @@ do
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
 running:
-        vTaskDelay(_PID, xDelay, local_bit, local_var1)
+        vTaskDelay(_PID, xDelay, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true)
     fi
 od
@@ -163,7 +163,7 @@ do
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
 running:
-        vTaskDelay(_PID, xDelay, local_bit, local_var1)
+        vTaskDelay(_PID, xDelay, local_var1, local_var2)
     :: ELSE(_PID, local_xReturn == true)
     fi
 od

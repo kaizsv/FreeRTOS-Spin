@@ -205,12 +205,12 @@ do
 ::  prvTakeAndGiveInTheSameOrder(_PID, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
 running1:
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_var1, local_var2);
 
     prvTakeAndGiveInTheOppositeOrder(_PID, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
 
 running2:
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_bit, local_var1);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD, local_var1, local_var2);
 od
 }
 
@@ -225,7 +225,7 @@ do
 ::  AWAIT(_PID, assert(uxQueueMessagesWaiting(xISRCountingSemaphore) == 0));
 
     AWAIT(_PID, xOkToGiveCountingSemaphore = true);
-    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD_T, local_bit, local_var1);
+    vTaskDelay(_PID, intsemINTERRUPT_MUTEX_GIVE_PERIOD_T, local_var1, local_var2);
     AWAIT(_PID, xOkToGiveCountingSemaphore = false);
 
     AWAIT(_PID,

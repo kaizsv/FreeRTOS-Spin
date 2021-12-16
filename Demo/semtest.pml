@@ -47,10 +47,9 @@ proctype prvSemaphoreTest1()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
     assert(FIRST_TASK == _PID);
 do
-::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
@@ -58,7 +57,7 @@ do
         AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = 1);
         AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1); pxFirstSemaphore_pulSharedVariable = 0);
 
-        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_var1, local_var2, _PID);
 running:
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
@@ -85,10 +84,9 @@ proctype prvSemaphoreTest2()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake_NB(pxFirstSemaphore_xSemaphore, pxFirstSemaphore_xBlockTime, local_xReturn, local_bit, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
@@ -96,7 +94,7 @@ do
         AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 0); pxFirstSemaphore_pulSharedVariable = 1);
         AWAIT(_PID, assert(pxFirstSemaphore_pulSharedVariable == 1); pxFirstSemaphore_pulSharedVariable = 0);
 
-        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxFirstSemaphore_xSemaphore, local_xReturn, local_var1, local_var2, _PID);
 running:
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
@@ -123,10 +121,9 @@ proctype prvSemaphoreTest3()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
@@ -134,7 +131,7 @@ do
         AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = 1);
         AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1); pxSecondSemaphore_pulSharedVariable = 0);
 
-        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
 running:
@@ -148,10 +145,9 @@ proctype prvSemaphoreTest4()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
     bit local_xReturn = false, local_bit = false;
-    bit local_xIsTimeOut = false;
     assert(FIRST_TASK <= _PID && _PID < IDLE_TASK_ID);
 do
-::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+::  xSemaphoreTake(pxSecondSemaphore_xSemaphore, pxSecondSemaphore_xBlockTime, local_xReturn, local_bit, local_var1, local_var2, _PID);
     if
     :: SELE(_PID, local_xReturn == true, local_xReturn = false);
         /* Ensure the variable is increased once. Would expect a context switch
@@ -159,7 +155,7 @@ do
         AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 0); pxSecondSemaphore_pulSharedVariable = 1);
         AWAIT(_PID, assert(pxSecondSemaphore_pulSharedVariable == 1); pxSecondSemaphore_pulSharedVariable = 0);
 
-        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreGive(pxSecondSemaphore_xSemaphore, local_xReturn, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn); local_xReturn = false);
 
 running:
@@ -171,13 +167,12 @@ od
 
 init {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_xIsTimeOut = false;
 
     xSemaphoreCreateBinary(pxFirstSemaphore_xSemaphore, 0);
-    xSemaphoreGive(pxFirstSemaphore_xSemaphore, _, local_xIsTimeOut, local_var1, local_var2, EP);
+    xSemaphoreGive(pxFirstSemaphore_xSemaphore, _, local_var1, local_var2, EP);
 
     xSemaphoreCreateBinary(pxSecondSemaphore_xSemaphore, 1);
-    xSemaphoreGive(pxSecondSemaphore_xSemaphore, _, local_xIsTimeOut, local_var1, local_var2, EP);
+    xSemaphoreGive(pxSecondSemaphore_xSemaphore, _, local_var1, local_var2, EP);
     skip; /* prevent Spin Error: jump into d_step sequence */
 
     d_step {

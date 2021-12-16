@@ -139,11 +139,11 @@ od
 proctype SUSP_SEND()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bit local_bit = false, local_xReturn = false;
+    bit local_xReturn = false;
     assert(_PID == xQueueSendWhenSuspendedHandler);
 do
 ::  vTaskSuspendAll(_PID);
-    xQueueSendToBack_NB(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xSuspendedTestQueue, ulValueToSend, priNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     xTaskResumeAll(_PID, local_var1, _);
     vTaskDelay(_PID, priSLEEP_TIME, local_var1, local_var2);
@@ -153,14 +153,14 @@ od
 proctype SUSP_RECV()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ulReceivedValue = 0;
-    bit local_xIsTimeOut = false, xGotValue = false;
+    bit xGotValue = false;
     assert(_PID == xQueueReceiveWhenSuspendedHandler);
 do
 ::  do
     :: SELE(_PID, xGotValue == false);
         vTaskSuspendAll(_PID);
         /* Remove pointless vTaskSuspendAll */
-        xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_var1, local_var2, _PID);
         /* Remove pointless xTaskResumeAll */
         xTaskResumeAll(_PID, local_var1, _);
 

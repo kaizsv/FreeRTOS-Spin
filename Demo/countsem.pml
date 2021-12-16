@@ -38,15 +38,15 @@ SemaphoreDeclarator(countMAX_COUNT_VALUE, byte);
 SemaphoreHandle_t(xP1_xSemaphore, countMAX_COUNT_VALUE, byte);
 SemaphoreHandle_t(xP2_xSemaphore, countMAX_COUNT_VALUE, byte);
 
-inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
+inline prvDecrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_var1, temp_var2)
 {
-    xSemaphoreGive(xSemaphore, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreGive(xSemaphore, xReturn, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == false));
 
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
         AWAIT(_id, assert(uxSemaphoreGetCount(xSemaphore) == (countMAX_COUNT_VALUE - (ux))));
 
-        xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+        xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
         AWAIT(_id, assert(xReturn == true); xReturn = false);
 runningDec:
         AWAIT(_id, skip)
@@ -57,19 +57,19 @@ runningDec:
 #endif
 
     AWAIT(_id, ux = 0; assert(uxSemaphoreGetCount(xSemaphore) == 0));
-    xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == false))
 }
 
-inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
+inline prvIncrementSemaphoreCount(_id, ux, xSemaphore, xReturn, temp_bool, temp_var1, temp_var2)
 {
-    xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreTake_NB(xSemaphore, countDONT_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == false));
 
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
         AWAIT(_id, assert(uxSemaphoreGetCount(xSemaphore) == ux));
 
-        xSemaphoreGive(xSemaphore, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+        xSemaphoreGive(xSemaphore, xReturn, temp_var1, temp_var2, _id);
         AWAIT(_id, assert(xReturn == true); xReturn = false);
 runningInc:
         AWAIT(_id, skip)
@@ -79,37 +79,37 @@ runningInc:
     taskYIELD(_PID, temp_var1);
 #endif
 
-    xSemaphoreGive(xSemaphore, xReturn, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreGive(xSemaphore, xReturn, temp_var1, temp_var2, _id);
     AWAIT(_id, ux = 0; assert(xReturn == false));
 }
 
 proctype CNT1()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
-    bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
+    bool local_xReturn = false, local_bit = false;
     assert(_PID == FIRST_TASK);
     // pxParameter->uxExpectedStartCount == countSTART_AT_MAX_COUNT
     // prvDecrementSemaphoreCount: remove the running label
-    xSemaphoreGive(xP1_xSemaphore, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreGive(xP1_xSemaphore, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
     for (ux: 0 .. (countMAX_COUNT_VALUE - 1)) {
         AWAIT(_PID, assert(uxSemaphoreGetCount(xP1_xSemaphore) == (countMAX_COUNT_VALUE - (ux))));
-        xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     }
 #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
 #endif
     AWAIT(_PID, ux = 0; assert(uxSemaphoreGetCount(xP1_xSemaphore) == 0));
-    xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false))
     // end prvDecrementSemaphoreCount //////////////////////////////
 
-    xSemaphoreTake_NB(xP1_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreTake_NB(xP1_xSemaphore, 0, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
 do
-::  prvIncrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
-    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+::  prvIncrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_var1, local_var2);
+    prvDecrementSemaphoreCount(_PID, ux, xP1_xSemaphore, local_xReturn, local_bit, local_var1, local_var2);
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
@@ -122,14 +122,14 @@ od
 proctype CNT2()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte, ux = 0;
-    bool local_xReturn = false, local_bit = false, local_xIsTimeOut = false;
+    bool local_xReturn = false, local_bit = false;
     assert(_PID == (FIRST_TASK + 1));
 
-    xSemaphoreTake_NB(xP2_xSemaphore, 0, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreTake_NB(xP2_xSemaphore, 0, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
 do
-::  prvIncrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
-    prvDecrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+::  prvIncrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_var1, local_var2);
+    prvDecrementSemaphoreCount(_PID, ux, xP2_xSemaphore, local_xReturn, local_bit, local_var1, local_var2);
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)

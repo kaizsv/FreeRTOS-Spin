@@ -56,28 +56,28 @@ byte ulGuardedVariable = 0;
 proctype GenQ()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bool local_xReturn = false, local_xIsTimeOut = false;
+    bool local_xReturn = false;
 
     byte ulLoopCounterSnapshot = 0, ulData = 0, ulData2 = 0;
     assert(_PID == FIRST_TASK);
 do
 ::  AWAIT(_PID, ulLoopCounterSnapshot = ulLoopCounter);
-    xQueueSendToFront_NB(xQUEUE, ulLoopCounterSnapshot, intsemNO_BLOCK, _, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToFront_NB(xQUEUE, ulLoopCounterSnapshot, intsemNO_BLOCK, _, local_var1, local_var2, _PID);
 
     AWAIT(_PID, ulLoopCounterSnapshot = 0; assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
-    xQueueReceive_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueReceive_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
     AWAIT(_PID, assert(ulLoopCounter == ulData && uxQueueMessagesWaiting(xQUEUE) == 0);
         ulData = 0);
 
     AWAIT(_PID, ulLoopCounterSnapshot = ulLoopCounter);
-    xQueueSendToBack_NB(xQUEUE, ulLoopCounterSnapshot, intsemNO_BLOCK, _, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xQUEUE, ulLoopCounterSnapshot, intsemNO_BLOCK, _, local_var1, local_var2, _PID);
 
     AWAIT(_PID, ulLoopCounterSnapshot = 0; assert(uxQueueMessagesWaiting(xQUEUE) == 1));
 
-    xQueueReceive_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueReceive_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 0 && ulLoopCounter == ulData);
@@ -88,20 +88,20 @@ do
     #endif
 
     for (ulData: 2 .. 4) {
-        xQueueSendToBack_NB(xQUEUE, ulData, intsemNO_BLOCK, _, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueSendToBack_NB(xQUEUE, ulData, intsemNO_BLOCK, _, local_var1, local_var2, _PID);
     }
 
     AWAIT(_PID, ulData = 0; assert(uxQueueMessagesWaiting(xQUEUE) == 3));
 
-    xQueueSendToFront_NB(xQUEUE, 1, intsemNO_BLOCK, _, local_xIsTimeOut, local_var1, local_var2, _PID);
-    xQueueSendToFront_NB(xQUEUE, 0, intsemNO_BLOCK, _, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToFront_NB(xQUEUE, 1, intsemNO_BLOCK, _, local_var1, local_var2, _PID);
+    xQueueSendToFront_NB(xQUEUE, 0, intsemNO_BLOCK, _, local_var1, local_var2, _PID);
 
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 5));
 
-    xQueueSendToFront_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToFront_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
 
-    xQueueSendToBack_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
 
     #if (configUSE_PREEMPTION == 0)
@@ -109,11 +109,11 @@ do
     #endif
 
     for (ulData: 0 .. (genqQUEUE_LENGTH - 1)) {
-        xQueuePeek_NB(_PID, xQUEUE, ulData2, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2);
+        xQueuePeek_NB(_PID, xQUEUE, ulData2, intsemNO_BLOCK, local_xReturn, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false;
             assert(ulData == ulData2); ulData2 = 0);
 
-        xQueueReceive_NB(xQUEUE, ulData2, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive_NB(xQUEUE, ulData2, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false;
             assert(ulData == ulData2); ulData2 = 0);
     }
@@ -125,27 +125,27 @@ do
     #endif
 
     for (ulData: 10 .. 11) {
-        xQueueSendToBack_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueSendToBack_NB(xQUEUE, ulData, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     }
 
     AWAIT(_PID, assert(uxQueueMessagesWaiting(xQUEUE) == 2));
 
     for (ulData: 0 .. 2) {
-        xQueueSendToFront_NB(xQUEUE, 9 - ulData, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueSendToFront_NB(xQUEUE, 9 - ulData, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     }
 
     AWAIT(_PID, ulData = 0; assert(uxQueueMessagesWaiting(xQUEUE) == 5));
 
-    xQueueSendToFront_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToFront_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
 
-    xQueueSendToBack_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xQueueSendToBack_NB(xQUEUE, 0, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == false));
 
     for (ulData: 7 .. (6 + genqQUEUE_LENGTH)) {
-        xQueueReceive_NB(xQUEUE, ulData2, intsemNO_BLOCK, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+        xQueueReceive_NB(xQUEUE, ulData2, intsemNO_BLOCK, local_xReturn, local_var1, local_var2, _PID);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false;
             assert(ulData == ulData2); ulData2 = 0);
     }
@@ -163,9 +163,9 @@ running:
 od
 }
 
-inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
+inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_var1, temp_var2)
 {
-    xSemaphoreTake(xMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreTake(xMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     AWAIT(_id, ulGuardedVariable = 0);
@@ -187,10 +187,10 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
 
     AWAIT(_id, assert(ulGuardedVariable == 0));
 
-    xSemaphoreTake(xLocalMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreTake(xLocalMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
-    xSemaphoreGive(xMutex, xReturn, temp_bool, temp_var1, temp_var2, _id);
+    xSemaphoreGive(xMutex, xReturn, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
@@ -201,7 +201,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
 
-    xSemaphoreGive(xLocalMutex, xReturn, temp_bool, temp_var1, temp_var2, _id);
+    xSemaphoreGive(xLocalMutex, xReturn, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
@@ -220,9 +220,9 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
 #endif
 }
 
-inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2)
+inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, temp_bool, temp_var1, temp_var2)
 {
-    xSemaphoreTake(xMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreTake(xMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     AWAIT(_id, ulGuardedVariable = 0);
@@ -241,10 +241,10 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 
     AWAIT(_id, assert(ulGuardedVariable == 0));
 
-    xSemaphoreTake(xLocalMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_xIsTimeOut, temp_var1, temp_var2, _id);
+    xSemaphoreTake(xLocalMutex, intsemNO_BLOCK, xReturn, temp_bool, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
-    xSemaphoreGive(xLocalMutex, xReturn, temp_bool, temp_var1, temp_var2, _id);
+    xSemaphoreGive(xLocalMutex, xReturn, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
@@ -255,7 +255,7 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
 
-    xSemaphoreGive(xMutex, xReturn, temp_bool, temp_var1, temp_var2, _id);
+    xSemaphoreGive(xMutex, xReturn, temp_var1, temp_var2, _id);
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
@@ -270,17 +270,17 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
 proctype MuLow()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
+    bool local_bit = false, local_xReturn = false;
     assert(_PID == (FIRST_TASK + 1));
 do
-::  prvTakeTwoMutexesReturnInDifferentOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+::  prvTakeTwoMutexesReturnInDifferentOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_var1, local_var2);
 
 running:
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
     #endif
 
-    prvTakeTwoMutexesReturnInSameOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2);
+    prvTakeTwoMutexesReturnInSameOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_var1, local_var2);
 
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID, local_var1);
@@ -301,14 +301,14 @@ od
 proctype MuHigh()
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bool local_bit = false, local_xReturn = false, local_xIsTimeOut = false;
+    bool local_bit = false, local_xReturn = false;
     assert(_PID == xHighPriorityMutexTask);
 do
 ::  vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
-    xSemaphoreTake(xMUTEX, portMAX_DELAY, local_xReturn, local_bit, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreTake(xMUTEX, portMAX_DELAY, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
-    xSemaphoreGive(xMUTEX, local_xReturn, local_xIsTimeOut, local_var1, local_var2, _PID);
+    xSemaphoreGive(xMUTEX, local_xReturn, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 od
 }
@@ -316,14 +316,13 @@ od
 init
 {
     byte local_var1 = NULL_byte, local_var2 = NULL_byte;
-    bool local_xIsTimeOut = false;
 
     d_step {
         xQueueCreate(xQUEUE, 0, genqQUEUE_LENGTH);
     };
 
-    xSemaphoreCreateMutex(xMUTEX, 1, local_xIsTimeOut, local_var1, local_var2, EP);
-    xSemaphoreCreateMutex(xLOCALMUTEX, 2, local_xIsTimeOut, local_var1, local_var2, EP);
+    xSemaphoreCreateMutex(xMUTEX, 1, local_var1, local_var2, EP);
+    xSemaphoreCreateMutex(xLOCALMUTEX, 2, local_var1, local_var2, EP);
     skip;
 
     d_step {

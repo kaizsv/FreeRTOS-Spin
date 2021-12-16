@@ -69,7 +69,7 @@ do
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_bit, local_var1);
+        vTaskDelay(_PID, 5, local_var1, local_var2);
     #endif
 #endif
 od
@@ -167,6 +167,11 @@ do
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID, local_var1);
         #endif
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        vTaskDelay(_PID, 5, local_var1, local_var2);
+    #endif
+#endif
     :: ELSE(_PID, xGotValue == false, xGotValue = false; break)
     od;
 running:

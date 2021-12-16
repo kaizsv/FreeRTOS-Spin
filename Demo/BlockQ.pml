@@ -34,7 +34,7 @@
     #include "property/BlockQ.ltl"
 #endif
 
-#define xBlockTime  100
+#define xBlockTime  80
 #define xDontBlock  0
 
 #define uxQueueSize1    1
@@ -106,7 +106,8 @@ running:
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 30, local_xIsTimeOut, local_var1);
+        vTaskDelay(_PID, 5, local_var1, local_var2);
+        vTaskDelay(_PID, 5, local_var1, local_var2);
     #endif
 #endif
 od
@@ -152,7 +153,8 @@ running:
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 30, local_xIsTimeOut, local_var1);
+        vTaskDelay(_PID, 5, local_var1, local_var2);
+        vTaskDelay(_PID, 5, local_var1, local_var2);
     #endif
 #endif
 od

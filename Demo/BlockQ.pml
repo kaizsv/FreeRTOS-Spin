@@ -104,13 +104,17 @@ running:
     taskYIELD(_PID, local_var1);
     #endif
 
-#ifdef CORRECTION
-    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_var1, local_var2);
-        vTaskDelay(_PID, 5, local_var1, local_var2);
-        vTaskDelay(_PID, 5, local_var1, local_var2);
-    #endif
-#endif
+// Memory out of bound
+//#ifdef CORRECTION
+//    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+//        // First attempt
+//        vTaskDelay(_PID, 5, local_var1, local_var2);
+//        vTaskDelay(_PID, 5, local_var1, local_var2);
+//        vTaskDelay(_PID, 5, local_var1, local_var2);
+//        // Second attempt
+//        vTaskDelay(_PID, 20, local_var1, local_var2);
+//    #endif
+//#endif
 od
 }
 
@@ -152,13 +156,14 @@ running:
     taskYIELD(_PID, local_var1);
     #endif
 
-#ifdef CORRECTION
-    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_var1, local_var2);
-        vTaskDelay(_PID, 5, local_var1, local_var2);
-        vTaskDelay(_PID, 5, local_var1, local_var2);
-    #endif
-#endif
+// Memory out of bound
+//#ifdef CORRECTION
+//    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+//        vTaskDelay(_PID, 5, local_var1, local_var2);
+//        vTaskDelay(_PID, 5, local_var1, local_var2);
+//        vTaskDelay(_PID, 5, local_var1, local_var2);
+//    #endif
+//#endif
 od
 }
 

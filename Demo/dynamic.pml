@@ -169,7 +169,15 @@ do
         #endif
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_var1, local_var2);
+//        // First attempt
+//        vTaskDelay(_PID, 10, local_var1, local_var2);
+//        // Second attempt (Memory out of bound)
+//        xTaskResumeAll(_PID, local_var1, local_var2);
+//        if
+//        :: SELE(_PID, local_var2 == true, local_var2 = NULL_byte);
+//            vTaskDelay(_PID, 5, local_var1, local_var2);
+//        :: ELSE(_PID, local_var2 == true, local_var2 = NULL_byte);
+//        fi;
     #endif
 #endif
     :: ELSE(_PID, xGotValue == false, xGotValue = false; break)

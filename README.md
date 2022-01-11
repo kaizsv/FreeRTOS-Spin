@@ -21,7 +21,6 @@ configurations below.
 
 2. Check configurations in `platform/stm32p103_FreeRTOSConfig.pml`, especially
 the configurations of scheduling policies. Check architecture in `FreeRTOS.pml`.
-Currently, we only have a **ARMv7-M** architecture model.
 
 3. Perform verification
     * Safety verification (*depth-first search* algorithm)

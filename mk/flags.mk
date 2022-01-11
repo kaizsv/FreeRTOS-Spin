@@ -53,7 +53,7 @@ endif
 	$(eval RUNTIME_FLAGS += -l)
 
 .trail.full:
-	$(eval TRAIL_FLAGS := -s -r -l -g $(TRAIL_FLAGS))
+	$(eval TRAIL_FLAGS := -l -g $(TRAIL_FLAGS))
 
 .trail.ltl:
 	$(eval TRAIL_FLAGS := -DLTL $(TRAIL_FLAGS))

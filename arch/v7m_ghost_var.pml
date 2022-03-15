@@ -15,10 +15,8 @@ inline MSR_BASEPRI(val)
 
 /* exception priority */
 #ifdef promela_NVIC_NUMBER
-    /*
-    * SHPR3: exp_prio[0] and exp_prio[1]
-    * NVIC IP register: other exceptions
-    */
+    /* SHPR3: exp_prio[0] and exp_prio[1]
+     * NVIC IP register: other exceptions */
     byte exp_prio[promela_EXP_NUMBER] = 16;
     #define GET_PRIO_EXP(_id)   exp_prio[_id]
     inline SET_PRIO_EXP(_id, prio)
@@ -58,6 +56,52 @@ inline clear_pending(id)
     pending_exp = pending_exp & ~(1 << id)
 }
 
+#if (promela_EXP_NUMBER == 2 && GET_PRIO_EXP(PendSV_ID) == GET_PRIO_EXP(SysTick_ID))
+
+#define STACK_SIZE      1
+#define LAST_EP_STACK   EP_Stack
+byte EP_Stack = NULL_byte;
+
+inline push(id)
+{
+    assert(LAST_EP_STACK == NULL_byte);
+    EP_Stack = id;
+}
+
+inline pop(ret)
+{
+    assert(LAST_EP_STACK != NULL_byte);
+    ret = EP_Stack;
+    EP_Stack = NULL_byte;
+}
+
+inline stack_check(id)
+{
+    assert((LAST_EP_STACK == NULL_byte || LAST_EP_STACK >= FIRST_TASK));
+}
+
+#define INT_TAKE \
+    (((GET_PENDING(PendSV_ID) && BASEPRI_MASK(PendSV_ID)) || \
+        (GET_PENDING(SysTick_ID) && BASEPRI_MASK(SysTick_ID))) && \
+        EP >= FIRST_TASK)
+#define INT_SAFE (!INT_TAKE)
+
+/* According to the Application Note 321, the Cortex-M3/M4 processor will
+ * recoginze interrupts are dis/enabled in the following three processor
+ * clocks after the system registers are changed (Cortex-M3/M4 has a three
+ * stages pipeline). */
+#define D_TAKEN_INT(_id) \
+    if \
+    :: INT_TAKE -> \
+        /* Expanding the macro __exp_taken(id) */ \
+        push(EP); \
+        /* __exp_taken(id) without clearing the pending bit. */ \
+        EP = (GET_PENDING(PendSV_ID) -> PendSV_ID : SysTick_ID); \
+    :: else \
+    fi
+
+#else
+
 /** The stack of executing processes
 * EP_Stack stores the tasks, user threads or exceptions, interrupted by a high
 * priority exception. The last element of the stack must be a user thread.
@@ -83,47 +127,18 @@ inline pop(ret)
     EP_Stack[EP_Top] = NULL_byte
 }
 
-inline stack_check(id)
-{
-#if (promela_EXP_NUMBER != 2)
-    #error Extend this macro if promela_NVIC_NUMBER is not equal to 2.
+#error Implement the macros, stack_check(id), INT_TAKE, INT_SAFE, and D_TAKEN_INT(id).
+
 #endif
-    if
-    :: EP_Top > 0 ->
-        assert(
-            EP_Stack[0] != id &&
-            EP_Stack[1] != id &&
-            EP_Stack[2] != id
-        );
-    :: else ->
-        assert(EP_Stack[0] == NULL_byte)
-    fi
-}
 
 inline switch_context(new_context)
 {
+#if (promela_EXP_NUMBER == 2 && GET_PRIO_EXP(PendSV_ID) == GET_PRIO_EXP(SysTick_ID))
+    assert(LAST_EP_STACK != NULL_byte && LAST_EP_STACK >= FIRST_TASK && new_context >= FIRST_TASK);
+#else
     assert(EP_Top == 1 && LAST_EP_STACK >= FIRST_TASK && new_context >= FIRST_TASK);
+#endif
     EP_Stack[0] = new_context
-}
-
-/* exp_inoperative
- * Tail-chaining and memroy barrier mechanisms assign a pending exception to EP.
- * In reality, the operation sets the pending exception to active state. In
- * PROMELA model, however, the assigned EP is not in active state yet. The
- * variable indicates that EP is inoperative and needs to be recognized at the
- * abstraction of irq.
- */
-bit exp_inoperative = 0;
-#define HAS_INOPERATIVE_EXP (exp_inoperative == 1)
-
-inline set_exp_inoperative()
-{
-    exp_inoperative = 1
-}
-
-inline clear_exp_inoperative()
-{
-    exp_inoperative = 0
 }
 
 /* SysTick control */
@@ -131,5 +146,7 @@ inline clear_exp_inoperative()
 #define CLEAR_SYST_FLAG()   clear_pending(SysTick_ID)
 
 #define SYST                GET_PENDING(SysTick_ID)
+
+#define TIMER_INT_IRQ       set_pending(SysTick_ID)
 
 #endif

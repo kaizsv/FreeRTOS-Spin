@@ -10,7 +10,7 @@ inline portYIELD_BLOCKED_BY_BASEPRI(_id, temp_var)
 
 inline portYIELD(_id, temp_var)
 {
-    AWAIT(_id, set_pending(PendSV_ID); v7m_memory_barrier(_id, temp_var))
+    AWAIT(_id, set_pending(PendSV_ID))
 }
 
 #define portDISABLE_INTERRUPTS(_id, temp_var)   vPortRaiseBASEPRI(_id, temp_var)
@@ -52,13 +52,12 @@ inline portYIELD(_id, temp_var)
 
 inline vPortRaiseBASEPRI(_id, temp_var)
 {
-    // v7m_memory_barrier(_id, temp_var)
-    AWAIT(_id, MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY); assert(!BASEPRI_MASK(SysTick_ID) && !BASEPRI_MASK(PendSV_ID)))
+    AWAIT(_id, MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY))
 }
 
 inline vPortSetBASEPRI(_id, ulNewMaskValue, temp_var)
 {
-    AWAIT(_id, MSR_BASEPRI(ulNewMaskValue); v7m_memory_barrier(_id, temp_var))
+    AWAIT(_id, MSR_BASEPRI(ulNewMaskValue))
 }
 
 #endif

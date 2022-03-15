@@ -46,7 +46,7 @@ inline xPortStartScheduler()
     uxCriticalNesting = 0;
 
     /* prvPortStartFirstTask */
-    assert(!HAS_PENDING_EXPS && !HAS_INOPERATIVE_EXP);
+    assert(!HAS_PENDING_EXPS);
     RUN_ALL_EXPS();
 
     RUN_ALL_TASKS(vPortSVCHandler)
@@ -78,12 +78,12 @@ proctype PendSV_Handler()
     byte local_var = NULL_byte;
     assert(PendSV_ID == _PID);
 do
-::  soft_gen_irq(_PID);
+::  exp_entry(_PID);
     AWAIT_DS(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
     vTaskSwitchContext(_PID, local_var);
     AWAIT_DS(_PID, MSR_BASEPRI(0));
     AWAIT_DS(_PID, switch_context(pxCurrentTCB));
-    AWAIT_DS(_PID, exp_return(local_var))
+    AWAIT(_PID, exp_return(local_var))
 od
 }
 
@@ -96,7 +96,7 @@ proctype SysTick_Handler()
 #endif
     assert(SysTick_ID == _PID);
 do
-::  syst_irq(_PID);
+::  exp_entry(_PID);
     portDISABLE_INTERRUPTS(_PID, local_var);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
@@ -105,7 +105,7 @@ do
     :: ELSE_AS(_PID, local_bit != false)
     fi;
     portENABLE_INTERRUPTS(_PID, local_var);
-    AWAIT_DS(_PID, exp_return(local_var))
+    AWAIT(_PID, exp_return(local_var))
 od
 }
 

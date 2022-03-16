@@ -93,8 +93,18 @@ byte mie_mip = 0;
 #define SET_MIP_MTIP()  CSRS(mie_mip, MIP_MTIP_Msk)
 #define CLR_MIP_MTIP()  CSRC(mie_mip, MIP_MTIP_Msk)
 
-// TODO: mtimer or mtimecmp
-// TODO: How to model SYST in risc-v?
-#define SET_SYST_FLAG() SET_MIP_MTIP()
+// TODO: Use mtimer and mtimecmp to model the timer interrupt?
+#define INT_TAKE    (GET_MSTATUS_MIE() && GET_MIE_MTIE() && GET_MIP_MTIP())
+#define INT_SAFE    (!INT_TAKE)
+#define EXP_IS_NOT_TAKEN    (mcause != M_ECALL_EXCEPTION)
+
+#define D_TAKEN_INT(_id) \
+    if \
+    :: EXP_IS_NOT_TAKEN && INT_TAKE -> \
+        _trap_entry(M_TIMER_INTERRUPT); \
+    :: else \
+    fi
+
+#define TIMER_INT_IRQ   SET_MIP_MTIP()
 
 #endif

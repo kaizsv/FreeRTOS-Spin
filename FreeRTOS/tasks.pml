@@ -932,7 +932,7 @@ inline vTaskEnterCritical(_id)
 inline vTaskExitCritical(_id)
 {
     if
-    :: SELE_AS(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
+    :: SELE(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
         AWAIT_DS(_id, TCB(pxCurrentTCB).uxCriticalNesting =
             TCB(pxCurrentTCB).uxCriticalNesting - 1);
         if
@@ -940,7 +940,7 @@ inline vTaskExitCritical(_id)
             portENABLE_INTERRUPTS(_id);
         :: ELSE_AS(_id, TCB(pxCurrentTCB).uxCriticalNesting == 0);
         fi
-    :: ELSE_AS(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
+    :: ELSE(_id, xIsSchedulerRunning && TCB(pxCurrentTCB).uxCriticalNesting > 0);
     fi
 }
 

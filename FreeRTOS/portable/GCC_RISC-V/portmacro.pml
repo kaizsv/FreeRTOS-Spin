@@ -6,13 +6,15 @@
 /* Scheduler utilities */
 inline portYIELD(_id)
 {
-    AWAIT(_id, ecall(_id));
+    AWAIT(_id, ecall());
 }
 
 /* Critical section management */
-#define portCRITICAL_NESTING_IN_TCB 1
+#define portCRITICAL_NESTING_IN_TCB 1 // TODO: To be released
 #define portDISABLE_INTERRUPTS(_id) AWAIT(_id, CLR_MSTATUS_MIE())
 #define portENABLE_INTERRUPTS(_id)  AWAIT(_id, SET_MSTATUS_MIE())
+
+// TODO: To be released
 #define portENTER_CRITICAL(_id)     vTaskEnterCritical(_id)
 #define portEXIT_CRITICAL(_id)      vTaskExitCritical(_id)
 

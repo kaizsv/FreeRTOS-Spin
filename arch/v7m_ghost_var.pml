@@ -142,11 +142,6 @@ inline switch_context(new_context)
 }
 
 /* SysTick control */
-#define SET_SYST_FLAG()     pending_exp = pending_exp | 2
-#define CLEAR_SYST_FLAG()   clear_pending(SysTick_ID)
-
-#define SYST                GET_PENDING(SysTick_ID)
-
 #define TIMER_INT_IRQ       set_pending(SysTick_ID)
 
 #endif

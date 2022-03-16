@@ -1,6 +1,8 @@
 #ifndef _PORTASM_
 #define _PORTASM_
 
+/* This model can also represent the "Vectored" mode of the mtvec register. */
+#define freertos_vector_table freertos_risc_v_trap_handler
 proctype freertos_risc_v_trap_handler()
 {
     byte local_var = NULL_byte;
@@ -35,7 +37,7 @@ do
         mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)];
     );
 
-    AWAIT_DS(_PID, mret());
+    AWAIT(_PID, mret());
 od
 }
 
@@ -44,6 +46,7 @@ inline xPortStartFirstTask()
     assert(mtvec == TRAP_ID);
 
     mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)];
+    // TODO: To be released; xCriticalNesting = 0;
     SET_MSTATUS_MIE();
     RUN_ALL_EXPS();
 

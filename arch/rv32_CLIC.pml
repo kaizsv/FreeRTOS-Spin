@@ -31,26 +31,18 @@ inline _trap_entry(ecode)
 }
 
 /* Synchronous Environment Call instruction */
-inline ecall(_wait_until)
+inline ecall()
 {
     _trap_entry(M_ECALL_EXCEPTION);
-
-    /* the caller must wait until the exception returns */
-    (EP == _wait_until);
 }
 
 inline trap_entry()
 {
-atomic {
+atomic { (EP == TRAP_ID) ->
     if
-    :: GET_MSTATUS_MIE() && GET_MIE_MTIE() && GET_MIP_MTIP() ->
-        /* Asynchronous Machine Timer Interrupt */
-        assert(EP >= FIRST_TASK);
-        _trap_entry(M_TIMER_INTERRUPT);
+    :: mcause == M_TIMER_INTERRUPT ->
         CLR_MIP_MTIP(); // Is this the correct position to clear mip.MTIP?
-    :: mcause == M_ECALL_EXCEPTION ->
-        /* Synchronous Environment Call Exceptions */
-        assert(EP == TRAP_ID);
+    :: else
     fi
 }   }
 

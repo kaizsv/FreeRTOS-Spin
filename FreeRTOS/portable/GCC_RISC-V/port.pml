@@ -31,6 +31,9 @@
         run freertos_risc_v_trap_handler(); \
     }
 
+// TODO: To be released
+//byte xCriticalNesting = 170; /* 0xaa */
+
 #include "../../../arch/rv32_CLIC.pml"
 #include "portmacro.pml"
 #include "../../tasks.pml"

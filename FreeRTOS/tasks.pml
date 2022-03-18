@@ -499,8 +499,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
                     if
                     :: !listLIST_IS_EMPTY(pxDelayedTaskList) ->
                         assert(xTickCount < 254); xTickCount = xTickCount + 1
-                    :: else ->
-                        assert(xTickCount == 0);
+                    :: else
                     fi
                 );
                 if
@@ -583,8 +582,7 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
             if
             :: !listLIST_IS_EMPTY(pxDelayedTaskList) ->
                 assert(xTickCount < 254); xTickCount = xTickCount + 1
-            :: else ->
-                assert(xTickCount == 0);
+            :: else
             fi
         );
         if
@@ -975,7 +973,8 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely)
             if
             :: !listLIST_IS_EMPTY(pxDelayedTaskList) ->
                 update_xTickCount(hidden_idx);
-            :: else
+            :: else ->
+                reset_xTickCount();
             fi;
             assert(xTickCount == 0);
             vListInsert(pxDelayedTaskList, DLIST_SIZE, CID_DELAYED_TASK, pxCurrentTCB, xState, hidden_idx);
@@ -994,9 +993,9 @@ inline prvAddCurrentTaskToDelayedList(_id, xTicksToWait, xCanBlockIndefinitely)
         if
         :: !listLIST_IS_EMPTY(pxDelayedTaskList) ->
             update_xTickCount(hidden_idx);
-        :: else
+        :: else ->
+            reset_xTickCount();
         fi;
-        assert(xTickCount == 0);
         vListInsert(pxDelayedTaskList, DLIST_SIZE, CID_DELAYED_TASK, pxCurrentTCB, xState, hidden_idx);
     });
     if

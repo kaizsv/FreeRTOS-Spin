@@ -162,23 +162,26 @@ do
         /* Remove pointless vTaskSuspendAll */
         xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_var1, local_var2, _PID);
         /* Remove pointless xTaskResumeAll */
+#if defined (CORRECTION) && (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        xTaskResumeAll(_PID, local_var1, local_var2);
+#else
         xTaskResumeAll(_PID, local_var1, _);
+#endif
 
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID);
         #endif
+
 #ifdef CORRECTION
-    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-//        // First attempt
-//        vTaskDelay(_PID, 10, local_var1, local_var2);
-//        // Second attempt (Memory out of bound)
-//        xTaskResumeAll(_PID, local_var1, local_var2);
-//        if
-//        :: SELE(_PID, local_var2 == true, local_var2 = NULL_byte);
-//            vTaskDelay(_PID, 5, local_var1, local_var2);
-//        :: ELSE(_PID, local_var2 == true, local_var2 = NULL_byte);
-//        fi;
-    #endif
+#if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        if
+        :: SELE(_PID, local_var2 == true, local_var2 = NULL_byte);
+            vTaskDelay(_PID, 5, local_var1, local_var2);
+        :: ELSE(_PID, local_var2 == true, local_var2 = NULL_byte);
+        fi;
+#elif (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
+        taskYIELD(_PID);
+#endif
 #endif
     :: ELSE(_PID, xGotValue == false, xGotValue = false; break)
     od;

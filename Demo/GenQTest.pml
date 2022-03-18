@@ -84,7 +84,7 @@ do
         ulData = 0);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
     for (ulData: 2 .. 4) {
@@ -105,7 +105,7 @@ do
     AWAIT(_PID, assert(local_xReturn == false));
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
     for (ulData: 0 .. (genqQUEUE_LENGTH - 1)) {
@@ -121,7 +121,7 @@ do
     AWAIT(_PID, ulData = 0; assert(uxQueueMessagesWaiting(xQUEUE) == 0));
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
     for (ulData: 10 .. 11) {
@@ -157,7 +157,7 @@ running:
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
 od
@@ -175,7 +175,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
     vTaskResume(_id, xHighPriorityMutexTask, temp_var1);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_id);
     #endif
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
@@ -194,7 +194,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_id);
     #endif
 
     AWAIT(_id, assert(ulGuardedVariable == 0));
@@ -205,7 +205,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_id);
     #endif
 
     AWAIT(_id, assert(ulGuardedVariable == 1));
@@ -232,7 +232,7 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
     vTaskResume(_id, xHighPriorityMutexTask, temp_var1);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_id);
     #endif
 
     AWAIT(_id, assert(uxTaskPriorityGet(NULL_byte) == genqMUTEX_HIGH_PRIORITY));
@@ -248,7 +248,7 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_id);
     #endif
 
     AWAIT(_id, assert(ulGuardedVariable == 0));
@@ -259,7 +259,7 @@ inline prvTakeTwoMutexesReturnInSameOrder(_id, xMutex, xLocalMutex, xReturn, tem
     AWAIT(_id, assert(xReturn == true); xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_id, local_var1);
+    taskYIELD(_id);
     #endif
 
     AWAIT(_id, assert(ulGuardedVariable == 1));
@@ -277,23 +277,23 @@ do
 
 running:
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
     prvTakeTwoMutexesReturnInSameOrder(_PID, xMUTEX, xLOCALMUTEX, local_xReturn, local_bit, local_var1, local_var2);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 od
 }
 
 proctype MuMed()
 {
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    byte local_var1 = NULL_byte;
     assert(_PID == xMediumPriorityMutexTask);
 do
-::  vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+::  vTaskSuspend(_PID, NULL_byte, local_var1);
     AWAIT(_PID, ulGuardedVariable = INC_VAR_AND_WRAP_AROUND(ulGuardedVariable));
 od
 }
@@ -304,7 +304,7 @@ proctype MuHigh()
     bool local_bit = false, local_xReturn = false;
     assert(_PID == xHighPriorityMutexTask);
 do
-::  vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+::  vTaskSuspend(_PID, NULL_byte, local_var1);
     xSemaphoreTake(xMUTEX, portMAX_DELAY, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
@@ -326,7 +326,7 @@ init
     skip;
 
     d_step {
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK, tskIDLE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 1, genqMUTEX_LOW_PRIORITY);
@@ -334,8 +334,8 @@ init
         xTaskCreate_fixed(xHighPriorityMutexTask, genqMUTEX_HIGH_PRIORITY);
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

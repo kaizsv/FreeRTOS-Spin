@@ -64,7 +64,7 @@ do
     vTaskPrioritySet(_PID, NULL_byte, uxOurPriority, local_var1, local_bit, local_var2);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
 #ifdef CORRECTION
@@ -77,13 +77,13 @@ od
 
 proctype LIM_INC()
 {
-    byte local_var1 = NULL_byte, local_var2 = NULL_byte;
+    byte local_var1 = NULL_byte;
 
     assert(_PID == xLimitedIncrementHandle);
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
 do
 ::  ULCOUNTER_IS_ACCESSED_BY(xLimitedIncrementHandle, ulCounter);
-        vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+        vTaskSuspend(_PID, NULL_byte, local_var1);
 od
 }
 
@@ -96,12 +96,12 @@ do
 ::  /* First section : */
 
     /* Remove sLoops to simplify verification */
-        vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
+        vTaskSuspend(_PID, xContinousIncrementHandle, local_var1);
             ULCOUNTER_IS_ACCESSED_BY(_PID, ulCounter);
         vTaskResume(_PID, xContinousIncrementHandle, local_var1);
 
         #if (configUSE_PREEMPTION == 0)
-            taskYIELD(_PID, local_var1);
+            taskYIELD(_PID);
         #endif
 
         vTaskDelay(_PID, priSLEEP_TIME, local_var1, local_var2);
@@ -112,14 +112,14 @@ do
 
     /* Second section: */
 
-    vTaskSuspend(_PID, xContinousIncrementHandle, local_var1, local_var2);
+    vTaskSuspend(_PID, xContinousIncrementHandle, local_var1);
 
     AWAIT(_PID, ulCounter = 0);
 
     vTaskResume(_PID, xLimitedIncrementHandle, local_var1);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
 running:
@@ -128,7 +128,7 @@ running:
     vTaskResume(_PID, xContinousIncrementHandle, local_var1);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 od
 }
@@ -165,7 +165,7 @@ do
         xTaskResumeAll(_PID, local_var1, _);
 
         #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
         #endif
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
@@ -188,12 +188,10 @@ od
 }
 
 init {
-    byte local_var = NULL_byte;
-
     d_step {
         xQueueCreate(xSuspendedTestQueue, 0, priSUSPENDED_QUEUE_LENGTH);
 
-        prvInitialiseTaskLists(local_var);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(xContinousIncrementHandle, tskIDLE_PRIORITY);
         xTaskCreate_fixed(xLimitedIncrementHandle, tskIDLE_PRIORITY + 1);
@@ -202,8 +200,8 @@ init {
         xTaskCreate_fixed(xQueueReceiveWhenSuspendedHandler, tskIDLE_PRIORITY);
     };
 
-    vTaskStartScheduler(EP, local_var);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

@@ -78,7 +78,7 @@ proctype IntMuS()
     bool local_bit = false, local_xReturn = false;
     assert(_PID == xSlaveHandle);
 do
-::  vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+::  vTaskSuspend(_PID, NULL_byte, local_var1);
 
     xSemaphoreTake(xMasterSlaveMutex, portMAX_DELAY, local_xReturn, local_bit, local_var1, local_var2, _PID);
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
@@ -106,7 +106,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_var1, temp_var2
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
 
@@ -135,7 +135,7 @@ inline prvTakeAndGiveInTheSameOrder(_id, xReturn, temp_bit, temp_var1, temp_var2
     xSemaphoreGive(xMasterSlaveMutex, xReturn, temp_var1, temp_var2, _id);
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
     AWAIT(_id,
@@ -161,7 +161,7 @@ inline prvTakeAndGiveInTheOppositeOrder(_id, xReturn, temp_bit, temp_var1, temp_
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
 
@@ -277,15 +277,15 @@ init
     skip;
 
     d_step {
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(xSlaveHandle, intsemSLAVE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 1, intsemMASTER_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY);
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

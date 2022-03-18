@@ -5,6 +5,7 @@
 
 /* for indexing in d_step command */
 hidden byte hidden_idx = NULL_byte;
+hidden byte hidden_idx2 = NULL_byte;
 
 /** Executing process
 *

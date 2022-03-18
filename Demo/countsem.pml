@@ -53,7 +53,7 @@ runningDec:
     }
 
 #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, temp_var1);
+    taskYIELD(_PID);
 #endif
 
     AWAIT(_id, ux = 0; assert(uxSemaphoreGetCount(xSemaphore) == 0));
@@ -76,7 +76,7 @@ runningInc:
     }
 
 #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, temp_var1);
+    taskYIELD(_PID);
 #endif
 
     xSemaphoreGive(xSemaphore, xReturn, temp_var1, temp_var2, _id);
@@ -98,7 +98,7 @@ proctype CNT1()
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
     }
 #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
 #endif
     AWAIT(_PID, ux = 0; assert(uxSemaphoreGetCount(xP1_xSemaphore) == 0));
     xSemaphoreTake_NB(xP1_xSemaphore, countDONT_BLOCK, local_xReturn, local_bit, local_var1, local_var2, _PID);
@@ -113,7 +113,7 @@ do
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
 od
@@ -133,7 +133,7 @@ do
 
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
 od
@@ -141,20 +141,18 @@ od
 
 init
 {
-    byte local_var1 = NULL_byte;
-
     d_step {
         xSemaphoreCreateCounting_fixed(xP1_xSemaphore, 0, countMAX_COUNT_VALUE, countMAX_COUNT_VALUE);
         xSemaphoreCreateCounting_fixed(xP2_xSemaphore, 1, countMAX_COUNT_VALUE, 0);
 
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK + 0, tskIDLE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY)
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

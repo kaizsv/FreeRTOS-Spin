@@ -55,16 +55,14 @@ od
 }
 
 init {
-    byte local_var = NULL_byte;
-
     d_step {
-        prvInitialiseTaskLists(local_var);
+        prvInitialiseTaskLists();
         xTaskCreate_fixed(FIRST_TASK + 0, 1);
         xTaskCreate_fixed(FIRST_TASK + 1, 1);
         xTaskCreate_fixed(FIRST_TASK + 2, tskIDLE_PRIORITY)
     };
-    vTaskStartScheduler(EP, local_var);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

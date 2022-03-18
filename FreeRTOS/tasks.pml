@@ -5,16 +5,15 @@
 #include "list.pml"
 
 #define tskIDLE_PRIORITY        0
-#define taskYIELD(_id, temp_var)     portYIELD(_id, temp_var)
+#define taskYIELD(_id)          portYIELD(_id)
 
-#define taskENTER_CRITICAL(_id, temp_var)    portENTER_CRITICAL(_id, temp_var)
-#define taskEXIT_CRITICAL(_id, temp_var)     portEXIT_CRITICAL(_id, temp_var)
+#define taskENTER_CRITICAL(_id) portENTER_CRITICAL(_id)
+#define taskEXIT_CRITICAL(_id)  portEXIT_CRITICAL(_id)
 
 #if (configUSE_PREEMPTION == 0)
-    #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
+    #define taskYIELD_IF_USING_PREEMPTION(_id)
 #else
-    // portYIELD_WITHIN_API(_id, temp_var)
-    #define taskYIELD_IF_USING_PREEMPTION(_id, temp_var) portYIELD_BLOCKED_BY_BASEPRI(_id, temp_var)
+    #define taskYIELD_IF_USING_PREEMPTION(_id)  portYIELD_WITHIN_API(_id)
 #endif
 
 #define taskEVENT_LIST_ITEM_VALUE_IN_USE 8 /* 0b1000 */
@@ -164,7 +163,7 @@ inline prvAddTaskToReadyList_fixed(pxTCB)
 
 #define prvGetTCBFromHandle(pxHandle) (pxHandle == NULL_byte -> pxCurrentTCB : pxHandle)
 
-inline prvInitialiseTaskLists(idx2)
+inline prvInitialiseTaskLists()
 {
 #if (promela_QUEUE_NUMBER > 0)
     /* check the Queue Lists are initialized */
@@ -176,10 +175,10 @@ inline prvInitialiseTaskLists(idx2)
 #endif
 
     /* idx2: prevent double assignment from vListInitialise */
-    for (idx2: 0 .. (configMAX_PRIORITIES - 1)) {
-        vListInitialise_pxIndex(pxReadyTasksLists[idx2], RLIST_SIZE);
+    for (hidden_idx2: 0 .. (configMAX_PRIORITIES - 1)) {
+        vListInitialise_pxIndex(pxReadyTasksLists[hidden_idx2], RLIST_SIZE);
     }
-    idx2 = NULL_byte;
+    hidden_idx2 = NULL_byte;
 
     vListInitialise(xDelayedTaskList1, DLIST_SIZE);
     vListInitialise(xPendingReadyList, PLIST_SIZE);
@@ -244,7 +243,7 @@ inline vTaskDelay(_id, xTicksToDelay, xAlreadyYielded, temp_var)
 
     if
     :: SELE(_id, xAlreadyYielded == false, xAlreadyYielded = NULL_byte);
-        portYIELD_WITHIN_API(_id, temp_var)
+        portYIELD_WITHIN_API(_id)
     :: ELSE(_id, xAlreadyYielded == false, xAlreadyYielded = NULL_byte)
     fi
 }
@@ -266,7 +265,7 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
 {
     AWAIT(_id, assert(uxNewPriority < configMAX_PRIORITIES && xYieldRequired == false && temp_var == NULL_byte));
 
-    taskENTER_CRITICAL(_id, temp_var);
+    taskENTER_CRITICAL(_id);
     AWAIT_DS(_id, assert(pxTCB == NULL_byte); pxTCB = prvGetTCBFromHandle(xTask));
 
 #if (configUSE_MUTEXES == 1)
@@ -324,21 +323,21 @@ inline vTaskPrioritySet(_id, xTask, uxNewPriority, pxTCB, xYieldRequired, temp_v
 
         if
         :: SELE_AS(_id, xYieldRequired != false, xYieldRequired = false; pxTCB = NULL_byte; uxPriorityUsedOnEntry_pset = NULL_byte);
-            taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
+            taskYIELD_IF_USING_PREEMPTION(_id)
         :: ELSE_AS(_id, xYieldRequired != false, pxTCB = NULL_byte; uxPriorityUsedOnEntry_pset = NULL_byte)
         fi
     :: ELSE_AS(_id, uxCurrentBasePriority != uxNewPriority, pxTCB = NULL_byte; uxCurrentBasePriority = NULL_byte)
     fi;
-    taskEXIT_CRITICAL(_id, temp_var)
+    taskEXIT_CRITICAL(_id)
 }
 
 #endif /* INCLUDE_vTaskPrioritySet */
 
 #if (INCLUDE_vTaskSuspend == 1)
 
-inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
+inline vTaskSuspend(_id, xTaskToSuspend, pxTCB)
 {
-    taskENTER_CRITICAL(_id, temp_var);
+    taskENTER_CRITICAL(_id);
     AWAIT_DS(_id, assert(pxTCB == NULL_byte); pxTCB = prvGetTCBFromHandle(xTaskToSuspend));
 
     AWAIT_DS(_id,
@@ -367,19 +366,19 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB, temp_var)
 
     AWAIT_DS(_id, vListInsertEnd(xSuspendedTaskList, SLIST_SIZE, CID_SUSPENDED_TASK, pxTCB, xState, hidden_idx));
 
-    taskEXIT_CRITICAL(_id, temp_var);
+    taskEXIT_CRITICAL(_id);
 
-    taskENTER_CRITICAL(_id, temp_var);
+    taskENTER_CRITICAL(_id);
     /* Reset the unblock tick in case it referred to the task that is now in
      * the Suspended state */
     prvResetNextTaskUnblockTicks(_id);
-    taskEXIT_CRITICAL(_id, temp_var);
+    taskEXIT_CRITICAL(_id);
 
     if
     :: SELE(_id, pxTCB == pxCurrentTCB, pxTCB = NULL_byte);
         /* The scheduler is always running */
         AWAIT(_id, assert(xIsSchedulerRunning && uxSchedulerSuspended == 0));
-        portYIELD_WITHIN_API(_id, temp_var)
+        portYIELD_WITHIN_API(_id)
     :: ELSE(_id, pxTCB == pxCurrentTCB, pxTCB = NULL_byte)
     fi
 }
@@ -405,7 +404,7 @@ inline vTaskResume(_id, xTaskToResume, temp_var)
 {
     if
     :: SELE(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte);
-        taskENTER_CRITICAL(_id, temp_var);
+        taskENTER_CRITICAL(_id);
 
         prvTaskIsTaskSuspended(_id, xTaskToResume, temp_var);
         if
@@ -415,26 +414,26 @@ inline vTaskResume(_id, xTaskToResume, temp_var)
 
             if
             :: SELE_AS(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority);
-                taskYIELD_IF_USING_PREEMPTION(_id, temp_var)
+                taskYIELD_IF_USING_PREEMPTION(_id)
             :: ELSE_AS(_id, TCB(xTaskToResume).uxPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
         :: ELSE_AS(_id, temp_var == true, assert(temp_var == NULL_byte))
         fi;
 
-        taskEXIT_CRITICAL(_id, temp_var)
+        taskEXIT_CRITICAL(_id)
     :: ELSE(_id, xTaskToResume != pxCurrentTCB && xTaskToResume != NULL_byte)
     fi
 }
 
 #endif /* INCLUDE_vTaskSuspend == 1 */
 
-inline vTaskStartScheduler(_id, temp_var)
+inline vTaskStartScheduler(_id)
 {
     d_step {
         xTaskCreate_fixed(IDLE_TASK_ID, (tskIDLE_PRIORITY | portPRIVILEGE_BIT));
     };
 
-    portDISABLE_INTERRUPTS(_id, temp_var);
+    portDISABLE_INTERRUPTS(_id);
     xNextTaskUnblockTicks = portMAX_DELAY;
     reset_xTickCount();
 
@@ -452,7 +451,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
     AWAIT(_id, xAlreadyYielded = false;
         assert(pxTCB == NULL_byte && uxSchedulerSuspended));
 
-    taskENTER_CRITICAL(_id, reuse_pxTCB);
+    taskENTER_CRITICAL(_id);
     AWAIT_DS(_id, uxSchedulerSuspended = uxSchedulerSuspended - 1);
     if
     :: SELE_AS(_id, uxSchedulerSuspended == 0);
@@ -565,13 +564,13 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
             #if (configUSE_PREEMPTION != 0)
             AWAIT_DS(_id, xAlreadyYielded = true);
             #endif
-            taskYIELD_IF_USING_PREEMPTION(_id, reuse_pxTCB)
+            taskYIELD_IF_USING_PREEMPTION(_id)
         :: ELSE_AS(_id, xYieldPending != false)
         fi
     :: ELSE_AS(_id, uxSchedulerSuspended == 0)
     fi;
 
-    taskEXIT_CRITICAL(_id, reuse_pxTCB)
+    taskEXIT_CRITICAL(_id)
 }
 
 // TODO: merge xTaskIncrementTick in xTaskResumeAll
@@ -739,19 +738,19 @@ inline vTaskMissedYield(_id)
     AWAIT_DS(_id, xYieldPending = true)
 }
 
-inline vTaskIDLE_TASK_BODY(_id, temp_var)
+inline vTaskIDLE_TASK_BODY(_id)
 {
     assert(_id == IDLE_TASK_ID);
 do
 ::
     #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_id, temp_var);
+        taskYIELD(_id);
     #endif
 
     #if ((configUSE_PREEMPTION == 1) && (configIDLE_SHOULD_YIELD == 1))
         if
         :: SELE(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[tskIDLE_PRIORITY]));
-            taskYIELD(_id, temp_var)
+            taskYIELD(_id)
         :: ELSE(_id, listLENGTH_IS_EXCEEDING_1(pxReadyTasksLists[tskIDLE_PRIORITY]))
         fi;
     #endif

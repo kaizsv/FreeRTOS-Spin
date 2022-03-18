@@ -76,7 +76,7 @@ do
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
         #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
         #endif
     :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0; break)
     od;
@@ -88,7 +88,7 @@ running:
     AWAIT(_PID, uxControllingCycles = INC_AND_WRAP_AROUND(uxControllingCycles));
 
     AWAIT(_PID, xControllingIsSuspended = true);
-    vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+    vTaskSuspend(_PID, NULL_byte, local_var1);
     AWAIT(_PID, xControllingIsSuspended = false);
 od
 }
@@ -106,7 +106,7 @@ do
             AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
             AWAIT(_PID, xBlockingIsSuspended = true);
-            vTaskSuspend(_PID, NULL_byte, local_var1, local_var2);
+            vTaskSuspend(_PID, NULL_byte, local_var1);
             AWAIT(_PID, xBlockingIsSuspended = false);
 
     AWAIT(_PID, assert(uxControllingCycles == INC_AND_WRAP_AROUND(uxBlockingCycles)));
@@ -129,12 +129,12 @@ do
 running:
         vTaskResume(_PID, xBlockingTaskHandle, local_var1);
         #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
         #endif
 
         vTaskResume(_PID, xControllingTaskHandle, local_var1);
         #if (configUSE_PREEMPTION == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
         #endif
 
         AWAIT(_PID, assert(!xBlockingIsSuspended && !xControllingIsSuspended));
@@ -153,7 +153,7 @@ running:
     fi;
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 od
 }
@@ -166,15 +166,15 @@ init
     skip;
 
     d_step {
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(xControllingTaskHandle, recmuCONTROLLING_TASK_PRIORITY);
         xTaskCreate_fixed(xBlockingTaskHandle, recmuBLOCKING_TASK_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 2, recmuPOLLING_TASK_PRIORITY);
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

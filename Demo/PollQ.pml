@@ -79,19 +79,17 @@ od
 }
 
 init {
-    byte local_var1 = NULL_byte;
-
     d_step {
         xQueueCreate(xPolledQueue, 0, pollqQUEUE_SIZE);
 
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK + 0, 1);
         xTaskCreate_fixed(FIRST_TASK + 1, 1)
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

@@ -64,12 +64,12 @@ running:
         /* xBlockTime is zero. Need not to delay. */
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0) || (configUSE_TIME_SLICING == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
-        taskYIELD(_PID, local_var1)
+        taskYIELD(_PID)
     fi;
 
 #ifdef CORRECTION
@@ -101,12 +101,12 @@ running:
         /* xBlockTime is zero. Need not to delay. */
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 0) || (configUSE_TIME_SLICING == 0)
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
     #endif
 #endif
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
-        taskYIELD(_PID, local_var1)
+        taskYIELD(_PID)
     fi;
 
 #ifdef CORRECTION
@@ -176,14 +176,14 @@ init {
     skip; /* prevent Spin Error: jump into d_step sequence */
 
     d_step {
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
         xTaskCreate_fixed(FIRST_TASK, tskIDLE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY);
         xTaskCreate_fixed(FIRST_TASK + 2, 1);
         xTaskCreate_fixed(FIRST_TASK + 3, 1)
     };
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

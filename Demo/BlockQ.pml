@@ -101,7 +101,7 @@ running:
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
 // Memory out of bound
@@ -134,7 +134,7 @@ running:
 
         #if (configUSE_PREEMPTION == 0)
         // pxQueueParameters3_xBlockTime is zero
-        taskYIELD(_PID, local_var1);
+        taskYIELD(_PID);
         #endif
     :: ELSE(_PID, local_xReturn == true)
     fi
@@ -153,7 +153,7 @@ running:
     AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 
 // Memory out of bound
@@ -180,7 +180,7 @@ running:
     INCREASE_VAR_AND_INTOVERFLOW_2(usValue);
 
     #if (configUSE_PREEMPTION == 0)
-    taskYIELD(_PID, local_var1);
+    taskYIELD(_PID);
     #endif
 od
 }
@@ -210,14 +210,12 @@ od
 }
 
 init {
-    byte local_var1 = NULL_byte;
-
     d_step {
         xQueueCreate(pxQueueParameters1_xQueue, 0, uxQueueSize1);
         xQueueCreate(pxQueueParameters3_xQueue, 1, uxQueueSize1);
         xQueueCreate(pxQueueParameters5_xQueue, 2, uxQueueSize2);
 
-        prvInitialiseTaskLists(local_var1);
+        prvInitialiseTaskLists();
 
         xTaskCreate_fixed(FIRST_TASK + 0, 1);
         xTaskCreate_fixed(FIRST_TASK + 1, tskIDLE_PRIORITY);
@@ -229,8 +227,8 @@ init {
         xTaskCreate_fixed(FIRST_TASK + 5, tskIDLE_PRIORITY);
     };
 
-    vTaskStartScheduler(EP, local_var1);
+    vTaskStartScheduler(EP);
 
     /* Start the IDLE TASK */
-    vTaskIDLE_TASK_BODY(IDLE_TASK_ID, local_var1)
+    vTaskIDLE_TASK_BODY(IDLE_TASK_ID)
 }

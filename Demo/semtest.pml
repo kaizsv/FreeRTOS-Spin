@@ -16,9 +16,11 @@
         run prvSemaphoreTest4(); \
     }
 
-/* After applying the correction, the verification is still disproved.
- * The error is polling the binary semaphore.
- */
+/* After applying the correction, the liveness verification is still disproved.
+ * The error trace shows that prvSemaphoreTest2 never takes the semaphore
+ * because the semaphore is taken by prvSemaphoreTest1. That is,
+ * whenever prvSemaphoreTest2 is executing, prvSemaphoreTest1 never releases
+ * the semaphore. */
 #ifdef CORRECTION
     #define CLEAR_configIDLE_SHOULD_YIELD_IF_USE_PREEMPTION_AND_TIME_SLICING
 #endif
@@ -69,14 +71,13 @@ running:
 #endif
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
+#if defined (CORRECTION) && (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        /* The liveness result is still disproved after applying this correction. */
+        vTaskDelay(_PID, 5, local_var1, local_var2);
+#else
         taskYIELD(_PID)
-    fi;
-
-#ifdef CORRECTION
-    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_bit, local_var1);
-    #endif
 #endif
+    fi;
 od
 }
 
@@ -106,14 +107,13 @@ running:
 #endif
     :: ELSE(_PID, local_xReturn == true);
         /* xBlockTime is zero. Yield. */
+#if defined (CORRECTION) && (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        /* The liveness result is still disproved after applying this correction. */
+        vTaskDelay(_PID, 5, local_var1, local_var2);
+#else
         taskYIELD(_PID)
-    fi;
-
-#ifdef CORRECTION
-    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, local_bit, local_var1);
-    #endif
 #endif
+    fi;
 od
 }
 

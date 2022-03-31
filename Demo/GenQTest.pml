@@ -215,7 +215,7 @@ inline prvTakeTwoMutexesReturnInDifferentOrder(_id, xMutex, xLocalMutex, xReturn
     vTaskPrioritySet(_id, NULL_byte, genqMUTEX_LOW_PRIORITY, temp_var1, temp_bool, temp_var2);
 #ifdef CORRECTION
     #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        vTaskDelay(_PID, 5, temp_bool, temp_var1);
+        vTaskDelay(_PID, 5, temp_var1, temp_var2);
     #endif
 #endif
 }

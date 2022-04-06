@@ -40,7 +40,7 @@ endif
 ifdef BITSTATE
 	COMPILETIME_FLAGS := $(filter-out -DCOLLAPSE, $(COMPILETIME_FLAGS))
 	COMPILETIME_FLAGS += -DBITSTATE
-	RUNTIME_FLAGS := -V \# Usage: ./pan $(MAX_DEPTH) -k -w
+	RUNTIME_FLAGS := -V \# Usage: ./pan -m$(MAX_DEPTH) -k -w
 endif
 
 ifdef CORRECTION

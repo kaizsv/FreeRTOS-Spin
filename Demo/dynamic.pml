@@ -41,7 +41,7 @@
 #define ULCOUNTER_IS_ACCESSED_BY(id, var)   \
     AWAIT(_PID, var = id)
 
-#define priSLEEP_TIME   80
+#define priSLEEP_TIME   75
 #define priLOOPS        5
 #define priMAX_COUNT    3
 #define priNO_BLOCK     0
@@ -158,13 +158,13 @@ proctype SUSP_RECV()
 do
 ::  do
     :: SELE(_PID, xGotValue == false);
-        vTaskSuspendAll(_PID);
+#if ! (defined (CORRECTION) && (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
         /* Remove pointless vTaskSuspendAll */
+        vTaskSuspendAll(_PID);
+#endif
         xQueueReceive_NB(xSuspendedTestQueue, ulReceivedValue, priNO_BLOCK, xGotValue, local_var1, local_var2, _PID);
+#if ! (defined (CORRECTION) && (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1))
         /* Remove pointless xTaskResumeAll */
-#if defined (CORRECTION) && (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        xTaskResumeAll(_PID, local_var1, local_var2);
-#else
         xTaskResumeAll(_PID, local_var1, _);
 #endif
 
@@ -173,13 +173,7 @@ do
         #endif
 
 #ifdef CORRECTION
-#if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
-        if
-        :: SELE(_PID, local_var2 == true, local_var2 = NULL_byte);
-            vTaskDelay(_PID, 5, local_var1, local_var2);
-        :: ELSE(_PID, local_var2 == true, local_var2 = NULL_byte);
-        fi;
-#elif (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
+#if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 0)
         taskYIELD(_PID);
 #endif
 #endif

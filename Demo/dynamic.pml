@@ -183,7 +183,7 @@ do
         taskYIELD(_PID);
 #endif
 #endif
-    :: ELSE(_PID, xGotValue == false, xGotValue = false; break)
+    :: ELSE(_PID, xGotValue == false, xGotValue = false); atomic { (_PID == EP); break }
     od;
 running:
     AWAIT(_PID, assert(ulReceivedValue == ulExpectedValue); ulReceivedValue = 0);

@@ -237,12 +237,11 @@ do
 running1:
     do
     :: xSemaphoreTake_NB(xISRCountingSemaphore, 0, local_xReturn, local_bit, local_var1, local_var2, _PID);
-       AWAIT(_PID,
-        if
-        :: local_xReturn == true -> local_xReturn = false; xCount = xCount + 1
-        :: else -> break
-        fi
-       )
+       if
+       :: SELE(_PID, local_xReturn == true, local_xReturn = false);
+            AWAIT(_PID, xCount = xCount + 1)
+       :: ELSE(_PID, local_xReturn == true); atomic { (_PID == EP); break }
+       fi;
     od;
 
     AWAIT(_PID, assert(xCount == intsemMAX_COUNT); xCount = 0);

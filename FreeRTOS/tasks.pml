@@ -77,7 +77,8 @@ inline taskSELECT_HIGHEST_PRIORITY_TASK(_id, local_idx)
     do
     :: SELE_SAFE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[local_idx]));
         AWAIT_SAFE(_id, assert(local_idx > 0); local_idx = local_idx - 1)
-    :: ELSE_SAFE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[local_idx]), break);
+    :: ELSE_SAFE(_id, listLIST_IS_EMPTY(pxReadyTasksLists[local_idx]));
+        atomic { (_id == EP); break }
     od;
 
     listGET_OWNER_OF_NEXT_ENTRY(_id, pxCurrentTCB, pxReadyTasksLists[local_idx], RLIST_SIZE);
@@ -481,7 +482,7 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
                 AWAIT_SAFE(_id, xYieldPending = true)
             :: ELSE_SAFE(_id, TCB(pxTCB).uxPriority >= TCB(pxCurrentTCB).uxPriority)
             fi
-        :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(xPendingReadyList), break)
+        :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(xPendingReadyList)); atomic { (_id == EP); break }
         od;
 
         if
@@ -511,8 +512,8 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
                         :: SELE_SAFE(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]));
                             AWAIT_SAFE(_id,
                                 xNextTaskUnblockTicks = listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]);
-                                pxTCB = NULL_byte; break
-                            );
+                                pxTCB = NULL_byte);
+                            atomic { (_id == EP); break }
                         :: ELSE_SAFE(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
                         fi;
                         AWAIT_SAFE_D(_id,
@@ -537,8 +538,8 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
                         AWAIT_SAFE(_id,
                             reset_xTickCount();
                             xNextTaskUnblockTicks = portMAX_DELAY;
-                            pxTCB = NULL_byte; break
-                        )
+                            pxTCB = NULL_byte);
+                        atomic { (_id == EP); break }
                     od;
                 :: ELSE_SAFE(_id, xTickCount >= xNextTaskUnblockTicks);
                 fi;
@@ -598,8 +599,8 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
                      * value in xNextTaskUnblockTicks and clear it. */
                     AWAIT_SAFE(_id,
                         xNextTaskUnblockTicks = listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]);
-                        pxTCB = NULL_byte; break
-                    );
+                        pxTCB = NULL_byte);
+                    atomic { (_id == EP); break }
                 :: ELSE_SAFE(_id, xTickCount < listGET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState]))
                 fi;
 
@@ -630,8 +631,8 @@ inline xTaskIncrementTick(_id, xSwitchRequired, pxTCB)
                 AWAIT_SAFE(_id,
                     reset_xTickCount();
                     xNextTaskUnblockTicks = portMAX_DELAY;
-                    pxTCB = NULL_byte; break
-                )
+                    pxTCB = NULL_byte);
+                atomic { (_id == EP); break }
             od
         :: ELSE_SAFE(_id, xTickCount >= xNextTaskUnblockTicks)
         fi;

@@ -66,7 +66,7 @@ do
         xSemaphoreTakeRecursive(_PID, xMutex, recmu15ms_DELAY, local_xReturn, local_bit, local_var1, local_var2);
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
         vTaskDelay(_PID, recmuSHORT_DELAY, local_var1, local_var2);
-    :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0; break)
+    :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0); atomic { (_PID == EP); break }
     od;
 
     do
@@ -78,7 +78,7 @@ do
         #if (configUSE_PREEMPTION == 0)
         taskYIELD(_PID);
         #endif
-    :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0; break)
+    :: ELSE(_PID, ux < recmuMAX_COUNT, ux = 0); atomic { (_PID == EP); break }
     od;
 
     xSemaphoreGiveRecursive(_PID, xMutex, local_xReturn, local_var1, local_var2);

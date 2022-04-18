@@ -206,12 +206,12 @@ do \
             fi \
         fi; \
         taskEXIT_CRITICAL(_id); \
-        AWAIT(_id, xReturn = true; break) \
+        AWAIT(_id, xReturn = true); atomic { (_id == EP); break } \
     :: ELSE_SAFE(_id, pxQueue.uxMessagesWaiting < pxQueue.uxLength || xCopyPosition == queueOVERWRITE); \
         if \
         :: SELE_SAFE(_id, xTicksToWait == 0); \
             taskEXIT_CRITICAL(_id); \
-            AWAIT(_id, xReturn = false; break) \
+            AWAIT(_id, xReturn = false); atomic { (_id == EP); break } \
         :: ELSE_SAFE(_id, xTicksToWait == 0) \
         fi \
     fi; \
@@ -243,7 +243,7 @@ od
         /* The timeout has expired. */ \
         prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
         xTaskResumeAll(_id, temp_var, _); \
-        AWAIT(_id, xReturn = false; break) \
+        AWAIT(_id, xReturn = false); atomic { (_id == EP); break } \
     fi;
 
 /* Simply for 0 xTicksToWait by removing the bottom half statements */
@@ -279,12 +279,12 @@ do \
         :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) \
         fi; \
         taskEXIT_CRITICAL(_id); \
-        AWAIT(_id, xReturn = true; break) \
+        AWAIT(_id, xReturn = true); atomic { (_id == EP); break } \
     :: ELSE_SAFE(_id, temp_var2 > 0, temp_var2 = NULL_byte); \
         if \
         :: SELE_SAFE(_id, xTicksToWait == 0); \
             taskEXIT_CRITICAL(_id); \
-            AWAIT(_id, xReturn = false; break) \
+            AWAIT(_id, xReturn = false); atomic { (_id == EP); break } \
         :: ELSE_SAFE(_id, xTicksToWait == 0) \
         fi \
     fi; \
@@ -318,7 +318,7 @@ od
         xTaskResumeAll(_id, temp_var, _); \
         if \
         :: SELE(_id, prvIsQueueEmpty(pxQueue)); \
-            AWAIT(_id, xReturn = false; break) \
+            AWAIT(_id, xReturn = false); atomic { (_id == EP); break } \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)) \
         fi \
     fi;
@@ -357,12 +357,12 @@ do \
         :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive])) \
         fi; \
         taskEXIT_CRITICAL(_id); \
-        AWAIT(_id, xReturn = true; break) \
+        AWAIT(_id, xReturn = true); atomic { (_id == EP); break } \
     :: ELSE_SAFE(_id, pxQueue.uxMessagesWaiting > 0); \
         if \
         :: SELE_SAFE(_id, xTicksToWait == 0); \
             taskEXIT_CRITICAL(_id); \
-            AWAIT(_id, xReturn = false; break) \
+            AWAIT(_id, xReturn = false); atomic { (_id == EP); break } \
         :: ELSE_SAFE(_id, xTicksToWait == 0) \
         fi \
     fi; \
@@ -397,7 +397,7 @@ od
    prvUnlockQueue(_id, pxQueue, temp_var, temp_var2); \
    xTaskResumeAll(_id, temp_var, _); \
    if \
-   :: SELE(_id, prvIsQueueEmpty(pxQueue), xReturn = false; break) \
+   :: SELE(_id, prvIsQueueEmpty(pxQueue), xReturn = false); atomic { (_id == EP); break } \
    :: ELSE(_id, prvIsQueueEmpty(pxQueue)) \
    fi
 
@@ -451,12 +451,12 @@ do \
         :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend])) \
         fi; \
         taskEXIT_CRITICAL(_id); \
-        AWAIT(_id, xInheritanceOccurred = false; xReturn = true; break) \
+        AWAIT(_id, xInheritanceOccurred = false; xReturn = true); atomic { (_id == EP); break } \
     :: ELSE_SAFE(_id, uxSemaphoreCount > 0, uxSemaphoreCount = NULL_byte); \
         if \
         :: SELE_SAFE(_id, xTicksToWait == 0); \
             taskEXIT_CRITICAL(_id); \
-            AWAIT(_id, assert(!xInheritanceOccurred && xReturn == false); break) \
+            AWAIT(_id, assert(!xInheritanceOccurred && xReturn == false)); atomic { (_id == EP); break } \
         :: ELSE_SAFE(_id, xTicksToWait == 0) \
         fi \
     fi; \
@@ -504,7 +504,7 @@ od
                 taskEXIT_CRITICAL(_id) \
             :: ELSE(_id, xInheritanceOccurred != false) \
             fi; \
-            AWAIT(_id, xReturn = false; break) \
+            AWAIT(_id, xReturn = false); atomic { (_id == EP); break } \
         :: ELSE(_id, prvIsQueueEmpty(pxQueue)) \
         fi \
     fi;
@@ -639,12 +639,12 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2)
             :: ELSE_SAFE(_id, temp_var != false, temp_var = NULL_byte)
             fi
         :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToReceive]));
-            AWAIT_SAFE(_id, cTxLock = NULL_byte; break)
+            AWAIT_SAFE(_id, cTxLock = NULL_byte); atomic { (_id == EP); break }
         fi;
         #endif /* configUSE_QUEUE_SETS */
 
         AWAIT_SAFE(_id, cTxLock = cTxLock - 1)
-    :: ELSE_SAFE(_id, cTxLock > queueLOCKED_UNMODIFIED, cTxLock = NULL_byte; break)
+    :: ELSE_SAFE(_id, cTxLock > queueLOCKED_UNMODIFIED, cTxLock = NULL_byte); atomic { (_id == EP); break }
     od;
     AWAIT_SAFE(_id, queueSET_cTxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id);
@@ -665,9 +665,9 @@ inline prvUnlockQueue(_id, pxQueue, temp_var, temp_var2)
 
             AWAIT_SAFE(_id, cRxLock = cRxLock - 1)
         :: ELSE_SAFE(_id, !listLIST_IS_EMPTY(QLISTs[queueGET_ListIndex(pxQueue) + xTasksWaitingToSend]));
-            AWAIT_SAFE(_id, cRxLock = NULL_byte; break)
+            AWAIT_SAFE(_id, cRxLock = NULL_byte); atomic { (_id == EP); break }
         fi;
-    :: ELSE_SAFE(_id, cRxLock > queueLOCKED_UNMODIFIED, cRxLock = NULL_byte; break)
+    :: ELSE_SAFE(_id, cRxLock > queueLOCKED_UNMODIFIED, cRxLock = NULL_byte); atomic { (_id == EP); break }
     od;
     AWAIT_SAFE(_id, queueSET_cRxLock(pxQueue, queueUNLOCKED));
     taskEXIT_CRITICAL(_id)

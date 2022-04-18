@@ -52,7 +52,7 @@ running:
             INCREASE_VAR_AND_INTOVERFLOW(usExpectedValue)
         :: ELSE(_PID, local_xReturn == true)
         fi
-    :: ELSE(_PID, uxQueueMessagesWaiting(xPolledQueue), break)
+    :: ELSE(_PID, uxQueueMessagesWaiting(xPolledQueue)); atomic { (_PID == EP); break }
     od;
     vTaskDelay(_PID, pollqCONSUMER_DELAY, local_var1, local_var2);
 od
@@ -72,7 +72,7 @@ do
         AWAIT(_PID, assert(local_xReturn == true); local_xReturn = false);
 running:
         INCREASE_VAR_AND_INTOVERFLOW(usValue)
-    :: ELSE(_PID, usLoop < usNumToProduce, usLoop = 0; break)
+    :: ELSE(_PID, usLoop < usNumToProduce, usLoop = 0); atomic { (_PID == EP); break }
     od;
     vTaskDelay(_PID, pollqPRODUCER_DELAY, local_var1, local_var2);
 od

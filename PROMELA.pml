@@ -27,26 +27,27 @@ byte EP = NULL_byte; /* Executing Process */
     :: true \
     fi
 
-#define AWAIT_DS(id, stmnt) d_step { assert(id == EP && INT_SAFE); stmnt }
-#define AWAIT_AS(id, stmnt) atomic { assert(id == EP && INT_SAFE); stmnt }
-#define AWAIT(id, stmnt)    atomic { (id == EP) -> stmnt; ND_TIMER_INT(id); D_TAKEN_INT(id) }
-#define SELE2(id, cond) atomic { ((id == EP) && (cond)) -> ND_TIMER_INT(id); D_TAKEN_INT(id) }
-#define ELSE2(id, cond) atomic { ((id == EP) && !(cond)) -> ND_TIMER_INT(id); D_TAKEN_INT(id) }
-#define SELE3(id, cond, stmnt)  \
-    atomic { ((id == EP) && (cond)) -> stmnt; ND_TIMER_INT(id); D_TAKEN_INT(id) }
-#define ELSE3(id, cond, stmnt)  \
-    atomic { ((id == EP) && !(cond)) -> stmnt; ND_TIMER_INT(id); D_TAKEN_INT(id) }
+#define AWAIT(id, stmt) atomic { (id == EP) -> stmt; ND_TIMER_INT(id); D_TAKEN_INT() }
+#define SELE2(id, cond) atomic { ((id == EP) && (cond)) -> ND_TIMER_INT(id); D_TAKEN_INT() }
+#define ELSE2(id, cond) atomic { ((id == EP) && !(cond)) -> ND_TIMER_INT(id); D_TAKEN_INT() }
+#define SELE3(id, cond, stmt)  \
+    atomic { ((id == EP) && (cond)) -> stmt; ND_TIMER_INT(id); D_TAKEN_INT() }
+#define ELSE3(id, cond, stmt)  \
+    atomic { ((id == EP) && !(cond)) -> stmt; ND_TIMER_INT(id); D_TAKEN_INT() }
 
-#define SELE2_AS(id, cond) atomic { (cond) -> assert(id == EP && INT_SAFE) }
-#define ELSE2_AS(id, cond) atomic { !(cond) -> assert(id == EP && INT_SAFE) }
-#define SELE3_AS(id, cond, stmnt) atomic { (cond) -> assert(id == EP && INT_SAFE); stmnt }
-#define ELSE3_AS(id, cond, stmnt) atomic { !(cond) -> assert(id == EP && INT_SAFE); stmnt }
+#define AWAIT_SAFE(id, stmt) atomic { (id == EP) -> stmt; assert(INT_SAFE); }
+#define SELE2_SAFE(id, cond) atomic { ((id == EP) && (cond)) -> assert(INT_SAFE) }
+#define ELSE2_SAFE(id, cond) atomic { ((id == EP) && !(cond)) -> assert(INT_SAFE) }
+#define SELE3_SAFE(id, cond, stmt) atomic { ((id == EP) && (cond)) -> stmt; assert(INT_SAFE) }
+#define ELSE3_SAFE(id, cond, stmt) atomic { ((id == EP) && !(cond)) -> stmt; assert(INT_SAFE) }
 
 #define __SELECT23__(_1, _2, _3, NAME, ...) NAME
 
 #define SELE(...)       __SELECT23__(__VA_ARGS__, SELE3, SELE2)(__VA_ARGS__)
 #define ELSE(...)       __SELECT23__(__VA_ARGS__, ELSE3, ELSE2)(__VA_ARGS__)
-#define SELE_AS(...)    __SELECT23__(__VA_ARGS__, SELE3_AS, SELE2_AS)(__VA_ARGS__)
-#define ELSE_AS(...)    __SELECT23__(__VA_ARGS__, ELSE3_AS, ELSE2_AS)(__VA_ARGS__)
+#define SELE_SAFE(...)  __SELECT23__(__VA_ARGS__, SELE3_SAFE, SELE2_SAFE)(__VA_ARGS__)
+#define ELSE_SAFE(...)  __SELECT23__(__VA_ARGS__, ELSE3_SAFE, ELSE2_SAFE)(__VA_ARGS__)
+
+#define AWAIT_SAFE_D(id, stmt) d_step { assert(id == EP); stmt; assert(INT_SAFE) }
 
 #endif

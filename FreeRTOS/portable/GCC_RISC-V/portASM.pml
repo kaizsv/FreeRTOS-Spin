@@ -14,25 +14,25 @@ proctype freertos_risc_v_trap_handler()
 do
 ::  trap_entry();
 
-    AWAIT_DS(_PID, mstatus_store[__OWNER_OF(pxCurrentTCB)] = mstatus);
+    AWAIT_SAFE(_PID, mstatus_store[__OWNER_OF(pxCurrentTCB)] = mstatus);
 
     /* test_if_asynchronous */
     if
-    :: SELE_AS(_PID, mcause & 1, assert(mcause == M_TIMER_INTERRUPT));
+    :: SELE_SAFE(_PID, mcause & 1, assert(mcause == M_TIMER_INTERRUPT));
         /* handle_asynchronous */
         xTaskIncrementTick(_PID, local_bit, local_var);
         if
-        :: SELE_AS(_PID, local_bit != false, local_bit = false);
+        :: SELE_SAFE(_PID, local_bit != false, local_bit = false);
             vTaskSwitchContext(_PID, local_var);
-        :: ELSE_AS(_PID, local_bit != false)
+        :: ELSE_SAFE(_PID, local_bit != false)
         fi;
-    :: ELSE_AS(_PID, mcause & 1, assert(mcause == M_ECALL_EXCEPTION));
+    :: ELSE_SAFE(_PID, mcause & 1, assert(mcause == M_ECALL_EXCEPTION));
         /* handle_synchronous */
         vTaskSwitchContext(_PID, local_var);
     fi;
 
     /* processed_source */
-    AWAIT_DS(_PID,
+    AWAIT_SAFE(_PID,
         mepc = pxCurrentTCB;
         mstatus = mstatus_store[__OWNER_OF(pxCurrentTCB)];
     );

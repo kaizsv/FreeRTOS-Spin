@@ -47,7 +47,7 @@ inline portYIELD(_id)
 
 inline vPortRaiseBASEPRI(_id)
 {
-    AWAIT(_id, MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY))
+    AWAIT_SAFE(_id, MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY))
 }
 
 inline vPortSetBASEPRI(_id, ulNewMaskValue)

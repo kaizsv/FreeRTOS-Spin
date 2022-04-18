@@ -57,19 +57,19 @@ inline xPortStartScheduler()
 inline vPortEnterCritical(_id)
 {
     portDISABLE_INTERRUPTS(_id);
-    AWAIT_DS(_id, uxCriticalNesting = uxCriticalNesting + 1);
+    AWAIT_SAFE(_id, uxCriticalNesting = uxCriticalNesting + 1);
     /* ensure VECTACTIVE is zero. In other words, the running task can only be
      * user tasks. */
-    AWAIT_DS(_id, assert((uxCriticalNesting != 1) || (EP >= FIRST_TASK)));
+    AWAIT_SAFE(_id, assert((uxCriticalNesting != 1) || (EP >= FIRST_TASK)));
 }
 
 inline vPortExitCritical(_id)
 {
-    AWAIT_DS(_id, assert(uxCriticalNesting); uxCriticalNesting = uxCriticalNesting - 1);
+    AWAIT_SAFE(_id, assert(uxCriticalNesting); uxCriticalNesting = uxCriticalNesting - 1);
     if
-    :: SELE_AS(_id, uxCriticalNesting == 0);
+    :: SELE_SAFE(_id, uxCriticalNesting == 0);
         portENABLE_INTERRUPTS(_id)
-    :: ELSE_AS(_id, uxCriticalNesting == 0)
+    :: ELSE_SAFE(_id, uxCriticalNesting == 0)
     fi
 }
 
@@ -79,10 +79,10 @@ proctype PendSV_Handler()
     assert(PendSV_ID == _PID);
 do
 ::  exp_entry(_PID);
-    AWAIT_DS(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
+    AWAIT_SAFE(_PID, assert(LAST_EP_STACK >= FIRST_TASK); MSR_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY));
     vTaskSwitchContext(_PID, local_var);
-    AWAIT_DS(_PID, MSR_BASEPRI(0));
-    AWAIT_DS(_PID, switch_context(pxCurrentTCB));
+    AWAIT_SAFE(_PID, MSR_BASEPRI(0));
+    AWAIT_SAFE(_PID, switch_context(pxCurrentTCB));
     AWAIT(_PID, exp_return(local_var))
 od
 }
@@ -100,9 +100,9 @@ do
     portDISABLE_INTERRUPTS(_PID);
     xTaskIncrementTick(_PID, local_bit, local_var);
     if
-    :: SELE_AS(_PID, local_bit != false, local_bit = false);
-        AWAIT_DS(_PID, set_pending(PendSV_ID))
-    :: ELSE_AS(_PID, local_bit != false)
+    :: SELE_SAFE(_PID, local_bit != false, local_bit = false);
+        AWAIT_SAFE(_PID, set_pending(PendSV_ID))
+    :: ELSE_SAFE(_PID, local_bit != false)
     fi;
     portENABLE_INTERRUPTS(_PID);
     AWAIT(_PID, exp_return(local_var))

@@ -47,19 +47,19 @@ bool xOkToGiveMutex = false, xOkToGiveCountingSemaphore = false;
     byte xTimeNow = 0
 #define vApplicationTickHook() \
     if \
-    :: SELE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD, xTimeNow = 0); \
+    :: SELE_SAFE(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD, xTimeNow = 0); \
         if \
-        :: SELE_AS(_PID, xOkToGiveMutex != false); \
+        :: SELE_SAFE(_PID, xOkToGiveMutex != false); \
             xQueueGiveFromISR(_PID, xISRMutex, pxTCB); \
-        :: ELSE_AS(_PID, xOkToGiveMutex != false); \
+        :: ELSE_SAFE(_PID, xOkToGiveMutex != false); \
         fi; \
         if \
-        :: SELE_AS(_PID, xOkToGiveCountingSemaphore != false); \
+        :: SELE_SAFE(_PID, xOkToGiveCountingSemaphore != false); \
             xQueueGiveFromISR(_PID, xISRCountingSemaphore, pxTCB); \
-        :: ELSE_AS(_PID, xOkToGiveCountingSemaphore != false); \
+        :: ELSE_SAFE(_PID, xOkToGiveCountingSemaphore != false); \
         fi; \
-    :: ELSE_AS(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD); \
-        AWAIT_AS(_PID, xTimeNow = (xOkToGiveMutex || xOkToGiveCountingSemaphore -> xTimeNow + 1 : 0)); \
+    :: ELSE_SAFE(_PID, xTimeNow >= intsemINTERRUPT_MUTEX_GIVE_PERIOD); \
+        AWAIT_SAFE(_PID, xTimeNow = (xOkToGiveMutex || xOkToGiveCountingSemaphore -> xTimeNow + 1 : 0)); \
     fi
 
 #include "../FreeRTOS.pml"

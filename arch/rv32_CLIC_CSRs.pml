@@ -98,7 +98,7 @@ byte mie_mip = 0;
 #define INT_SAFE    (!INT_TAKE)
 #define EXP_IS_NOT_TAKEN    (mcause != M_ECALL_EXCEPTION)
 
-#define D_TAKEN_INT(_id) \
+#define D_TAKEN_INT() \
     if \
     :: EXP_IS_NOT_TAKEN && INT_TAKE -> \
         _trap_entry(M_TIMER_INTERRUPT); \

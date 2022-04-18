@@ -90,7 +90,7 @@ inline stack_check(id)
  * recoginze interrupts are dis/enabled in the following three processor
  * clocks after the system registers are changed (Cortex-M3/M4 has a three
  * stages pipeline). */
-#define D_TAKEN_INT(_id) \
+#define D_TAKEN_INT() \
     if \
     :: INT_TAKE -> \
         /* Expanding the macro __exp_taken(id) */ \

@@ -344,14 +344,14 @@ inline vTaskSuspend(_id, xTaskToSuspend, pxTCB)
     taskENTER_CRITICAL(_id);
     AWAIT_SAFE(_id, assert(pxTCB == NULL_byte); pxTCB = prvGetTCBFromHandle(xTaskToSuspend));
 
-    AWAIT_SAFE_D(_id,
+    AWAIT_SAFE_D(_id, assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ||
+            listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_READY_LISTS + TCB(pxTCB).uxPriority);
         if
         :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_READY_LISTS + TCB(pxTCB).uxPriority ->
             uxListRemove_pxIndex(pxReadyTasksLists[TCB(pxTCB).uxPriority], RLIST_SIZE, pxTCB, xState, hidden_idx);
         :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ->
             uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState, hidden_idx);
             listSET_LIST_ITEM_VALUE(TCB(pxTCB).ListItems[xState], 0);
-        // else -> the d_step command is blocked
         fi
     );
 #ifndef EMPTY_RESET_PRIORITY_MACROS
@@ -469,6 +469,12 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
                 assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xEvent]) == CID_PENDING_READY);
                 uxListRemove(xPendingReadyList, PLIST_SIZE, pxTCB, xEvent, hidden_idx));
             AWAIT_SAFE_D(_id,
+#if (INCLUDE_vTaskSuspend == 1)
+                assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ||
+                    listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_SUSPENDED_TASK);
+#else
+                assert(listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK);
+#endif
                 if
                 :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_DELAYED_TASK ->
                     uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxTCB, xState, hidden_idx);
@@ -477,7 +483,6 @@ inline xTaskResumeAll(_id, pxTCB, xAlreadyYielded)
                 :: listLIST_ITEM_CONTAINER(TCB(pxTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
                     uxListRemove(xSuspendedTaskList, SLIST_SIZE, pxTCB, xState, hidden_idx);
 #endif
-                // else -> the d_step command will be blocked
                 fi
             );
             prvAddTaskToReadyList(_id, pxTCB);
@@ -705,6 +710,12 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList)
         AWAIT_SAFE_D(_id,
             /* Reset xTickCount and xState of pxUnblockedTCB as soon as possible */
             listSET_LIST_ITEM_VALUE(TCB(pxUnblockedTCB).ListItems[xState], 0);
+#if (INCLUDE_vTaskSuspend == 1)
+            assert(listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK ||
+                listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_SUSPENDED_TASK);
+#else
+            assert(listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK);
+#endif
             if
             :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_DELAYED_TASK ->
                 uxListRemove(pxDelayedTaskList, DLIST_SIZE, pxUnblockedTCB, xState, hidden_idx);
@@ -712,7 +723,6 @@ inline xTaskRemoveFromEventList(_id, pxUnblockedTCB, pxEventList)
             :: listLIST_ITEM_CONTAINER(TCB(pxUnblockedTCB).ListItems[xState]) == CID_SUSPENDED_TASK ->
                 uxListRemove(xSuspendedTaskList, SLIST_SIZE, pxUnblockedTCB, xState, hidden_idx);
 #endif
-            // else -> the d_step command will be blocked
             fi
         );
         prvAddTaskToReadyList(_id, pxUnblockedTCB);

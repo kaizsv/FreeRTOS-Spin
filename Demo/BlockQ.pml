@@ -172,6 +172,12 @@ running:
     #if (configUSE_PREEMPTION == 0)
     taskYIELD(_PID);
     #endif
+
+#ifdef CORRECTION
+    #if (configUSE_PREEMPTION == 1) && (configUSE_TIME_SLICING == 1)
+        vTaskDelay(_PID, 7, local_var1, local_var2);
+    #endif
+#endif
 od
 }
 
